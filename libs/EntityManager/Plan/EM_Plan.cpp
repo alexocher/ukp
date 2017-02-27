@@ -100,7 +100,7 @@
 // Добавление/Обновление исполнителя
 #define query_InsertPlanItemUser    "INSERT INTO plan.members " \
                                     " (planitem_suid,user_suid,external) " \
-                                    " VALUES " \`
+                                    " VALUES " \
                                     " (?,?,?) "
 #define query_DeletePlanItemUser    "DELETE FROM plan.members " \
                                     " WHERE planitem_suid IN (%1)"
