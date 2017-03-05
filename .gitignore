@@ -44,6 +44,7 @@ object_script.*
 *.log
 .tmp
 qrc_res.cpp
+.DS_Store
 
 apps/ukpcarryplan/debug/
 apps/ukpcarryplan/release/
