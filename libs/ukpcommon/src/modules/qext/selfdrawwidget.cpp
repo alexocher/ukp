@@ -619,7 +619,8 @@ void TDrawElement::draw(QPainter &p)
 {
   QPen pen(p.pen());
   QBrush brush(p.brush());
-  int dx(0), dy(0), kolPoints(fPlPoints.size());
+  int dx(0), dy(0);
+  const int kolPoints = fPlPoints.size();
 
     pen.setWidth(fLineWidth);
     pen.setStyle(fPenStyle);
@@ -636,22 +637,22 @@ void TDrawElement::draw(QPainter &p)
                 p.drawLine(*fPlPoints.at(i),*fPlPoints.at(i+1));
             break;
         case detPolyline:
-            if (kolPoints)
+            if (fPlPoints.size())
             {
-              QPoint arPoints[kolPoints];
-                for (int i=0; i<kolPoints; i++)
-                    arPoints[i] = *fPlPoints.at(i);
-                p.drawPolyline(arPoints,kolPoints);
+                QVector<QPoint> vPoints(kolPoints);
+                  for (int i=0; i<kolPoints; i++)
+                      vPoints[i] = *fPlPoints.at(i);
+                  p.drawPolyline(QPolygon(vPoints));
             }
             break;
         case detPolygon:
         case detPolygon3:
             if (kolPoints)
             {
-              QPoint arPoints[kolPoints];
+              QVector<QPoint> vPoints(kolPoints);
                 for (int i=0; i<kolPoints; i++)
-                    arPoints[i] = *fPlPoints.at(i);
-                p.drawPolygon(arPoints,kolPoints);
+                    vPoints[i] = *fPlPoints.at(i);
+                p.drawPolygon(QPolygon(vPoints));
             }
             break;
         case detEllipce:
@@ -745,11 +746,11 @@ void TDrawElement::draw(QPainter &p)
                 p.setPen(pen);
                 brush.setColor(pink);
                 brush.setStyle(Qt::SolidPattern);
-              QPoint arPoints[kolPoints];
+              QVector<QPoint> vPoints(kolPoints);
                 for (int i=0; i<kolPoints; i++)
-                    arPoints[i] = *fPlPoints.at(i);
+                    vPoints[i] = *fPlPoints.at(i);
                 p.setBrush(brush);
-                p.drawPolygon(arPoints,kolPoints);
+                p.drawPolygon(QPolygon(vPoints));
                 rct.setTopLeft(rct.topLeft()+QPoint(-DREL_TEXT_OUTDRAW,-DREL_TEXT_OUTDRAW));
                 rct.setBottomRight(rct.bottomRight()+QPoint(DREL_TEXT_OUTDRAW,DREL_TEXT_OUTDRAW));
                 p.drawLine(rct.topLeft(),rct.bottomRight());

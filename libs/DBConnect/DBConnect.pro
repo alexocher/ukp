@@ -30,7 +30,7 @@ win32:CONFIG(debug, debug|release): {
     OBJECTS_DIR = ./obj
     QMAKE_POST_LINK  = "copy  .\debug\*.dll /B ..\..\release\ /B /Y" && "copy  .\debug\*.dll /B ..\..\TestApp\build\debug\ /B /Y"
 }
-unix: !macx {
+unix {
     OBJECTS_DIR = .tmp/obj
     QMAKE_POST_LINK  = "mkdir -p ../../build/libs" && "mv -f libDBConnect.* ../../build/libs"
 }

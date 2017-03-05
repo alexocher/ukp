@@ -35,7 +35,7 @@ win32:CONFIG(debug, debug|release): {
 
     RESOURCES += ../resources/resources.qrc
 }
-unix:!macx {
+unix {
     OBJECTS_DIR = .tmp/obj
     LIBS += -L../../build/libs -lEntityManager
     QMAKE_POST_LINK  = "mkdir -p ../../build/libs" && "mv -f libLoginService.* ../../build/libs"

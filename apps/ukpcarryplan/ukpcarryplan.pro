@@ -49,7 +49,7 @@ FORMS   += src/forms/fmainukpcarryplan.ui \
 
 RESOURCES += src/res.qrc
 
-unix: !macx {
+unix {
      INCLUDEPATH += src/modules ../../include
      LIBS += -L../../build/libs -lukpcommon -lukpplan -lDBConnect -lEntityManager -lLoginService
 }
@@ -57,10 +57,5 @@ unix: !macx {
 win32 {
      INCLUDEPATH += src/modules ../../include
      LIBS += -L../../build/libs -lukpcommon -lukpplan -lDBConnect -lEntityManager -lLoginService
-}
-
-macx {
-     INCLUDEPATH += src/modules ../../include
-     LIBS += -L../../build/libs -lukpcommon -lukpplan
 }
 

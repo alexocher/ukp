@@ -404,8 +404,8 @@ QString gen::minuteToTimeCh(int m)
   int iH, iM;
   QString sgn = m<0 ? "- " : (m==0 ? "" : "+ "), s0;
 
-    iH = (int)fabs(m)/60;
-    iM = (int)fabs(m)%60;
+    iH = abs(m)/60;
+    iM = abs(m)%60;
     s0 = iM<10 ? "0" : "";
     return sgn+intToStr(iH)+"."+s0+intToStr(iM);
 }

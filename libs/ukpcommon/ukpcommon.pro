@@ -3,6 +3,8 @@ QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QMAKE_CXXFLAGS += -std=c++11
+
 TARGET = ukpcommon
 TEMPLATE = lib
 
@@ -71,7 +73,7 @@ SOURCES += src/modules/qext/qtools.cpp \
            src/modules/qext/mdisubwindow.cpp \
            src/modules/qext/tgantgraphicsview.cpp
 
-unix: !macx {
+unix {
     UI_DIR      = .tmp/ui
     OBJECTS_DIR = .tmp/obj
     MOC_DIR     = .tmp/moc
@@ -88,9 +90,4 @@ win32 {
     QMAKE_POST_LINK  = mkdir "..\..\build\libs" & \
                        for %%i in ("debug\libukpcommon.a","debug\ukpcommon.dll") do copy "%%i" "..\..\build\libs\*.*" /y & \
                        copy "debug\ukpcommon.dll" "..\..\apps\ukpcarryplan\debug\*.*" /y
-}
-
-macx {
-    INCLUDEPATH += . ../../include
-    QMAKE_POST_LINK  = "mkdir -p ../../build/libs" && "cp -f *.dylib ../../build/libs"
 }

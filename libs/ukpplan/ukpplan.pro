@@ -37,7 +37,7 @@ SOURCES += src/modules/proj/tappplan.cpp \
 
 SOURCES += src/modules/qext/tcalendartable.cpp
 
-unix: !macx {
+unix {
     UI_DIR      = .tmp/ui
     OBJECTS_DIR = .tmp/obj
     MOC_DIR     = .tmp/moc
@@ -52,11 +52,5 @@ win32 {
     QMAKE_POST_LINK  = mkdir "..\..\build\libs" & \
                        for %%i in ("debug\libukpplan.a","debug\ukpplan.dll") do copy "%%i" "..\..\build\libs\*.*" /y & \
                        copy "debug\ukpplan.dll" "..\..\apps\ukpcarryplan\debug\*.*" /y
-}
-
-macx {
-    INCLUDEPATH += . ../../include
-    LIBS += -L../../build/libs -lukpcommon
-    QMAKE_POST_LINK  = "mkdir -p ../../build/libs" && "cp -f *.dylib ../../build/libs"
 }
 

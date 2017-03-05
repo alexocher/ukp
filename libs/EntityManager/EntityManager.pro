@@ -66,7 +66,7 @@ win32:CONFIG(release, debug|release): {
     RCC_DIR     = .tmp/qrc
 
     QMAKE_POST_LINK  = "copy  .\debug\*.dll /B ..\..\release\ /B /Y" && "copy  .\debug\*.dll /B ..\..\TestApp\build\debug\ /B /Y"
-}else:unix:!macx {
+}else:unix {
     OBJECTS_DIR = .tmp/obj
     LIBS += -L../../build/libs -lDBConnect
     QMAKE_POST_LINK  = "mkdir -p ../../build/libs" && "mv -f libEntityManager.* ../../build/libs"
