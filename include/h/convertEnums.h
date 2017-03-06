@@ -9,6 +9,8 @@ class UKPCOMMONSHARED_EXPORT convertEnums
 {
 public:
 
+    static QString enumToStr(TUnitLevel en);       // Уровень подразделения
+    static void strToEnum(QString nm, TUnitLevel &en);
     static QString enumToStr(TProductionView en);  // Виды продукции (первый уровень иерархии)
     static void strToEnum(QString nm, TProductionView &en);
     static QString enumToStr(TProductionRubr2 en); // Второй уровень иерархии

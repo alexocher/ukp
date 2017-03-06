@@ -6,6 +6,8 @@
 #include <common>
 #include <gen>
 #include <defMacro>
+#include <defPictures>
+#include <convertEnums>
 #include <TIdent>
 #include <TModuleUnits>
 #include <EM_Oshs>
@@ -187,6 +189,51 @@ void TModuleUnits::reflectToCb(QComboBox &cb, int fromparentid, TUnitLevelList l
     {
         // ???
     }
+}
+//-----------------------------------------------------------------------------
+
+// Отобразить в списке внешние подразделения указанных уровней (lvls) и шаблонные подразделения по линии иерархии
+// PIX_CHECKED - свое подразделение
+// PIX_LOW     - подчиненное подразделение
+// PIX_HIGH    - подразделение-начальник
+// PIX_LEFT    - внешнее подразделение
+void TModuleUnits::reflectForTemplateToCb(QComboBox &cb, TUnitLevelList lvls)
+{
+  QList<TUnitLevel> levels = { ulvCompany, ulvDirection, ulvDepartment, ulvSection };
+  int selfIndex(-1);
+    foreach (TUnitLevel lvl,levels)
+    {
+        if (selfUnit()->level()==lvl) // мой уровень
+        {
+            cb.addItem(ICONPIX(PIX_CHECKED),convertEnums::enumToStr(lvl),QVariant(-(int)lvl));
+            selfIndex = cb.count()-1;
+        }
+        else
+            cb.addItem(ICONPIX(selfIndex>-1 ? PIX_LOW : PIX_HIGH),convertEnums::enumToStr(lvl),QVariant(-(int)lvl));
+    }
+    foreach (TUnit *subUn,fMainUnit->subUnits())
+    {
+    //PR2(0,"%1: %2",subUn->scrName(),(int)subUn->level());
+        if (lvls.indexOf(subUn->level())>-1)
+        {
+        //PR1(4,"ADD %1",subUn->scrName());
+            cb.addItem(ICONPIX(PIX_LEFT),subUn->scrName(),QVariant(subUn->id()));
+        }
+    }
+    cb.setCurrentIndex(selfIndex);
+}
+//-----------------------------------------------------------------------------
+
+// Найти в списке подразделение (конкретное или шаблонное) в списке по id (-lvl)
+// Вернуть индекс и сделать текущим
+int TModuleUnits::findUnitForTemplateInCb(QComboBox &cb, int id)
+{
+    for (int i=0; i<cb.count(); i++)
+        if (cb.itemData(i).toInt()==id)
+        {
+            cb.setCurrentIndex(i);
+            return i;
+        }
 }
 //-----------------------------------------------------------------------------
 

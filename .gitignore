@@ -42,6 +42,7 @@ object_script.*
 *.stash
 *.autosave
 *.log
+log.txt
 .tmp
 qrc_res.cpp
 .DS_Store

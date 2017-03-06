@@ -27,8 +27,8 @@ WTemplate::WTemplate(QWidget *parent) : QFrame(parent)
 
   MODULE(Units);
   TUnitLevelList lvls;
-    lvls<<ulvDirection<<ulvDepartment<<ulvSection;
-    modUnits->reflectToCb(*cbExtUnit,modUnits->mainUnit()->id(),lvls,true,true);
+    lvls<<ulvDepartment<<ulvSection;
+    modUnits->reflectForTemplateToCb(*cbExtUnit,lvls);
 
     twCurrentTemplate->setColumnWidth(0,766); twCurrentTemplate->setColumnWidth(1,50); twCurrentTemplate->setColumnWidth(2,50); twCurrentTemplate->setColumnWidth(3,50);
     if (QTreeWidgetItem *hdrIt = twCurrentTemplate->headerItem())

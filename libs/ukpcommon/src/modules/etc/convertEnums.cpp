@@ -1,6 +1,28 @@
 
 #include <convertEnums>
 
+// Уровень подразделения
+QString convertEnums::enumToStr(TUnitLevel en)
+{
+    switch (en)
+    {
+        case ulvCompany:    return "Предприятие";
+        case ulvDirection:  return "Направление";
+        case ulvDepartment: return "Отдел";
+        case ulvSection:    return "Отделение";
+        default:            return ""; // ulvNone
+    }
+}
+
+void convertEnums::strToEnum(QString nm, TUnitLevel &en)
+{
+    if (nm==QString("Предприятие")) en = ulvCompany;
+    else if (nm==QString("Направление")) en = ulvDirection;
+    else if (nm==QString("Отдел")) en = ulvDepartment;
+    else if (nm==QString("Отделение")) en = ulvSection;
+    else en = ulvNone;
+}
+
 // Виды продукции (первый уровень иерархии)
 QString convertEnums::enumToStr(TProductionView en)
 {

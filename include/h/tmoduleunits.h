@@ -29,8 +29,8 @@ public :
 
     void reflectToTree(const TUnitList &units, QTreeWidget &tw); // Отобразить на дереве
     void reflectToCb(QComboBox &cb, int fromparentid, TUnitLevelList lvls, bool withempty=false, bool withparent=false, bool withchilds=false); // Отобразить в списке подразделения, подчиненные родителю с fromparentid
-
-    //QByteArray toJson(JsonFormat format);
+    void reflectForTemplateToCb(QComboBox &cb, TUnitLevelList lvls); // Отобразить в списке внешние подразделения указанных уровней (lvls) и шаблонные подразделения по линии иерархии
+    int findUnitForTemplateInCb(QComboBox &cb, int id); // Найти в списке подразделение (конкретное или шаблонное) в списке по id (-lvl)
 
 public: // TAbstractModule interface
     bool init();
