@@ -768,6 +768,7 @@ bool TModulePlans::fromDB(QString param)
                     //PR(4,"if EM_PlanItem");
                       TCarryPlan *newCarryPlan(new TCarryPlan(NULL,curTmpl->getID(),curTmpl->getNum(),curTmpl->getShortTitle()));
                         newCarryPlan->setScrName(QString("%1.%2. %3").arg(newCarryPlan->num()/10).arg(newCarryPlan->num()%10).arg(newCarryPlan->name()));
+                    if (newCarryPlan->num()==11) PR1(12,"TEMPLATE: newCarryPlan: %1",newCarryPlan->scrName());
                         newCarryPlan->setCondition(curTmpl->getState());
                         newCarryPlan->setProblem(curTmpl->getProblem());
                         newCarryPlan->setSourcesTitle(curTmpl->getSrcTitle());
@@ -796,6 +797,7 @@ bool TModulePlans::fromDB(QString param)
                             {
                             //PR(12,"if EM_StagePlanItem");
                               TCarryProcedure *newCarryProcedure(new TCarryProcedure(newCarryPlan,curPr->getID(),curPr->getNum(),curPr->getShortTitle()));
+                            if (newCarryPlan->num()==11) PR1(12,"TEMPLATE: newCarryProcedure: %1",newCarryProcedure->scrName());
                                 newCarryProcedure->setISort(newCarryProcedure->num());
                                 newCarryProcedure->setCondition(curPr->getState());
                                 newCarryProcedure->setProblem(curPr->getProblem());
@@ -803,6 +805,7 @@ bool TModulePlans::fromDB(QString param)
                                 newCarryProcedure->setResultsTitle(curPr->getResTitle());
                               TEmployeeRole rl(curPr->getTemplEmployee());
                                 rl.setUnitId(curPr->getOshsItemID());
+                            if (newCarryPlan->num()==11) PR2(16,"rl: TP[%1], [%2]",rl.type(),rl.unitId());
                                 newCarryProcedure->setSingleTemplateRole(rl);
                                 if (EM_User *user = curPr->getEmployee()) newCarryProcedure->setEmployee(modEmployees->findEmployee(user->SUID()));
                                 newCarryProcedure->setTemplatePeriod(curPr->getTypalDuration());
@@ -818,7 +821,7 @@ bool TModulePlans::fromDB(QString param)
                                 newCarryProcedure->setStatuses(curPr->getStatus());
                                 newCarryProcedure->setDescr(curPr->getDescr());
                                 newCarryProcedure->setExternProcedureNum(curPr->getExtProcNum());
-                            PR3(4,"proc: %1, TemplEmployee: %2, OshsItemID: %3",newCarryProcedure->scrName(),curPr->getTemplEmployee(),curPr->getOshsItemID());
+                            //PR3(4,"proc: %1, TemplEmployee: %2, OshsItemID: %3",newCarryProcedure->scrName(),curPr->getTemplEmployee(),curPr->getOshsItemID());
                                 newCarryProcedure->setSaved(true);
                                 for(EM_BasePlanItem::iterator wrkIter=curPr->begin(); wrkIter!=curPr->end(); ++wrkIter)
                                 {

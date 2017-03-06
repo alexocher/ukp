@@ -332,9 +332,8 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                             //lwResults
                           TEmployeeType emplTp;
                             convertEnums::strToEnum(cbEmployee->currentText(),emplTp);
-                          TUnit *un = modUnits->findUnit(cbExtUnit->currentText(),true);
                           TEmployeeRole emplRl(emplTp);
-                            emplRl.setUnitId(un ? un->id() : 0);
+                            emplRl.setUnitId(cbEmployee->currentData().toInt());
                             pr->setSingleTemplateRole(emplRl);
                             foreach (TCarryWork *wrk,pr->works()) // ??? записать зависимые параметры во все работы процедуры
                             {
@@ -372,6 +371,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
     }
     else if (&btn==pbClearCurrentItem)
     {
+      MODULE(Units);
         sbNum->setValue(1);
         edName->setText("");
         cbExtProcedure->setCurrentIndex(0);
@@ -380,7 +380,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
         edResults->setText("");
         lwResults->clear();
         cbEmployee->setCurrentIndex(0);
-        cbExtUnit->setCurrentIndex(0);
+        modUnits->findUnitForTemplateInCb(*cbExtUnit,-modUnits->selfUnit()->level());
         sbTime->setValue(0);
         pbOptional->setChecked(false);
         pbOptional->setIcon(ICONPIX(""));
@@ -507,22 +507,17 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
             edResults->setText(curProc->resultsTitle());
             curProc->reflectAttachmentsToLw(curProc->results(),*lwResults);
           TEmployeeRole rl = curProc->firstTemplateRole();
+          MODULE(Units);
             if (rl.type()==eltNone)
             {
                 cbEmployee->setCurrentIndex(0);
-                cbExtUnit->setCurrentIndex(0);
+                modUnits->findUnitForTemplateInCb(*cbExtUnit,-modUnits->selfUnit()->level());
             }
             else
             {
                 cbEmployee->setCurrentIndex(cbEmployee->findText(convertEnums::enumToStr(rl.type())));
-              MODULE(Units);
-              int indUn(0);
-                if (TUnit *un = modUnits->findUnit(rl.unitId()))
-                {
-                    indUn = cbExtUnit->findText(un->scrName());
-                    if (indUn<0) indUn = 0;
-                }
-                cbExtUnit->setCurrentIndex(indUn);
+PR2(4,"IT: %1, ID: %2",curIt->text(0),rl.unitId())
+                modUnits->findUnitForTemplateInCb(*cbExtUnit,rl.unitId());
             }
         }
         else if (curWork)
@@ -535,22 +530,16 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
             edResults->setText(curWork->resultsTitle());
             curWork->reflectAttachmentsToLw(curWork->results(),*lwResults);
           TEmployeeRole rl = curWork->firstTemplateRole();
+          MODULE(Units);
             if (rl.type()==eltNone)
             {
                 cbEmployee->setCurrentIndex(0);
-                cbExtUnit->setCurrentIndex(0);
+                modUnits->findUnitForTemplateInCb(*cbExtUnit,-modUnits->selfUnit()->level());
             }
             else
             {
                 cbEmployee->setCurrentIndex(cbEmployee->findText(convertEnums::enumToStr(rl.type())));
-              MODULE(Units);
-              int indUn(0);
-                if (TUnit *un = modUnits->findUnit(rl.unitId()))
-                {
-                    indUn = cbExtUnit->findText(un->scrName());
-                    if (indUn<0) indUn = 0;
-                }
-                cbExtUnit->setCurrentIndex(indUn);
+                modUnits->findUnitForTemplateInCb(*cbExtUnit,rl.unitId());
             }
             sbTime->setValue(curWork->templatePeriod());
             pbOptional->setChecked(curWork->isOptional());
