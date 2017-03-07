@@ -234,6 +234,15 @@ TEmployeeList *TModuleEmployees::findEmployees(const TEmployeeRoleList &rls)
 }
 //-----------------------------------------------------------------------------
 
+// Отобрать по TEmployeeRole.type() подходящих должностных лиц для подразделения с unitid
+// !!! Если unitid<0 (задано не конкретное подраделение, а типовое),
+//     то предварительно найти ВСЕ подразделения, подходящие под данный уровень
+TEmployeeList *TModuleEmployees::findEmployees(int unitid, const TEmployeeRoleList &rls)
+{
+
+}
+//-----------------------------------------------------------------------------
+
 void TModuleEmployees::reflectEmployeeTypesToCb(QComboBox &cb)
 {
     cb.clear();

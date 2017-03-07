@@ -27,6 +27,7 @@ public :
     TEmployee *findEmployee(int id);   // ... поиск по id
     TEmployee *findEmployee(const QString &nm, bool onscrnm=false);   // ... поиск по наименованию (false) или по отображаемому наименованию (true)
     TEmployeeList *findEmployees(const TEmployeeRoleList &rls); // ... поиск с подходящими ролями
+    TEmployeeList *findEmployees(int unitid, const TEmployeeRoleList &rls); // ... поиск с подходящими ролями в заданном формировании
 
     bool createSelfEmployee();         // Создать собственное ДЛ
     static void reflectEmployeeTypesToCb(QComboBox &cb); // Отобразить в списке типы должностей
