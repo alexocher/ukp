@@ -200,6 +200,20 @@ void WPlan::resetPlan(const QPushButton &btn)
             }
         }
     }
+    else if (&btn==pbEmployeesAdd)
+    {
+        if (QTreeWidgetItem *curIt = twProjects->currentItem())
+        {
+          QStringList scrnms = qtools::hierarchyTexts(*curIt);
+          MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            {
+                // ??? добавить должностное лицо, выбранное в списке
+
+                //plEl->insertPossibleEmployee(TEmployee *empl);
+            }
+        }
+    }
     else if (&btn==pbChangeYes || &btn==pbChangeNo)
     {
       QList<QTreeWidgetItem*> checkedItems;
@@ -314,10 +328,10 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
           bool isPlan(false), isProcedure(false), isWork(false); // isTask(false),
             //if (dynamic_cast<TCarryTask*>(plEl)) isTask = true; // TCarryTask *tsk =
             //else
+          MODULE(Employees);
             if (dynamic_cast<TCarryPlan*>(plEl)) isPlan = true; // TCarryPlan *plan =
             else if (TCarryProcedure *pr = dynamic_cast<TCarryProcedure*>(plEl))
             {
-              MODULE(Employees);
                 modEmployees->reflectEmployeesToLw(pr->possibleEmployees(),*lwEmployees);
                 isProcedure = true;
             }
@@ -330,6 +344,11 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
             pbEmployeesOk->setEnabled(isProcedure);
             pbEmployeesCalendar->setEnabled(isProcedure);
             pbEmployeesReset->setEnabled(isProcedure);
+            pbEmployeesAdd->setEnabled(isProcedure);
+            if (isProcedure)
+            {
+                // ??? заполнить cbEmployees соответствующим полным перечнем ДЛ
+            }
         }
     }
     teParams->setText(params);

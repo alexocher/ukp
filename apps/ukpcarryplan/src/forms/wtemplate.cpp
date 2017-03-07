@@ -333,7 +333,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                           TEmployeeType emplTp;
                             convertEnums::strToEnum(cbEmployee->currentText(),emplTp);
                           TEmployeeRole emplRl(emplTp);
-                            emplRl.setUnitId(cbEmployee->currentData().toInt());
+                            emplRl.setUnitId(cbExtUnit->currentData().toInt());
                             pr->setSingleTemplateRole(emplRl);
                             foreach (TCarryWork *wrk,pr->works()) // ??? записать зависимые параметры во все работы процедуры
                             {
@@ -516,7 +516,6 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
             else
             {
                 cbEmployee->setCurrentIndex(cbEmployee->findText(convertEnums::enumToStr(rl.type())));
-PR2(4,"IT: %1, ID: %2",curIt->text(0),rl.unitId())
                 modUnits->findUnitForTemplateInCb(*cbExtUnit,rl.unitId());
             }
         }
