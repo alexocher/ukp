@@ -104,8 +104,8 @@ int TCarryPlan::nextProcedureNum()
 }
 //-----------------------------------------------------------------------------
 
-// Сформировать план на основе шаблона, заполнив possibleEmployees из wrkun
-bool TCarryPlan::fillFromTemplate(const TCarryPlan *tmpl, const TUnit &wrkun)
+// Сформировать план на основе шаблона
+bool TCarryPlan::fillFromTemplate(const TCarryPlan *tmpl)
 {
     if (!tmpl) return false;
     clearProcedures();
@@ -115,11 +115,12 @@ bool TCarryPlan::fillFromTemplate(const TCarryPlan *tmpl, const TUnit &wrkun)
         newPr->setISort(newPr->num());
         newPr->clearPossibleEmployeess();
       TEmployeeRole frstRl = tmplpr->firstTemplateRole();
-        if (frstRl.type()!=eltNone && frstRl.unitId()==0) // свое подразделение
+        if (frstRl.type()!=eltNone)
         {
           TEmployeeRoleList rls;
             rls<<frstRl;
-            if (TEmployeeList *posempl = const_cast<TUnit&>(wrkun).findEmployees(rls))
+          MODULE(Employees);
+            if (TEmployeeList *posempl = modEmployees->findEmployees(frstRl.unitId(),rls))
                 foreach (TEmployee *empl,*posempl) newPr->insertPossibleEmployee(empl);
         }
         foreach (TCarryWork *newWrk,newPr->works())

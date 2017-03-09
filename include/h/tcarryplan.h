@@ -29,7 +29,7 @@ public:
 
     TCarryPlan &operator=(const TCarryPlan &crp);
 
-    bool fillFromTemplate(const TCarryPlan *tmpl, const TUnit &wrkun); // Сформировать план на основе шаблона, заполнив possibleEmployees из wrkun
+    bool fillFromTemplate(const TCarryPlan *tmpl); // Сформировать план на основе шаблона
     void recalcPeriod(bool ontempl);   // Пересчитать продолжительность (шаблонную или плановую) процедур и плана по продолжительности отдельных работ (realPeriod() - рассчитывается в каждом элементе)
     void reflectToTree(QTreeWidget &tw, bool astemplate=false); // Отобразить план на дереве
 

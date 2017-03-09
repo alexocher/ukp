@@ -239,7 +239,62 @@ TEmployeeList *TModuleEmployees::findEmployees(const TEmployeeRoleList &rls)
 //     то предварительно найти ВСЕ подразделения, подходящие под данный уровень
 TEmployeeList *TModuleEmployees::findEmployees(int unitid, const TEmployeeRoleList &rls)
 {
-
+  TEmployeeList *res(new TEmployeeList());
+    res->setAutoDelete(false);
+  TUnitList givenUnits;
+    givenUnits.setAutoDelete(false);
+  MODULE(Units);
+    if (unitid<0) // типовое подразделение
+    {
+      TUnitLevel givenLevel((TUnitLevel)abs(unitid));
+        if (givenLevel==modUnits->selfUnit()->level()) // свое подразделение
+        {
+            givenUnits.append(modUnits->selfUnit());
+        }
+        else if (givenLevel>modUnits->selfUnit()->level()) // подчиненные (n) подразделения
+        {
+            foreach (TUnit *subUnit,modUnits->selfUnit()->subUnits())
+                if (subUnit->level()==givenLevel) givenUnits.append(subUnit);
+        }
+        else if (givenLevel<modUnits->selfUnit()->level()) // подразделение (1) начальников
+        {
+          TUnit *parentUnit(modUnits->selfUnit());
+            while (parentUnit)
+            {
+                if (parentUnit->level()==givenLevel)
+                {
+                    givenUnits.append(parentUnit);
+                    break;
+                }
+                parentUnit = parentUnit->chiefUnit();
+            }
+        }
+    }
+    else if (TUnit *un = modUnits->findUnit(unitid)) // конкретное подраделение
+    {
+        givenUnits.append(un);
+    }
+    foreach (TUnit *givenUnit,givenUnits)
+    {
+      bool isAppend(false);
+        if (fSelfEmployee->unit()==givenUnit)
+        {
+            if (fSelfEmployee)
+                foreach (TEmployeeRole rl,rls)
+                    if (fSelfEmployee->role().isMatch(rl)) { isAppend = true; break; }
+                if (isAppend) res->append(fSelfEmployee);
+        }
+        foreach (TEmployee *empl,givenUnit->employees())
+        {
+            isAppend = false;
+            foreach (TEmployeeRole rl,rls)
+                if (empl->role().isMatch(rl)) { isAppend = true; break; }
+            if (isAppend)
+                if (res->indexOf(empl)==-1) res->append(empl);
+        }
+    }
+    if (!res->count()) DELETE(res);
+    return res;
 }
 //-----------------------------------------------------------------------------
 

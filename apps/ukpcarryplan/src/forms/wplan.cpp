@@ -102,8 +102,7 @@ void WPlan::resetPlan(const QPushButton &btn)
                 {
                   QTreeWidgetItem *topIt(curIt->parent());
                   QString tskTitle(topIt ? topIt->text(0) : "");
-                  MODULE(Units);
-                    plan->fillFromTemplate((TCarryPlan*)modPlans->findPlanTemplate(cbTemplates->currentText(),true),*modUnits->selfUnit());
+                    plan->fillFromTemplate((TCarryPlan*)modPlans->findPlanTemplate(cbTemplates->currentText(),true));
                     modPlans->setWorkIdsForPlan();
                     modPlans->reflectCarryTasksToTree(modPlans->carryTasks(),*twProjects);
                     qtools::expand(*twProjects,0);
