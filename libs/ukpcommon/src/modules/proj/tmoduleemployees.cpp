@@ -2,6 +2,7 @@
 #include <EM_AddressBook>
 #include <EM_Oshs>
 #include <defMacro>
+#include <defPictures>
 #include <common>
 #include <convertEnums>
 #include <TModuleEmployees>
@@ -244,17 +245,25 @@ TEmployeeList *TModuleEmployees::findEmployees(int unitid, const TEmployeeRoleLi
   TUnitList givenUnits;
     givenUnits.setAutoDelete(false);
   MODULE(Units);
+PR(0,"==============================================================================");
+PR1(4,"unitid: %1",unitid);
     if (unitid<0) // типовое подразделение
     {
       TUnitLevel givenLevel((TUnitLevel)abs(unitid));
+    PR1(4,"givenLevel: %1",(int)givenLevel);
         if (givenLevel==modUnits->selfUnit()->level()) // свое подразделение
         {
+        PR1(8,"appendSelfUnit: %1",modUnits->selfUnit()->name());
             givenUnits.append(modUnits->selfUnit());
         }
         else if (givenLevel>modUnits->selfUnit()->level()) // подчиненные (n) подразделения
         {
             foreach (TUnit *subUnit,modUnits->selfUnit()->subUnits())
-                if (subUnit->level()==givenLevel) givenUnits.append(subUnit);
+                if (subUnit->level()==givenLevel)
+                {
+                PR1(8,"appendSubUnit: %1",subUnit->name());
+                    givenUnits.append(subUnit);
+                }
         }
         else if (givenLevel<modUnits->selfUnit()->level()) // подразделение (1) начальников
         {
@@ -263,6 +272,7 @@ TEmployeeList *TModuleEmployees::findEmployees(int unitid, const TEmployeeRoleLi
             {
                 if (parentUnit->level()==givenLevel)
                 {
+                PR1(8,"appendComUnit: %1",parentUnit->name());
                     givenUnits.append(parentUnit);
                     break;
                 }
@@ -272,6 +282,7 @@ TEmployeeList *TModuleEmployees::findEmployees(int unitid, const TEmployeeRoleLi
     }
     else if (TUnit *un = modUnits->findUnit(unitid)) // конкретное подраделение
     {
+    PR1(8,"appendUnit: %1",un->scrName());
         givenUnits.append(un);
     }
     foreach (TUnit *givenUnit,givenUnits)
@@ -295,6 +306,68 @@ TEmployeeList *TModuleEmployees::findEmployees(int unitid, const TEmployeeRoleLi
     }
     if (!res->count()) DELETE(res);
     return res;
+}
+//-----------------------------------------------------------------------------
+
+// Отобрать ВСЕХ должностных лиц для подразделения с unitid
+// !!! Если unitid<0 (задано не конкретное подраделение, а типовое),
+//     то предварительно найти ВСЕ подразделения, подходящие под данный уровень
+void TModuleEmployees::reflectEmployeesToCb(int unitid, QComboBox &cb)
+{
+    cb.clear();
+  TUnitList givenUnits;
+    givenUnits.setAutoDelete(false);
+  MODULE(Units);
+PR(0,"******************************************************************************");
+PR1(4,"unitid: %1",unitid);
+    if (unitid<0) // типовое подразделение
+    {
+      TUnitLevel givenLevel((TUnitLevel)abs(unitid));
+    PR1(4,"givenLevel: %1",(int)givenLevel);
+        if (givenLevel==modUnits->selfUnit()->level()) // свое подразделение
+        {
+        PR1(8,"appendSelfUnit: %1",modUnits->selfUnit()->name());
+            givenUnits.append(modUnits->selfUnit());
+        }
+        else if (givenLevel>modUnits->selfUnit()->level()) // подчиненные (n) подразделения
+        {
+            foreach (TUnit *subUnit,modUnits->selfUnit()->subUnits())
+                if (subUnit->level()==givenLevel)
+                {
+                PR1(8,"appendSubUnit: %1",subUnit->name());
+                    givenUnits.append(subUnit);
+                }
+        }
+        else if (givenLevel<modUnits->selfUnit()->level()) // подразделение (1) начальников
+        {
+          TUnit *parentUnit(modUnits->selfUnit());
+            while (parentUnit)
+            {
+                if (parentUnit->level()==givenLevel)
+                {
+                PR1(8,"appendComUnit: %1",parentUnit->name());
+                    givenUnits.append(parentUnit);
+                    break;
+                }
+                parentUnit = parentUnit->chiefUnit();
+            }
+        }
+    }
+    else if (TUnit *un = modUnits->findUnit(unitid)) // конкретное подраделение
+    {
+    PR1(8,"appendUnit: %1",un->scrName());
+        givenUnits.append(un);
+    }
+  TEmployeeList empls;
+    empls.setAutoDelete(false);
+    foreach (TUnit *givenUnit,givenUnits)
+    {
+        if (TEmployee *chf = givenUnit->chief()) empls.append(chf);
+        foreach (TEmployee *empl,givenUnit->employees())
+            if (empls.indexOf(empl)==-1) empls.append(empl);
+    }
+    foreach (TEmployee *empl,empls)
+        cb.addItem(ICONPIX(empl->role().type()==eltChief ? PIX_ADDUSER : ""),empl->scrName(),QVariant(empl->id()));
 }
 //-----------------------------------------------------------------------------
 

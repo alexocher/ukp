@@ -48,6 +48,7 @@ WPlan::WPlan(QWidget *parent) : QFrame(parent)
     connect(pbEmployeesOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbEmployeesCalendar,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbEmployeesReset,SIGNAL(clicked()),this,SLOT(resetPlan()));
+    connect(pbEmployeesAdd,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbChangeYes,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbChangeNo,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbChangeReset,SIGNAL(clicked()),this,SLOT(resetPlan()));
@@ -184,16 +185,15 @@ void WPlan::resetPlan(const QPushButton &btn)
             if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
             {
                 plEl->clearPossibleEmployeess();
+              MODULE(Employees);
               TEmployeeRole frstRl = plEl->firstTemplateRole();
-                if (frstRl.type()!=eltNone && frstRl.unitId()==0) // свое подразделение
+                if (frstRl.type()!=eltNone)
                 {
-                  MODULE(Units);
                   TEmployeeRoleList rls;
                     rls<<frstRl;
-                    if (TEmployeeList *posempl = modUnits->selfUnit()->findEmployees(rls))
+                    if (TEmployeeList *posempl = modEmployees->findEmployees(frstRl.unitId(),rls))
                         foreach (TEmployee *empl,*posempl) plEl->insertPossibleEmployee(empl);
                 }
-              MODULE(Employees);
                 modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(),*lwEmployees);
                 teParams->setText(plEl->toHtml(!cbIsShort->isChecked()));
             }
@@ -207,9 +207,12 @@ void WPlan::resetPlan(const QPushButton &btn)
           MODULE(Plans);
             if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
             {
-                // ??? добавить должностное лицо, выбранное в списке
-
-                //plEl->insertPossibleEmployee(TEmployee *empl);
+              MODULE(Employees);
+                if (TEmployee *empl = modEmployees->findEmployee(cbEmployees->currentData().toInt()))
+                {
+                    plEl->insertPossibleEmployee(empl);
+                    modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(),*lwEmployees);
+                }
             }
         }
     }
@@ -346,8 +349,10 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
             pbEmployeesAdd->setEnabled(isProcedure);
             if (isProcedure)
             {
-                // ??? заполнить cbEmployees соответствующим полным перечнем ДЛ
+              TEmployeeRole frstRl = plEl->firstTemplateRole();
+                modEmployees->reflectEmployeesToCb(frstRl.unitId(),*cbEmployees);
             }
+            else cbEmployees->clear();
         }
     }
     teParams->setText(params);

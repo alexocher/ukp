@@ -58,7 +58,8 @@ bool TModuleUnits::init()
                 while (!stack.isEmpty())
                 {
                   EM_OSHSItem &curIt = *stack.pop();
-                //PR2(curIt.getLevel()*4,"%1 (%2)",curIt.getShortTitle(),curIt.getID());
+                //PR3(curIt.getLevel()*4,"%1 (%2, level: %3)",curIt.getShortTitle(),curIt.getID(),curIt.getOSHSLevel());
+                //update oshs.oshsitem SET level=3 where suid=147;
                   TUnit *newUn(new TUnit(curIt.getID(),curIt.getFullTitle(),curIt.getShortTitle()));
                     newUn->setLevel((TUnitLevel)(curIt.getOSHSLevel()+1));
                     newUn->setShtatEmployeeCount(curIt.getEemployeeCount());

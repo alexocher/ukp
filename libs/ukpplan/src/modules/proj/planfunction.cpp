@@ -2,6 +2,7 @@
 #include <TModuleEmployees>
 #include <TModulePlans>
 #include <QMessageBox>
+
 // объявить глобальные переменные (задать неименованное пространство имен. Скрыть видимость переменных из вне)
 namespace {
     int tbeginplan=0; // время (день) начала общего планирования (начиная с 0). Например, если tbeginplan=5, то
@@ -1478,28 +1479,19 @@ void TModulePlans::testPlanData()
 // ВОЗВРАТ - признак успешности
 bool TModulePlans::createCarryPlans(TCarryTaskList &tasks, QString &errs)
 {
-    QMessageBox::information(0,"Отладка", "Начало планирования");
-
     errs = "";
     if (!tasks.count())
     {
         errs = "Список проектов пуст";
         return false;
     }
-    //return Plan(tasks, errs); // errs
 
-    int kodvozvrata = Plan(tasks, errs);
+    // ??? Проверить для всех ли процедур заданы possibleEmployees()
+
+  int kodvozvrata = Plan(tasks, errs);
     qDebug()<<errs;
 
-    if(kodvozvrata){
-        QMessageBox::information(0,"Отладка", "Планирование аварийно завершено");
-        return false;
-    }
-    else {
-        QMessageBox::information(0,"Отладка", "Планирование успешно завершено");
-        return true;
-    }
-
+    return !kodvozvrata;
 }
 //-----------------------------------------------------------------------------
 

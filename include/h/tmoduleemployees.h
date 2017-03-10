@@ -32,6 +32,7 @@ public :
     bool createSelfEmployee();         // Создать собственное ДЛ
     static void reflectEmployeeTypesToCb(QComboBox &cb); // Отобразить в списке типы должностей
     void reflectEmployeesToLw(const TEmployeeList &empls, QListWidget &lw); // Отобразить ДЛ в списке
+    void reflectEmployeesToCb(int unitid, QComboBox &cb); // Отобразить ДЛ формирования в списке
 
 public: // TAbstractModule interface
     bool init();

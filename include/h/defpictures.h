@@ -35,6 +35,7 @@
     #define PIX_LEFT                   QString(":/images/wizBack.png")
     #define PIX_RIGHT                  QString(":/images/wizNext.png")
     #define PIX_CHANGE                 QString(":/images/change.png")
+    #define PIX_ADDUSER                QString(":/images/addRecipient.png")
     #define PIX_LEVEL0                 QString(":/images/0_48.png")
     #define PIX_LEVEL1                 QString(":/images/1_48.png")
     #define PIX_LEVEL2                 QString(":/images/2_48.png")
