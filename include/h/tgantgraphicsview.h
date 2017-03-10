@@ -104,6 +104,7 @@ public:
 
 public:
     explicit TGantGraphicsView( int year=0,  int curday=-1, QWidget *prnt=NULL); // year: если 0, то текущий год; curday: если < 0, то не отображать
+    //  explicit TGantGraphicsView( int year=0,  int curday=-1, QGraphicsScene *pscene=NULL, QWidget *prnt=NULL); // year: если 0, то текущий год; curday: если < 0, то не отображать
     ~TGantGraphicsView();
 
     int year() const;                  // год графика
@@ -148,10 +149,17 @@ public slots:
      void ScrollHoriz_P(int value);
      void set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_);
      void set_scrollbarHoriz(QScrollBar *qscrollbarHorizPlan_);
+     void redraw();//ContentDraw cd);         // переотрисовка диаграмму
+
+protected:
+      void resizeEvent(QResizeEvent *event);//
 
 private:
 
+    QTimer *timer;
+
     QWidget *prnt_gv;
+    QGraphicsScene *pscene_gv;
 
     // параметры календаря
     int                 m_year,
