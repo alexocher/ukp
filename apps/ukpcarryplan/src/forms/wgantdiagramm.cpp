@@ -189,12 +189,16 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                                 wrkGit->setOpen(true);
                                 wrkGit->setBegin(GANT_IND_PLAN,wrk->dayPlanBegin());
                                 wrkGit->setEnd(GANT_IND_PLAN,wrk->dayPlanEnd());
+                            //PR3((wrkGit->level()+1)*4,"%1 [%2..%3]",wrkGit->name(),wrkGit->begin(0),wrkGit->end(0));
                                 prGit->insertChild(wrkGit);
                             }
+                        //PR3((prGit->level()+1)*4,"%1 [%2..%3]",prGit->name(),prGit->begin(0),prGit->end(0));
                             planGit->insertChild(prGit);
                         }
+                    //PR3((planGit->level()+1)*4,"%1 [%2..%3]",planGit->name(),planGit->begin(0),planGit->end(0));
                         tskGit->insertChild(planGit);
                     }
+        //PR3((tskGit->level()+1)*4,"%1 [%2..%3]",tskGit->name(),tskGit->begin(0),tskGit->end(0));
             gd.insertTopItem(tskGit);
         }
     }
@@ -256,6 +260,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
         }
     }
 
+    printDiagrammTree();
+
     gd.moveToDay(QDate::currentDate().dayOfYear()-1);
     gd.draw(whatdraw);
 
@@ -267,16 +273,21 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
 void WGantDiagramm::printDiagrammTree()
 {
   TGantGraphicsView &gd = *DIAGR;
-  QStack<TGantItem*> stack;
     PR(0,"GantGraphicsView:");
     foreach (TGantItem *topIt,gd.topItems())
     {
-        stack.push(topIt);
-        while (!stack.isEmpty())
+    PR3((topIt->level()+1)*4,"%1 [%2..%3]",topIt->name(),topIt->begin(0),topIt->end(0)); // task
+        foreach (TGantItem *planIt,topIt->childs())
         {
-          TGantItem &curIt = *stack.pop();
-            PR3((curIt.level()+1)*4,"%1 [%2..%3]",curIt.name(),curIt.begin(0),curIt.end(0));
-            foreach (TGantItem *it,curIt.childs()) stack.push(it);
+        PR3((planIt->level()+1)*4,"%1 [%2..%3]",planIt->name(),planIt->begin(0),planIt->end(0)); // plan
+            foreach (TGantItem *procIt,planIt->childs())
+            {
+            PR3((procIt->level()+1)*4,"%1 [%2..%3]",procIt->name(),procIt->begin(0),procIt->end(0)); // procedure
+                foreach (TGantItem *workIt,procIt->childs())
+                {
+                PR3((workIt->level()+1)*4,"%1 [%2..%3]",workIt->name(),workIt->begin(0),workIt->end(0)); // work
+                }
+            }
         }
     }
 }
