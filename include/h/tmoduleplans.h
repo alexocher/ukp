@@ -51,7 +51,7 @@ public :
     void setCurrentGenPlan(TGenPlan *pl);
 
     void testPlanData();
-    void setWorkIdsForPlan();          // Назначить id для работ c id==0 (для выполнения createCarryPlans). После записи в БД id изменятся
+    void setElementIdsForPlan();       // Назначить id для элементов c id==0 (для выполнения createCarryPlans). После записи в БД id изменятся
     bool createCarryPlans(TCarryTaskList &tasks, QString &errs); // Основная функция планирования
 
     TCarryTask *findTask(const TCarryTaskList &tsks, QString nm, bool onscrnm=false); // ... найти по наименованию (по умолчанию) или по отображаемому наименованию

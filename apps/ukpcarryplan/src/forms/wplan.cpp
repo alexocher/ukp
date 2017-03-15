@@ -104,7 +104,7 @@ void WPlan::resetPlan(const QPushButton &btn)
                   QTreeWidgetItem *topIt(curIt->parent());
                   QString tskTitle(topIt ? topIt->text(0) : "");
                     plan->fillFromTemplate((TCarryPlan*)modPlans->findPlanTemplate(cbTemplates->currentText(),true));
-                    modPlans->setWorkIdsForPlan();
+                    modPlans->setElementIdsForPlan();
                     modPlans->reflectCarryTasksToTree(modPlans->carryTasks(),*twProjects);
                     qtools::expand(*twProjects,0);
                     for (int i=0; i<twProjects->topLevelItemCount(); i++)

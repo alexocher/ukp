@@ -645,32 +645,46 @@ void TModulePlans::reflectExternProceduresToCb(const TExternProcedureTemplateLis
 }
 //-----------------------------------------------------------------------------
 
-// Назначить id для работ c id==0. После записи в БД id изменятся
+// Назначить id для элементов c id==0. После записи в БД id изменятся
 // (для выполнения createCarryPlans)
-void TModulePlans::setWorkIdsForPlan()
+void TModulePlans::setElementIdsForPlan()
 {
   int maxId(0);
-    foreach(TCarryTask *tsk,fPlCarryTasks) // найти наибольший id работы
+    foreach(TCarryTask *tsk,fPlCarryTasks) // найти наибольший id элемента
     {
+        if (tsk->id()>maxId) maxId = tsk->id();
       TCarryPlanList plans;
         plans.setAutoDelete(false);
         if (tsk->ordPlan()) plans.append(tsk->ordPlan());
         if (tsk->carryPlan()) plans.append(tsk->carryPlan());
         foreach (TCarryPlan *plan,plans)
+        {
+            if (plan->id()>maxId) maxId = plan->id();
             foreach (TCarryProcedure *proc,plan->procedures())
+            {
+                if (proc->id()>maxId) maxId = proc->id();
                 foreach (TCarryWork *wrk,proc->works())
                     if (wrk->id()>maxId) maxId = wrk->id();
+            }
+        }
     }
-    foreach(TCarryTask *tsk,fPlCarryTasks) // назначить id для работ c id==0
+    foreach(TCarryTask *tsk,fPlCarryTasks) // назначить id для элемента c id==0
     {
+        if (!tsk->id()) tsk->setId(++maxId);
       TCarryPlanList plans;
         plans.setAutoDelete(false);
         if (tsk->ordPlan()) plans.append(tsk->ordPlan());
         if (tsk->carryPlan()) plans.append(tsk->carryPlan());
         foreach (TCarryPlan *plan,plans)
+        {
+            if (!plan->id()) plan->setId(++maxId);
             foreach (TCarryProcedure *proc,plan->procedures())
+            {
+                if (!proc->id()) proc->setId(++maxId);
                 foreach (TCarryWork *wrk,proc->works())
                     if (!wrk->id()) wrk->setId(++maxId);
+            }
+        }
     }
 }
 //-----------------------------------------------------------------------------
