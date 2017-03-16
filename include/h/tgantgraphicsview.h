@@ -147,9 +147,10 @@ public slots:
      void ScrollHoriz(int value);
      void ScrollHoriz_T(int value);
      void ScrollHoriz_P(int value);
+     void ScrollVert_P(int value);
      void set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_);
      void set_scrollbarHoriz(QScrollBar *qscrollbarHorizPlan_);
-     void redraw();//ContentDraw cd);         // переотрисовка диаграмму
+     void redraw();         // переотрисовка диаграмму
 
 protected:
       void resizeEvent(QResizeEvent *event);//
@@ -184,6 +185,9 @@ private:
     QString             m_monthLabels[ 12 ]; // наименования месяцев
     // общие параметры отрисовки
     ContentDraw         m_contentDraw;
+
+    //начальная отрисовка (для появления ползунка)
+    bool nachalo;
 
     void fillHeaderDatas(); // заполнить данные заголовка ( m_dates, m_monthStarts )
     void newPlan();

@@ -6,6 +6,7 @@
 #include <QScrollBar>
 #include <defMacro>
 #include <qtools>
+#include <gen>
 #include <TModulePlans>
 #include <WGantDiagramm>
 
@@ -118,6 +119,8 @@ void WGantDiagramm::resetGantDiagramm(const QPushButton &btn)
 }
 //-----------------------------------------------------------------------------
 
+// ??? Раскрасить ???
+
 void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDraw whatdraw)
 {
   MODULE(Plans);
@@ -126,20 +129,25 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
     qtools::expand(*TREE);
 
   QPen planItemsPen(Qt::darkBlue);
-    planItemsPen.setWidth(2);
-  QBrush planItemsBrash(Qt::blue);
+  QBrush planItemsTaskBrash(Qt::darkGray);
+  QBrush planItemsPlanBrash(Qt::darkGray);
+  QBrush planItemsProcedureBrash(Qt::darkGray);
+  QBrush planItemsWorkBrash(Qt::blue);
+
   QPen realItemsPen(Qt::darkGreen);
-    realItemsPen.setWidth(2);
-  QBrush realItemsBrash(Qt::green);
+  QBrush realItemsTaskBrash(Qt::blue);
+  QBrush realItemsPlanBrash(Qt::blue);
+  QBrush realItemsProcedureBrash(Qt::blue);
+  QBrush realItemsWorkBrash(Qt::blue);
 
   TGantGraphicsView &gd = *DIAGR;
     gd.setHeaderHeight(HEADER_H);
     gd.setColumnWidth(COLUMN_W);
     gd.setRowHeight(ROW_H);
-    gd.setGridPen(QPen(Qt::black));
+    gd.setGridPen(QPen(Qt::darkGray));
     gd.setWeekendPen(QPen(Qt::darkRed));
-    gd.setGridBrush( QBrush(Qt::lightGray));
-    gd.setWeekendBrush(QBrush(Qt::darkGray));
+    gd.setGridBrush( QBrush(Qt::white));
+    gd.setWeekendBrush(QBrush(Qt::lightGray));
     gd.clearTopItems();
 
     // плановые элементы
@@ -154,8 +162,9 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                     if (plan->isChecked()) { isReflect = true; break; }
             if (!isReflect) continue;
           TGantItem *tskGit(new TGantItem(TGantItem::gitProject,tsk->scrName()));
+            tskGit->setLabel(GANT_IND_PLAN,gen::intToStr(tsk->num()));
             tskGit->setPen(GANT_IND_PLAN,planItemsPen);
-            tskGit->setBrush(GANT_IND_PLAN,planItemsBrash);
+            tskGit->setBrush(GANT_IND_PLAN,planItemsTaskBrash);
             tskGit->setLevel(0);
             tskGit->setOpen(true);
             tskGit->setBegin(GANT_IND_PLAN,tsk->dayPlanBegin());
@@ -165,8 +174,9 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                     if (plan->isChecked())
                     {
                       TGantItem *planGit(new TGantItem(TGantItem::gitPlan,plan->scrName(),tskGit));
+                        planGit->setLabel(GANT_IND_PLAN,gen::intToStr(plan->num()));
                         planGit->setPen(GANT_IND_PLAN,planItemsPen);
-                        planGit->setBrush(GANT_IND_PLAN,planItemsBrash);
+                        planGit->setBrush(GANT_IND_PLAN,planItemsPlanBrash);
                         planGit->setLevel(1);
                         planGit->setOpen(true);
                         planGit->setBegin(GANT_IND_PLAN,plan->dayPlanBegin());
@@ -174,8 +184,9 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                         foreach (TCarryProcedure *pr,plan->procedures())
                         {
                           TGantItem *prGit(new TGantItem(TGantItem::gitProcedure,pr->scrName(),planGit));
+                            prGit->setLabel(GANT_IND_PLAN,gen::intToStr(pr->num()));
                             prGit->setPen(GANT_IND_PLAN,planItemsPen);
-                            prGit->setBrush(GANT_IND_PLAN,planItemsBrash);
+                            prGit->setBrush(GANT_IND_PLAN,planItemsProcedureBrash);
                             prGit->setLevel(2);
                             prGit->setOpen(true);
                             prGit->setBegin(GANT_IND_PLAN,pr->dayPlanBegin());
@@ -183,8 +194,9 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                             foreach (TCarryWork *wrk,pr->works())
                             {
                               TGantItem *wrkGit(new TGantItem(TGantItem::gitWork,wrk->scrName(),prGit));
+                                wrkGit->setLabel(GANT_IND_PLAN,gen::intToStr(wrk->num()));
                                 wrkGit->setPen(GANT_IND_PLAN,planItemsPen);
-                                wrkGit->setBrush(GANT_IND_PLAN,planItemsBrash);
+                                wrkGit->setBrush(GANT_IND_PLAN,planItemsWorkBrash);
                                 wrkGit->setLevel(3);
                                 wrkGit->setOpen(true);
                                 wrkGit->setBegin(GANT_IND_PLAN,wrk->dayPlanBegin());
@@ -216,7 +228,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
             if (!isReflect) continue;
           TGantItem *tskGit(new TGantItem(TGantItem::gitProject,tsk->scrName()));
             tskGit->setPen(GANT_IND_REAL,realItemsPen);
-            tskGit->setBrush(GANT_IND_REAL,realItemsBrash);
+            tskGit->setBrush(GANT_IND_REAL,realItemsTaskBrash);
             tskGit->setLevel(0);
             tskGit->setOpen(true);
             tskGit->setBegin(GANT_IND_REAL,tsk->dayRealBegin());
@@ -227,7 +239,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                     {
                       TGantItem *planGit(new TGantItem(TGantItem::gitPlan,plan->scrName(),tskGit));
                         planGit->setPen(GANT_IND_REAL,realItemsPen);
-                        planGit->setBrush(GANT_IND_REAL,realItemsBrash);
+                        planGit->setBrush(GANT_IND_REAL,realItemsPlanBrash);
                         planGit->setLevel(1);
                         planGit->setOpen(true);
                         planGit->setBegin(GANT_IND_REAL,plan->dayRealBegin());
@@ -236,7 +248,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                         {
                           TGantItem *prGit(new TGantItem(TGantItem::gitProcedure,pr->scrName(),planGit));
                             prGit->setPen(GANT_IND_REAL,realItemsPen);
-                            prGit->setBrush(GANT_IND_REAL,realItemsBrash);
+                            prGit->setBrush(GANT_IND_REAL,realItemsProcedureBrash);
                             prGit->setLevel(2);
                             prGit->setOpen(true);
                             prGit->setBegin(GANT_IND_REAL,pr->dayRealBegin());
@@ -245,7 +257,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                             {
                               TGantItem *wrkGit(new TGantItem(TGantItem::gitWork,wrk->scrName(),prGit));
                                 wrkGit->setPen(GANT_IND_REAL,realItemsPen);
-                                wrkGit->setBrush(GANT_IND_REAL,realItemsBrash);
+                                wrkGit->setBrush(GANT_IND_REAL,realItemsWorkBrash);
                                 wrkGit->setLevel(3);
                                 wrkGit->setOpen(true);
                                 wrkGit->setBegin(GANT_IND_REAL,wrk->dayRealBegin());
