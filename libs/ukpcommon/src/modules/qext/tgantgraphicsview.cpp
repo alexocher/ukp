@@ -10,6 +10,7 @@
 #include <QGridLayout>
 #include <QStack>
 #include <QTimer>
+#include <defMacro>
 
 //#define DEBUG_INFO
 
@@ -444,8 +445,19 @@ void TGantGraphicsView::newPlan(){
   #endif
 
       int dob(0);
-      if (qscrollbarVert)
-         dob = this ->height() - headerHeight -  qscrollbarVert->pageStep()*m_rowHeight;
+
+      if (qscrollbarVert){
+         //dob = this ->height() - headerHeight -  qscrollbarVert->pageStep()*m_rowHeight;
+          int height(this ->height());
+          //int h_v (qscrollbarVertgvPlan->height());
+           int h_v (this->horizontalScrollBar()->height());
+          //h_v=0;//
+          int kol =(int) (((float)(height - headerHeight - h_v)) /m_rowHeight);
+          dob = height - headerHeight  -  kol*m_rowHeight;
+
+      }
+
+       std::cerr << " !!!!!!!    dob new = " << dob << std::endl;
 
       //int slayder(m_rowHeight/2);
       int slayder(dob);
@@ -1541,6 +1553,9 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     std::cerr << " totalHeight = " << totalHeight << std::endl;
 #endif
 
+    //std::cerr << " !!!!!!!!  m_headerHeight = " << m_headerHeight << std::endl;
+    //std::cerr << " !!!!!!!! m_rowHeight = " << m_rowHeight << std::endl;
+
     int slayder(m_rowHeight/2);
         //int slayder_gor(m_columnWidth);
 
@@ -1707,7 +1722,6 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
       int height (this->height());
 
     QGraphicsProxyWidget *wid(scene->addWidget(gvTable));
-    //wid->resize(3000,3000);
     QTransform tr(wid->transform());
 
     tr.translate(0,0);
@@ -1747,8 +1761,11 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
         if (prnt_gv)
         {
-            //int height = prnt_gv->height();
-            dob = height - headerHeight -  qscrollbarVert->pageStep()*m_rowHeight;
+            int h_v (this->horizontalScrollBar()->height());
+            // h_v =0;
+            int kol =(int) (((float)(height - headerHeight - h_v )) /m_rowHeight);
+            dob = height - headerHeight  -  kol*m_rowHeight;
+
             if (headerHeight + m_rowHeight*rowcount >  height )
             {
              connect(qscrollbarVert,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert(int)));//
@@ -1771,6 +1788,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
              std::cerr << " !!! qscrollbarVert pageStep = " << page_v  << std::endl;
              std::cerr << " !!! qscrollbarVert->width() = " << qscrollbarVert->width() << std::endl;
              std::cerr << " !!! qscrollbarVert->height() = " << qscrollbarVert->height() << std::endl;
+             std::cerr << " !!! dob = " << dob << std::endl;
              std::cerr << " !!! this->width()  = " << this->width() << std::endl;
              std::cerr << " !!! this->height() = " << this->height() << std::endl;
 //#endif
@@ -1792,6 +1810,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
         //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+        //qscrollbarHoriz = (QScrollBar * ) GetDlgItem(IDC_SCROLLBAR1);
         qscrollbarHoriz = horizontalScrollBar();
         //qscrollbarHoriz =new QScrollBar(Qt::Horizontal,prnt);
         //qscrollbarHoriz =new QScrollBar(Qt::Horizontal,this);
@@ -1816,7 +1835,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             int pagestep = qscrollbarHoriz->pageStep();//->PageStep
             std::cerr << " !!!! min width = !!!! "  << min <<std::endl;
             std::cerr << " !!!! max width = !!!! "  << max <<std::endl;
-             std::cerr << " !!!! width = !!!! "  << width <<std::endl;
+            std::cerr << " !!!! width = !!!! "  << width <<std::endl;
             std::cerr << " !!!! pagestep = !!!! "  << pagestep <<std::endl;
             std::cerr << " !!!! qscrollbarHoriz->maximum() = !!!! "  <<  qscrollbarHoriz->maximum() <<std::endl;
             std::cerr << " !!!! qscrollbarHoriz->minimum() = !!!! "  <<  qscrollbarHoriz->minimum() <<std::endl;
@@ -1891,10 +1910,10 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 //#ifdef DEBUG_INFO
     std::cerr << " !!!! gv->width()   AFTER  =  " << gv->width() <<std::endl;
     std::cerr << " !!!! gv->height()  AFTER  =  " << gv->height() <<std::endl;
-    std::cerr << " !!!! gv->minimumWidth() AFTER =  " << gv->minimumWidth() <<std::endl;
-    std::cerr << " !!!! gv->maximumWidth() AFTER =  " << gv->maximumWidth() <<std::endl;
-    std::cerr << " !!!! gv->minimumHeight() AFTER =  " << gv->minimumHeight() <<std::endl;
-    std::cerr << " !!!! gv->maximumHeight() AFTER =  " << gv->maximumHeight() <<std::endl;
+    //std::cerr << " !!!! gv->minimumWidth() AFTER =  " << gv->minimumWidth() <<std::endl;
+    //std::cerr << " !!!! gv->maximumWidth() AFTER =  " << gv->maximumWidth() <<std::endl;
+    //std::cerr << " !!!! gv->minimumHeight() AFTER =  " << gv->minimumHeight() <<std::endl;
+    //std::cerr << " !!!! gv->maximumHeight() AFTER =  " << gv->maximumHeight() <<std::endl;
 //#endif
 
     gv->show();
@@ -1904,6 +1923,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
  void TGantGraphicsView:: resizeEvent(QResizeEvent *event) {// Q_DECL_OVERRIDE{
 
      //timer->start(50);
+
       QGraphicsView::resizeEvent(event);
 //#ifdef DEBUG_INFO
      std::cerr << " !!! resizeEvent this->width()  = " << this->width() << std::endl;
