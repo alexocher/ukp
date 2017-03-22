@@ -142,7 +142,7 @@ TUnit *TModuleUnits::findUnit(QString nm, bool onscrnm)
 }
 //-----------------------------------------------------------------------------
 
-void TModuleUnits::reflectToTree(const TUnitList &units, QTreeWidget &tw)
+void TModuleUnits::reflectToTree(const TUnitList &units, QTreeWidget &tw, bool withempl)
 {
     tw.clear();
   TUnit *mainUnit(NULL);
@@ -152,13 +152,33 @@ void TModuleUnits::reflectToTree(const TUnitList &units, QTreeWidget &tw)
     {
       QTreeWidgetItem *twiNew(new QTreeWidgetItem(&tw));
         twiNew->setText(0,mainUnit->name());
-        //twiNew->setIcon(0,ICONPIX(addBatr->pixMain()));
+        if (mainUnit==fSelfUnit) twiNew->setIcon(0,ICONPIX(PIX_CHECKED));
         twiNew->setText(1,mainUnit->scrName());
         twiNew->setText(2,gen::intToStr(mainUnit->id()));
         twiNew->setData(0,Qt::UserRole,qVariantFromValue(TIdent(mainUnit->id(),0,mainUnit->scrName(),0)));
         twiNew->setFlags(twiNew->flags() | Qt::ItemIsTristate);
         twiNew->setCheckState(0,Qt::Unchecked);
-        mainUnit->reflectSubUnitsToTree(*twiNew);
+        if (withempl)
+        {
+          MODULE(Employees);
+          TEmployeeList localEmployees;
+            localEmployees.setAutoDelete(false);
+            if (mainUnit->chief()) localEmployees.append(mainUnit->chief());
+            foreach (TEmployee *empl,mainUnit->employees())
+                if (empl!=mainUnit->chief()) localEmployees.append(empl);
+            foreach (TEmployee *empl,localEmployees)
+            {
+              QTreeWidgetItem *twiNewEmpl(new QTreeWidgetItem(twiNew));
+                twiNewEmpl->setText(0,QString("%1, %2").arg(convertEnums::enumToStr(empl->role().type())).arg(empl->name()));
+                twiNewEmpl->setIcon(0,ICONPIX(empl==modEmployees->selfEmployee() ? PIX_CHECKED : PIX_ADDUSER));
+                twiNewEmpl->setText(1,empl->scrName());
+                twiNewEmpl->setText(2,gen::intToStr(empl->id()));
+                twiNewEmpl->setData(0,Qt::UserRole,qVariantFromValue(TIdent(empl->id(),0,empl->scrName(),0)));
+                twiNewEmpl->setFlags(twiNew->flags() | Qt::ItemIsTristate);
+                twiNewEmpl->setCheckState(0,Qt::Unchecked);
+            }
+        }
+        mainUnit->reflectSubUnitsToTree(*twiNew,withempl);
     }
 }
 //-----------------------------------------------------------------------------

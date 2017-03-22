@@ -1,7 +1,10 @@
 #include <defMacro>
+#include <defPictures>
+#include <convertEnums>
 #include <gen>
 #include <TIdent>
 #include <TUnit>
+#include <TModuleUnits>
 
 TUnit::TUnit(int id, QString nm, QString shrtnm, TUnit *chfun, int n, TAbstractObject *parent) : TAbstractObject(id,n,nm,parent), fLevel(ulvNone), fChief(NULL), fShtatEmployeeCount(0), fChiefUnit(chfun)
 {
@@ -194,20 +197,50 @@ bool TUnit::isTopUnit(TUnit *un)
 }
 //-----------------------------------------------------------------------------
 
-void TUnit::reflectSubUnitsToTree(QTreeWidgetItem &twiself)
+void TUnit::reflectSubUnitsToTree(QTreeWidgetItem &twiself, bool withempl)
 {
-    for (int i=twiself.childCount()-1; i>=0; i--) twiself.removeChild(twiself.child(i));
+    //for (int i=twiself.childCount()-1; i>=0; i--) twiself.removeChild(twiself.child(i));
+  MODULE(Units);
     foreach (TUnit *un,fSubUnits)
     {
       QTreeWidgetItem *twiNew(new QTreeWidgetItem(&twiself));
         twiNew->setText(0,un->name());
-        //twiNew->setIcon(0,ICONPIX(un->pixMain()));
+        if (un==modUnits->selfUnit()) twiNew->setIcon(0,ICONPIX(PIX_CHECKED));
         twiNew->setText(1,un->scrName());
         twiNew->setText(2,gen::intToStr(un->id()));
         twiNew->setData(0,Qt::UserRole,qVariantFromValue(TIdent(un->id(),0,un->scrName(),0)));
         twiNew->setFlags(twiNew->flags() | Qt::ItemIsTristate);
         twiNew->setCheckState(0,Qt::Unchecked);
-        un->reflectSubUnitsToTree(*twiNew);
+        if (withempl)
+        {
+          MODULE(Employees);
+          TEmployeeList localEmployees;
+            localEmployees.setAutoDelete(false);
+            foreach (TEmployee *empl,un->employees())
+                if (empl!=un->chief())
+                {
+                    localEmployees.append(empl);
+                    empl->setSSort(QString("%1, %2").arg(convertEnums::enumToStr(empl->role().type())).arg(empl->name()));
+                }
+            qStableSort(localEmployees.begin(),localEmployees.end(),obj::FSortMinToMaxStr<TEmployee*>());
+            if (un->chief())
+            {
+                un->chief()->setSSort(QString("%1, %2").arg(convertEnums::enumToStr(un->chief()->role().type())).arg(un->chief()->name()));
+                localEmployees.prepend(un->chief());
+            }
+            foreach (TEmployee *empl,localEmployees)
+            {
+              QTreeWidgetItem *twiNewEmpl(new QTreeWidgetItem(twiNew));
+                twiNewEmpl->setText(0,empl->sSort());
+                twiNewEmpl->setIcon(0,ICONPIX(empl==modEmployees->selfEmployee() ? PIX_CHECKED : PIX_ADDUSER));
+                twiNewEmpl->setText(1,empl->scrName());
+                twiNewEmpl->setText(2,gen::intToStr(empl->id()));
+                twiNewEmpl->setData(0,Qt::UserRole,qVariantFromValue(TIdent(empl->id(),0,empl->scrName(),0)));
+                twiNewEmpl->setFlags(twiNew->flags() | Qt::ItemIsTristate);
+                twiNewEmpl->setCheckState(0,Qt::Unchecked);
+            }
+        }
+        un->reflectSubUnitsToTree(*twiNew,withempl);
     }
 }
 //-----------------------------------------------------------------------------

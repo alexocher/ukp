@@ -52,7 +52,7 @@ public:
     TUnit &operator=(const TUnit &obj);
 
     bool isTopUnit(TUnit *un);         // Признак подчиненности подразделению un
-    void reflectSubUnitsToTree(QTreeWidgetItem &twiself); // Отобразить на дереве
+    void reflectSubUnitsToTree(QTreeWidgetItem &twiself, bool withempl=false); // Отобразить на дереве
 
 public: // TAbstractObject interface
     void reset(bool thisonly);

@@ -141,6 +141,7 @@ bool TModuleEmployees::init()
                             if (!curEmpl) curEmpl = new TEmployee(&curUn,us->SUID(),0,common::value(us->getDescr().toStdString(),"name").toString());
                             curEmpl->setScrName(QString("%1 - %2").arg(curEmpl->name()).arg(estblsh.getName()));
                             curEmpl->setRole(TEmployeeRole(estblsh.getGroup()));
+                            if (curEmpl->role().type()==eltChief) curUn.setChief(curEmpl);
                             curEmpl->setEstablishedPost(estblsh.getType());
                             // !!! TEmployeeCalendar *fCalendar - при создании общего календаря TModulePlans::fromDB("CompanyCalendar");
                             curUn.insertEmployee(curEmpl);
