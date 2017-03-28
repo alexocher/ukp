@@ -10,7 +10,7 @@
 #include <QGridLayout>
 #include <QStack>
 #include <QTimer>
-#include <defMacro>
+//#include "windows.h"
 
 //#define DEBUG_INFO
 
@@ -311,95 +311,13 @@ TGantGraphicsView::TGantGraphicsView(int year, int curday, QWidget *prnt) :
     gv=NULL;
 
     timer = new QTimer();
-    //connect(timer,SIGNAL(timeout()),this, SLOT(redraw()));
-    //timer->start(50);
+    connect(timer,SIGNAL(timeout()),this, SLOT(redraw()));
+    timer->start(100);
 
-    /*
-    if (prnt==NULL)
-    {
+    counter =0;
+    connect(this,SIGNAL(start_newPlan()),this, SLOT(newWindow()));
 
-        //sceneTable = new QGraphicsScene(this);
-        sceneTable = new QGraphicsScene();
-        gvTable = new QGraphicsView(sceneTable);
-        //sceneGant = new QGraphicsScene(this);
-         sceneGant = new QGraphicsScene();
-        gvPlan = new QGraphicsView(sceneGant);
-        //scene = new QGraphicsScene(this);
-        scene = new QGraphicsScene();
-        gv = new QGraphicsView(scene);
 
-    }
-    else
-    {
-        sceneTable = new QGraphicsScene();
-        //sceneTable = new QGraphicsScene(this);
-        gvTable = new QGraphicsView(sceneTable);
-        //gvTable = new QGraphicsView(prnt);
-        sceneGant = new QGraphicsScene();
-        //sceneGant = new QGraphicsScene(this);
-        gvPlan = new QGraphicsView(sceneGant);
-        //gvPlan = new QGraphicsView(prnt);
-        scene = new QGraphicsScene();
-        //scene = pscene;// = new QGraphicsScene();
-        //scene = new QGraphicsScene(this);
-        gv = new QGraphicsView(scene,this);
-        //gv = new QGraphicsView(scene, prnt_gv);
-        //gv = new QGraphicsView(scene);//,this);
-        //gv->setGeometry(this->geometry());
-        //prnt->layout();
-        //this->layout();
-        //gv->layout();
-
-        //gv->setViewport(prnt);
-
-        //QVBoxLayout *pb = new QVBoxLayout;
-        //pb->addWidget(gv);
-        //pb->setGeometry(this->geometry());
-        //prnt->setLayout(pb);
-        //this->setLayout(pb);
-
-    }
-
-    gv->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    gvPlan->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    gvTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-
-    gvTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    gvTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    gvPlan->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    gvPlan->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-
-    gv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    gv->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-    qscrollbarVertgvPlan = gvPlan->verticalScrollBar();
-    qscrollbarHorgvPlan  = gvPlan->horizontalScrollBar();
-    qscrollbarHorgvTable = gvTable->horizontalScrollBar();
-
-    connect(qscrollbarHorgvPlan, SIGNAL(valueChanged(int)),
-            qscrollbarHorgvTable, SLOT(setValue(int)));
-
-    connect(qscrollbarHorgvTable, SIGNAL(valueChanged(int)),
-            qscrollbarHorgvPlan, SLOT(setValue(int)));
-
-    qscrollbarHoriz = NULL;
-    qscrollbarVert = NULL;
-
-    if (prnt){
-        gvPlan->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        gvPlan->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-#ifdef DEBUG_INFO
-        int w = gv->width();//->sliderPosition();//->SliderPosition();
-        std::cerr << " !!!! gv->width() определен =  " << w<<std::endl;
-        int h = gv->height();//->width();//->sliderPosition();//->SliderPosition();
-        std::cerr << " !!!! gv->height() определен =  " << h<<std::endl;
-#endif
-
-    }
-
-   */
 }
 //-----------------------------------------------------------------------------
 
@@ -407,10 +325,14 @@ TGantGraphicsView::~TGantGraphicsView()
 {
     foreach (TGantItem *it,m_topItems)
         if (it) delete it;
+
+    deletePlan();
 }
 
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::newPlan(){
+
+    std::cerr << " ! ==============newPlan()=============== ! " << std::endl;
 
     int kolDays(GANT_KOL_DAY);
       if (m_dates[GANT_KOL_DAY-1]==0) kolDays = GANT_KOL_DAY-1;
@@ -428,6 +350,8 @@ void TGantGraphicsView::newPlan(){
       }
 
       rowcount =kol_curr;
+      rowcount_all =kol_curr;
+
   #ifdef DEBUG_INFO
       std::cerr << " ==============rowcount=============== " << rowcount<< std::endl;
   #endif
@@ -444,8 +368,8 @@ void TGantGraphicsView::newPlan(){
       std::cerr << " totalHeight new = " << totalHeight << std::endl;
   #endif
 
-      int dob(0);
-
+      //int dob(0);
+      dob = 0;
       if (qscrollbarVert){
          //dob = this ->height() - headerHeight -  qscrollbarVert->pageStep()*m_rowHeight;
           int height(this ->height());
@@ -456,8 +380,9 @@ void TGantGraphicsView::newPlan(){
           dob = height - headerHeight  -  kol*m_rowHeight;
 
       }
-
+  #ifdef DEBUG_INFO
        std::cerr << " !!!!!!!    dob new = " << dob << std::endl;
+   #endif
 
       //int slayder(m_rowHeight/2);
       int slayder(dob);
@@ -529,6 +454,7 @@ void TGantGraphicsView::newPlan(){
   //sceneGant->setSceneRect (QRectF(0,0,colDaysWidth*kolDays+slayder_gor,m_rowHeight*rowcount+slayder));// на слайдер
   //!!!!
   sceneGant->setSceneRect (QRectF(0,0,colDaysWidth*kolDays+slayder_gor,m_rowHeight*rowcount + slayder));//
+  //sceneGant->setSceneRect (QRectF(0,0,colDaysWidth*kolDays+slayder_gor,m_rowHeight*rowcount ));//
   //std::cerr << " Вертикаль 1" << std::endl;
   //!!!
   sceneTable->setSceneRect(QRectF(0,0,colDaysWidth*kolDays+slayder_gor,headerHeight));//
@@ -536,6 +462,7 @@ void TGantGraphicsView::newPlan(){
   //scene->setSceneRect(QRectF(0,0,colDaysWidth*kolDays+slayder_gor,headerHeight+m_rowHeight*rowcount+slayder));// на слайдер
   //!!!
   scene->setSceneRect(QRectF(0,0,colDaysWidth*kolDays+slayder_gor,headerHeight+m_rowHeight*rowcount + slayder));//
+  //scene->setSceneRect(QRectF(0,0,colDaysWidth*kolDays+slayder_gor,headerHeight+m_rowHeight*rowcount ));//
 
   //int w=this->width();
   //int h=this->height();//->width();
@@ -599,7 +526,7 @@ void TGantGraphicsView::newPlan(){
   int min_w = gv->minimumWidth(); int max_w = gv->maximumWidth();// minimumWidth ()
   int min_h = gv->minimumHeight(); int max_h = gv->maximumHeight();// minimumWidth ()
 
-//#ifdef DEBUG_INFO
+#ifdef DEBUG_INFO
   std::cerr << " !!!! this->width()   BEFOR =  " <<  this->width() <<std::endl;
   std::cerr << " !!!! this->height()  BEFOR =  " << this->height() <<std::endl;
   std::cerr << " !!!! gv->width()     BEFOR =  " << ww<<std::endl;
@@ -608,15 +535,19 @@ void TGantGraphicsView::newPlan(){
   std::cerr << " !!!! gv->maximumWidth() BEFOR =  " << max_w <<std::endl;
   std::cerr << " !!!! gv->minimumHeight() BEFOR =  " << min_h <<std::endl;
   std::cerr << " !!!! gv->maximumHeight() BEFOR =  " << max_h <<std::endl;
-//#endif
+#endif
 
-  //int hh_new(headerHeight + m_rowHeight*rowcount);
-  int hh_new( height);
+  //gv->viewport()->setFixedSize(this->width() + 1 ,  this->height() + 1);
+  //gvTable->viewport()->setFixedSize(this->width() + 1 ,  this->height() + 1);
+  //gvPlan->viewport()->setFixedSize(this->width() + 1 ,  this->height() + 1);
+
+  int hh_new(headerHeight + m_rowHeight*rowcount);
+  //int hh_new( height);
   int ww_new(width);
 
-  //gv->resize( ww_new,hh_new);
-  //gvTable->resize( ww_new,headerHeight);
-  //gvPlan->resize( ww_new,hh_new - headerHeight);
+  gv->resize( ww_new,hh_new);
+  gvTable->resize( ww_new,headerHeight);
+  gvPlan->resize( ww_new,hh_new - headerHeight);
 
   std::cerr << " !!!! gv->width()     AFT  =  " << gv->width()<<std::endl;
   std::cerr << " !!!! gv->height()    AFT  =  " << gv->height()<<std::endl;
@@ -632,45 +563,75 @@ void TGantGraphicsView::newPlan(){
     //gv->setMinimumHeight(hh_new);
     //gv->setMaximumWidth(ww_new);
     //gv->setMinimumWidth(ww_new);
-    gv->resize( ww_new,hh_new);
-    gvTable->resize( ww_new,headerHeight);
-    gvPlan->resize( ww_new,hh_new - headerHeight);
-
-    std::cerr << " !!!! gv->width()     AFT resize =  " << gv->width()<<std::endl;
-    std::cerr << " !!!! gv->height()    AFT resize =  " << gv->height()<<std::endl;
-
+    if (headerHeight + m_rowHeight*rowcount >  height ) {
+       gv->resize( ww_new,hh_new);
+       gvTable->resize( ww_new,headerHeight);
+       gvPlan->resize( ww_new,hh_new - headerHeight);
+       std::cerr << " !!!! gv->width()     AFT resize =  " << gv->width()<<std::endl;
+       std::cerr << " !!!! gv->height()    AFT resize =  " << gv->height()<<std::endl;
+    }
      nachalo = true;
-  }
+
+  } 
+
+  //!!!! не работает на ползунок
+  //this->setMinimumWidth(gv->viewport()->width()+ 1 );
+  //this->setMinimumHeight(gv->viewport()->height()+ 1 );
+  // (->resize (gv->viewport()->width()+ 1, gv->viewport()->height()+ 1 );
+  //this->resize (gv->viewport()->width()+ 1, gv->viewport()->height()+ 1 );
 
 }
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::deletePlan(){
 
-    if (sceneTable) {
-        delete sceneTable;
-        sceneTable=NULL;
-    }
+    std::cerr << " !!!!=================== deletePlan()=================  "<<std::endl;
+
     if (gvTable) {
         delete gvTable;
         gvTable=NULL;
+#ifdef DEBUG_INFO
+        std::cerr << " !!!!=================== deletePlan() gvTable============  " <<std::endl;
+#endif
+    }
+
+    if (sceneTable) {
+        delete sceneTable;
+        sceneTable=NULL;
+#ifdef DEBUG_INFO
+        std::cerr << " !!!!=================== deletePlan() sceneTable============  " <<std::endl;
+#endif
+    }
+
+    if (gvPlan){
+        delete gvPlan;
+        gvPlan=NULL;
+#ifdef DEBUG_INFO
+         std::cerr << " !!!!=================== deletePlan() gvPlan=============  " <<std::endl;
+#endif
     }
 
     if (sceneGant){
         delete  sceneGant;
         sceneGant=NULL;
+#ifdef DEBUG_INFO
+         std::cerr << " !!!!=================== deletePlan() scenePlan=============  " <<std::endl;
+#endif
     }
-    if (gvPlan){
-        delete gvPlan;
-        gvPlan=NULL;
+
+    if (gv){
+         delete gv;
+         gv=NULL;
+#ifdef DEBUG_INFO
+         std::cerr << " !!!!=================== deletePlan() GV================  " <<std::endl;
+#endif
     }
 
     if (scene) {
-        delete scene;
-        scene=NULL;
-    }
-    if (gv){
-        delete gv;
-        gv=NULL;
+         delete scene;
+         scene=NULL;
+#ifdef DEBUG_INFO
+         std::cerr << " !!!!=================== deletePlan() sceneGV================  " <<std::endl;
+#endif
     }
 
 }
@@ -899,6 +860,7 @@ void TGantGraphicsView::setOpen(TGantItem *it, bool isop)
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::ScrollVert(int value)
 {
+    if (Vert) return;
     if (qscrollbarVert==NULL) return;
     int min_  = qscrollbarVert->minimum();//
     int max_  = qscrollbarVert->maximum();//
@@ -928,12 +890,58 @@ void TGantGraphicsView::ScrollVert(int value)
     //std::cerr << " !!! rez = " << rez<< std::endl;
 #endif
 
-     disconnect(qscrollbarVertgvPlan,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert_P(int)));
+     //disconnect(qscrollbarVertgvPlan,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert_P(int)));
+      Vert_P =true;
      qscrollbarVertgvPlan->setSliderPosition(rez);
-     connect(qscrollbarVertgvPlan,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert_P(int)));
+      Vert_P =false;
+     //connect(qscrollbarVertgvPlan,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert_P(int)));
 
 }
 
+void TGantGraphicsView::ScrollVert_P(int value)
+{
+    if (Vert_P) return;
+    if (qscrollbarVert==NULL) return;
+
+    int min_  = qscrollbarVertgvPlan->minimum();//
+    int max_  = qscrollbarVertgvPlan->maximum();//
+
+    //int page_vp_ = qscrollbarVertgvPlan->pageStep();
+    //qscrollbarVertgvPlan->setMaximum(m_rowHeight*rowcount   - qscrollbarVertgvPlan->pageStep() );
+    //max_ = m_rowHeight*rowcount_all - qscrollbarVertgvPlan->pageStep();
+
+    int min  = qscrollbarVert->minimum();//
+    int max  = qscrollbarVert->maximum();
+
+    float k =0;
+    //if (max - min + pagestep >0 && max_ - min_ + pagestep_>0){
+    //    k= (((float)(max-min + pagestep))/(max_-min_ + pagestep_));
+    //}
+
+    if (max - min  >0 && max_ - min_ >0){
+        k= (((float)(max-min ))/(max_-min_ ));
+        // k= (((max-min ))/(max_-min_ ));
+    }
+
+     int rez =(int)(k * (value - min_ ) + min );
+     //if (k * (value - min_ ) + min - rez>0.5) rez= rez+1;
+#ifdef DEBUG_INFO
+    //std::cerr << " !!! value = " << value << std::endl;
+    //std::cerr << " !!! qscrollbarVertgvPlan max = " << max << std::endl;
+    //std::cerr << " !!! qscrollbarVertgvPlan min = " << min << std::endl;
+    //std::cerr << " !!! qscrollbarVert max = " << max_ << std::endl;
+    //std::cerr << " !!! qscrollbarVert min = " << min_ << std::endl;
+    //std::cerr << " !!! k = " << k << std::endl;
+    //std::cerr << " !!! rez = " << rez<< std::endl;
+#endif
+
+     //disconnect(qscrollbarVert,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert(int)));
+     //Vert =true;
+     qscrollbarVert->setSliderPosition(rez);
+     Vert =false;
+     //connect(qscrollbarVert,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert(int)));
+
+}
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::ScrollHoriz(int value)
 {
@@ -964,43 +972,6 @@ void TGantGraphicsView::ScrollHoriz(int value)
 //    position = qscrollbarHorgvPlan->sliderPosition();//->SliderPosition();
 //    std::cerr << "position new = " <<position << std::endl;
 //#endif
-}
-
-void TGantGraphicsView::ScrollVert_P(int value)
-{
-    if (qscrollbarVert==NULL) return;
-    int min_  = qscrollbarVertgvPlan->minimum();//
-    int max_  = qscrollbarVertgvPlan->maximum();//
-    //int pagestep_ = qscrollbarVert->pageStep();
-    // qscrollbarVert->setMaximum(max_ + qscrollbarVert->pageStep());
-
-    int min  = qscrollbarVert->minimum();//
-    int max  = qscrollbarVert->maximum();
-
-    float k =0;
-    //if (max - min + pagestep >0 && max_ - min_ + pagestep_>0){
-    //    k= (((float)(max-min + pagestep))/(max_-min_ + pagestep_));
-    //}
-
-    if (max - min  >0 && max_ - min_ >0){
-        k= (((float)(max-min ))/(max_-min_ ));
-        // k= (((max-min ))/(max_-min_ ));
-    }
-
-     int rez =(int)(k * (value - min_ ) + min );
-     //if (k * (value - min_ ) + min - rez>0.5) rez= rez+1;
-#ifdef DEBUG_INFO
-    //std::cerr << " !!! value = " << value << std::endl;
-    //std::cerr << " !!! qscrollbarVertgvPlan max = " << max << std::endl;
-    //std::cerr << " !!! qscrollbarVertgvPlan min = " << min << std::endl;
-    //std::cerr << " !!! qscrollbarVert max = " << max_ << std::endl;
-    //std::cerr << " !!! qscrollbarVert min = " << min_ << std::endl;
-    //std::cerr << " !!! k = " << k << std::endl;
-    //std::cerr << " !!! rez = " << rez<< std::endl;
-#endif
-
-     qscrollbarVert->setSliderPosition(rez);
-
 }
 
 //-----------------------------------------------------------------------------
@@ -1074,7 +1045,7 @@ void TGantGraphicsView::show()
 }
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::fillHeaderDatas()
-{
+{       
      // календарь
      for (int i=0;i<12;i++){
          months.insert(i+1, m_monthLabels[i]);
@@ -1505,12 +1476,31 @@ void  TGantGraphicsView::set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_
     qscrollbarHoriz = qscrollbarHorizPlan_;
 }
 
+ /*
+ void TGantGraphicsView::draw_time(TGantGraphicsView::ContentDraw cd)
+ {
+      std::cerr << " !!!============================  new  draw time ======================= !!! "  << std::endl;
+
+      m_contentDraw = cd;
+      //first_resizeEvent=true;
+      timer ->start(100);
+
+ }
+*/
+
 // !!! толщина (высота) элемента зависит от TGantGraphicsView::ContentDraw:
 //     cdPlan или cdReal - полная
 //     cdAll             - половинная
 void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 {
+    std::cerr << " !!!============================  new  draw ======================= !!! "  << std::endl;
+
+    //emit start_newPlan();
+
     m_contentDraw = cd;
+
+    Vert =false;
+    Vert_P =false;
 
     deletePlan();
     newPlan();
@@ -1526,7 +1516,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
   int headerHeight(m_headerHeight);
   int rowcount(0);
-    kol_curr = 0;
+  kol_curr = 0;
   TGantItemList &items = m_topItems;
   TGantItemList::iterator it2;
     for (it2=items.begin(); it2!=items.end(); ++it2)
@@ -1556,27 +1546,8 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     //std::cerr << " !!!!!!!!  m_headerHeight = " << m_headerHeight << std::endl;
     //std::cerr << " !!!!!!!! m_rowHeight = " << m_rowHeight << std::endl;
 
-    int slayder(m_rowHeight/2);
-        //int slayder_gor(m_columnWidth);
-
-    /*
-    sceneGant->setSceneRect (QRectF(0,0,colDaysWidth*kolDays+slayder_gor,m_rowHeight*rowcount+slayder));// на слайдер
-    //std::cerr << " Вертикаль 1" << std::endl;
-    sceneTable->setSceneRect(QRectF(0,0,colDaysWidth*kolDays+slayder_gor,headerHeight));// на слайдер
-    //std::cerr << " Вертикаль 2" << std::endl;
-    scene->setSceneRect(QRectF(0,0,colDaysWidth*kolDays+slayder_gor,headerHeight+m_rowHeight*rowcount+slayder));// на слайдер
-
-    //std::cerr << " Вертикаль 3 " << std::endl;
-     //std::cerr << " Вертикаль 4" << std::endl;
-    gvPlan->setScene(sceneGant);
-    //std::cerr << " Вертикаль 5" << std::endl;
-    //std::cerr << " Вертикаль 6" << std::endl;
-    gvTable->setScene(sceneTable);
-    //std::cerr << " Вертикаль 7 " << std::endl;
-    gv->setScene(scene);
-    //gv->resize(555,777);
-    //std::cerr << " Вертикаль 8" << std::endl;
-    */
+    //int slayder(m_rowHeight/2);
+    //int slayder_gor(m_columnWidth);
 
     // Сетка
     // Вертикальная
@@ -1587,11 +1558,13 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     {
         if (m_weekends[i])
         {
-            sceneGant->addRect(i*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount+slayder,m_weekendPen,m_weekendBrush);
+            //sceneGant->addRect(i*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount+slayder,m_weekendPen,m_weekendBrush);
+            sceneGant->addRect(i*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_weekendBrush);
             sceneTable->addRect(i*colDaysWidth,0,colDaysWidth,headerHeight,m_weekendPen,m_weekendBrush);
         }
         QGraphicsLineItem *line(NULL);
-        line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount+slayder);
+        //line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount+slayder);
+        line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount);
         line->setPen(QPen(Qt::black));
         if (m_weekends[i]) line->setPen(m_weekendPen);
         else line->setPen(m_gridPen);
@@ -1718,8 +1691,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
           }
       }
 
-
-      int height (this->height());
+     int height (this->height());
 
     QGraphicsProxyWidget *wid(scene->addWidget(gvTable));
     QTransform tr(wid->transform());
@@ -1731,7 +1703,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     tr = wid->transform();
 
     tr.translate(0,headerHeight);
-    wid->setTransform(tr);
+    wid->setTransform(tr);    
 
     // устанавливаем в положение слайдер
     qscrollbarHorgvPlan->setMinimum(0);
@@ -1750,7 +1722,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     //   gv->setViewport(prnt_gv);
     //gv->layout();
 
-    qscrollbarVertgvPlan->setMinimum(0);
+    qscrollbarVertgvPlan->setMinimum(0);    
     qscrollbarVertgvPlan->setMaximum(m_rowHeight*rowcount );
     qscrollbarVertgvPlan->setSliderPosition(0);
 
@@ -1769,13 +1741,13 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             if (headerHeight + m_rowHeight*rowcount >  height )
             {
              connect(qscrollbarVert,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert(int)));//
-
+             connect(qscrollbarVertgvPlan, SIGNAL(valueChanged(int)),
+                    this, SLOT(ScrollVert_P(int)));
              int page_v = qscrollbarVert->pageStep();//
              int min = qscrollbarVert->minimum();
              int max = qscrollbarVert->maximum();
              int min_ = qscrollbarVertgvPlan->minimum();
-             int page_vp = qscrollbarVertgvPlan->pageStep();//->maximum();
-             //qscrollbarVertgvPlan->setMaximum(m_rowHeight*rowcount + qscrollbarVertgvPlan->height()  - page_vp );
+             int page_vp = qscrollbarVertgvPlan->pageStep();//
              qscrollbarVertgvPlan->setMaximum(m_rowHeight*rowcount + dob  - page_vp );
              int max_ = qscrollbarVertgvPlan->maximum();
 
@@ -1799,8 +1771,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             }
 
         }
-        connect(qscrollbarVertgvPlan, SIGNAL(valueChanged(int)),
-               this, SLOT(ScrollVert_P(int)));
+
         qscrollbarVert->setSliderPosition(0);
     }
 
@@ -1812,15 +1783,13 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         //qscrollbarHoriz = (QScrollBar * ) GetDlgItem(IDC_SCROLLBAR1);
         qscrollbarHoriz = horizontalScrollBar();
-        //qscrollbarHoriz =new QScrollBar(Qt::Horizontal,prnt);
+
         //qscrollbarHoriz =new QScrollBar(Qt::Horizontal,this);
         //setHorizontalScrollBar(qscrollbarHoriz );
 
         if (qscrollbarHoriz!=NULL){
             qscrollbarHoriz->setEnabled (true );
             qscrollbarHoriz->setVisible (true );
-            //std::cerr << " !!!! qscrollbarHoriz->maximum() = !!!! "  <<  qscrollbarHoriz->maximum() <<std::endl;
-            //std::cerr << " !!!! qscrollbarHoriz->minimum() = !!!! "  <<  qscrollbarHoriz->minimum() <<std::endl;
             qscrollbarHoriz->setMaximum((int)((float)width*9/10));
             qscrollbarHoriz->setMinimum(0);
             //qscrollbarHoriz->triggerAction(QAbstractSlider::SliderMove );
@@ -1842,7 +1811,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             std::cerr << " !!!! qscrollbarHoriz->value() = !!!! "  <<  qscrollbarHoriz->value() <<std::endl;
 //#endif
 
-        }
+        }      
     }
 
     if (qscrollbarHoriz!=NULL)
@@ -1923,28 +1892,56 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
  void TGantGraphicsView:: resizeEvent(QResizeEvent *event) {// Q_DECL_OVERRIDE{
 
      //timer->start(50);
+     // Sleep(2000);
 
+     //#ifdef DEBUG_INFO
+          std::cerr << " !!! resizeEvent this->width()  = " << this->width() << std::endl;
+          std::cerr << " !!! resizeEvent this->height() = " << this->height() << std::endl;
+          //-----std::cerr << " !!! resizeEvent gv->width()  = " << gv->width() << std::endl;
+          //-----std::cerr << " !!! resizeEvent gv->height() = " << gv->height() << std::endl;
+     //#endif
+     // if (first_resizeEvent) return;
+
+      timer->start(100);
       QGraphicsView::resizeEvent(event);
-//#ifdef DEBUG_INFO
-     std::cerr << " !!! resizeEvent this->width()  = " << this->width() << std::endl;
-     std::cerr << " !!! resizeEvent this->height() = " << this->height() << std::endl;
-     //-----std::cerr << " !!! resizeEvent gv->width()  = " << gv->width() << std::endl;
-     //-----std::cerr << " !!! resizeEvent gv->height() = " << gv->height() << std::endl;
-//#endif
 
     //fitInView(gvTable->rect(), Qt::KeepAspectRatio);
     //fitInView(gvPlan->rect(), Qt::KeepAspectRatio);
     //fitInView(gv->rect(), Qt::KeepAspectRatio);
     //------gv->resize(this->width() ,  this->height() );
+    //
 
+    // draw(m_contentDraw );
+    //gv->viewport()->setFixedSize(this->width() ,  this->height());
+
+    /*
     draw(m_contentDraw );
+    Sleep(2000);
+    this->horizontalScrollBar()->setVisible(false);
+    //this->horizontalScrollBar()->setValue(100);
+    Sleep(2000);
+    this->horizontalScrollBar()->setVisible(true);
+    //this->horizontalScrollBar()->setValue(0);
+    //this->horizontalScrollBar()->setMinimum(0);
+    //this->horizontalScrollBar()->setMaximum(10000);
+    //this->show();
+    //this->resize(this->width() + 1, this->height()+1);
+    */
+
+     //repaint();
 
  }
+
 //---------------------------------------------------------------------------------
  void TGantGraphicsView:: redraw() {// Q_DECL_OVERRIDE{
 
+     timer->stop();
      draw(m_contentDraw );
 
  }
 
+ void TGantGraphicsView::  newWindow() {//
 
+     counter++;
+
+ }

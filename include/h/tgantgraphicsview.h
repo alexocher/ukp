@@ -137,6 +137,7 @@ public:
 
     void prepare(int hdrH, int colW, int rowH); // ??? подготовить диаграмму
     void draw(ContentDraw cd);         // отрисовать диаграмму
+    //void draw_time(ContentDraw cd);         // отрисовать диаграмму
     void moveToDay(int day);           // прокрутить диаграмму, чтобы первым был day [0..GANT_KOL_DAY)
     TGantItem *findItem(const QStringList &slitnms); // глобальный поиск элементов (в элементах верхнего уровня и во всех вложенных)
     void setOpen(TGantItem *it, bool isop); // раскрытие (сворачивание) элементов
@@ -151,10 +152,11 @@ public slots:
      void set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_);
      void set_scrollbarHoriz(QScrollBar *qscrollbarHorizPlan_);
      void redraw();         // переотрисовка диаграмму
+     void newWindow();
 
 protected:
       void resizeEvent(QResizeEvent *event);//
-
+      //void paintEvent(QPaintEvent *event);
 private:
 
     QTimer *timer;
@@ -219,8 +221,16 @@ private:
     QScrollBar *qscrollbarHoriz;
     QScrollBar *qscrollbarVert;
 
-    int kol_curr;
+    bool Vert;
+    bool Vert_P;
 
+    int kol_curr;
+    int rowcount_all;
+    int dob ;
+
+    int counter;
+
+    //bool first_resizeEvent;
     // календарь
     QMap<int,QString>  months;
     QMap<int,int>  days;
@@ -230,6 +240,9 @@ private:
 //public:
 //    QGraphicsView  *gv;
 
+ signals:
+
+    void start_newPlan();
 
 };
 

@@ -2,410 +2,593 @@
 #include <TModuleEmployees>
 #include <TModulePlans>
 #include <QMessageBox>
+#include <QtCore>
+#include <TWorkCalendar> //??? Надо ли???
+
 // объявить глобальные переменные (задать неименованное пространство имен. Скрыть видимость переменных из вне)
 namespace {
-    int tbeginplan=0; // время (день) начала общего планирования (начиная с 0). Например, если tbeginplan=5, то
-                  //планировани всех работ начнется с 6 января, т.к. для 1 января tbeginplan=0
+    int tbeginplan = 0;    // номер дня (начиная с 0) начала планирования
+    int numerror = 0;      // порядковый номер ошибки
     struct executor_type { // структура исполнителя
-        int  code;            // код исполнителя (id)
-        bool external;        // исполнитель внешний (true) или внутренний (false)
-        std::vector<int>rest; // вектор нерабочих дней исполнителя (отпуск, командировка. Кроме праздничные и вых. дней)
+        int  id;           // id исполнителя
+        bool external;     // исполнитель внешний (true) или внутренний (false)
+        QVector<int>rest;  // вектор нерабочих дней исполнителя (отпуск, командировка, праздничные и вых. дни). Начиная с 0
     };
+
     struct job_type { // структура работы
-        int                        id;        // уникальный идентификатор БД (нужен для записи результатов планирования в task)
-        int                        code;      // код работы
-        int                        procedure; // код процедуры, которой принадлежит работа
-        int                        product;   // код продукции, которой принадлежит работа
-        int                        begin;     // время начала выполнения работы
-        int                        time;      // полное время выполнения работы
-        int                        end;       // время окончания работы (с учетом нерабочих дней)
-        executor_type              executor;  // назначенный исполнитель (взятый обязательно из списка people)
-        std::vector<executor_type> people;    // возможные исполнители работы (списки д.б. одинаковые во всех работах одной процедуры)
-        bool                       flcorrect; // флаг запрета редактирования работы (true - разрешена корректировка; false-запрет)
+        int                    id;           // id работы
+        int                    projectnum;   // номер проекта, которой принадлежит работа (только для формирования сообщения об ошибке)
+        int                    productnum;   // номер продукции, которой принадлежит работа (только для формирования сообщения об ошибке)
+        int                    procedurenum; // номер процедуры, которой принадлежит работа (только для формирования сообщения об ошибке)
+        int                    num;          // номер работы (только для формирования сообщения об ошибке)
+        int                    begin;        // время начала выполнения работы
+        int                    time;         // полное время выполнения работы
+        int                    end;          // время окончания работы (с учетом нерабочих дней)
+        executor_type          executor;     // назначенный исполнитель (из списка people)
+        QVector<executor_type> people;       // возможные исполнители работы
+        bool                   protection;   // признак защиты работы от редактирования (true - защищена; false - можно редактировать)
+
     };
-    struct time_type { // структура для временного хранения времен начала и конца работы
-        int begin;  // время начала работы
-        int end;    // время конца работы
-    };
-    std::vector<std::vector<job_type>> job;  // вектор работ, содержащий всю основную информация по работам
-    std::vector<executor_type> executor;       // вектор исполнители (данные о всех возможных исполнителях всех работ)
-    int flprint=2; // вывести в консоль: 0-ничего; 1-ошибки, план; 2-ошибки, план, job, tasks; 3-ошибки, план, job, tasks, мелочевка
+    QVector<QVector<QVector<job_type>>> job;  // вектор работ, содержащий всю основную информацию по всем работам
+    QVector<executor_type> executor;          // вектор исполнители (данные о всех возможных исполнителях всех планируемых работ)
+    QVector<int>holidey;                      // вектор праздничные и выходных дней (календарь предприятия). Начиная с 0
+
+    int flprint = 1; // флаг вывода отладочной информации в консоль: 0-ничего; 1-ошибки, план; 2-ошибки, план, job, tasks
 }
 
-// объявить  прототипы функций
-int  TestTCarryTask(TCarryTaskList &tasks, QString &errs);
-int  TestPlan(QString &errs);
-int  TestData(QString &errs);
-void PrintPlan();
-void PrintJob();
-void PrinTCarryTask(TCarryTaskList &tasks);
-void FillVectorExecutor();
-void FillVectorJob(TCarryTaskList &tasks);
-void FillTek(int &l, int &m, std::vector<time_type> &tek);
-void FindBeginEndJob(executor_type &executor, int &tstart, int &time, int &tbegin, int &tend);
-void PlanJob(int &l, int &m);
-void SetExecutor(int &l, int &m);
-int  Plan(TCarryTaskList &tasks, QString &errs);
+// объявить прототипы функций
+void     FillHoliday();
+int      TestTCarryTask(TCarryTaskList &tasks, QString &errs);
+int      Plan(TCarryTaskList &tasks, QString &errs);
+void     FindBeginEndJob(executor_type &executor, int &tstart, int &time, int &tbegin, int &tend);
+int      TestPlan(QString &errs);
+int      TestData(QString &errs);
+void     PrintPlan();
+void     PrintJob();
+void     PrinTCarryTask(TCarryTaskList &tasks);
 job_type FindJob(int &code);
+void     FillVectorJob(TCarryTaskList &tasks);
+void     WritePlan(TCarryTaskList &tasks);
+void     PlanJob(int &l, int &m, int &n);
+int      Plan(TCarryTaskList &tasks, QString &errs);
+
+void FillHoliday() // заполнить календарь предприятия
+{
+    // ДЛЯ ОТЛАДКИ ЗАПОЛНИТЬ СУББОТАМИ И ВОСКРЕСЕНЬЯМИ 2017 года ВЕКТОР holidey
+    //Возможно, этот календарь не понадобится. Все нерабочие дни будут в календарях исполнителей
+
+    // Заполнить вектор праздничными днями и выходными
+    holidey.clear() ;// очистить вектор holidey
+    // Заполнить вектор выходных и праздничных дней (календарь предприятия)
+    for(int i=0; i<=365; i=i+7){ // на 2017 год. 1 января - вск. 0, 6,7, 13,14, 20,21,...
+        holidey.push_back(i);
+        if(i>0) holidey.push_back(i-1);
+    }
+}
 
 int TestTCarryTask(TCarryTaskList &tasks, QString &errs) // проверить данные объекта tasks
 {
-    // Начальные проверки данные объекта tasks на ошибки, которые не позволят провести планирование
-    bool flerrs = false; // признак наличия ошибки
+    // Начальные проверки данные объекта tasks на ошибки, которые не позволят начать планирование
+    bool flerror = false; // признак наличия ошибки
 
-    foreach (TCarryTask *curTask,tasks) // цикл перебора продукций
+    foreach (TCarryTask *curTask,tasks) // цикл перебора проектов
     {
-        for(int i=0; i<=1; i++){ // цикл перебора двух планов: План выпуска продукции (i=0) и План ОРД (i=1)
+        for(int i=0; i<=1; i++){ // цикл перебора продукций (План выпуска продукции (i=0) и План ОРД (i=1))
             TCarryPlan *plan;
 
             // Проверка. Это план выпуска продукции или ОРД?
             if(i==0) plan = curTask->carryPlan(); // план выпуска продукции
             else     plan = curTask->ordPlan();   // план ОРД
 
-            // Проверка. Если нет плана, то пропустить этот блок
-            //if(plan->procedures().size()==0)continue; // пропустить план, в котором нет процедур
-            if(!plan) continue; // пропустить пустой план
+            if(!plan) continue; // пропустить пустую продукцию (пустой план)
 
             foreach (TCarryProcedure *proc,plan->procedures()) // цикл перебора процедур
             {
-                // вывести в цикле возможных исполнителей процедуры
-                //foreach (TEmployee *empl, proc->possibleEmployees())
-                //{
-                //    qDebug()<<"            possibleEmployees (people) id="<<empl->id();
-                //}
-                // вывести назначенного исполнителя процедуры
-                //if(proc->employee()) qDebug()<<"            employee id="<<proc->employee()->id();
-                //else                 qDebug()<<"            employee id=..."; // не назначен исполнитель
-                // вывести данные по работе
 
-                // Проверка. Список возможных исполнителей процедуры пуст?
+                // Проверка. Если список возможных исполнителей процедуры пуст, то прекратить планирование
                 if(proc->possibleEmployees().empty()){
-                    flerrs = true; // признак наличия ошибки, если нет возможных исполнителей
-                    errs += QString("<br>Ошибка. Пустой список исполнителей в процедуре: %1").arg(proc->name());
+                    flerror = true; // признак наличия ошибки
+                    numerror ++; // порядковый номер ошибки
+                    errs += QString("<br><b>%1</b>. Пустой список исполнителей в процедуре: %2.%3.%4").arg(numerror).arg(curTask->num()).arg(plan->num()).arg(proc->num());
                 }
 
                 foreach (TCarryWork *work,proc->works()) // цикл перебора работ
                 {
                     if(work){ // проверка на нулевой указатель
-                        //qDebug()<<"            Работа id="<<work->id();
-                        //if(work->dtPlanBegin()) qDebug()<<"                fDtPlanBegin (begin)="<<work->dtPlanBegin()->toString("d.M.yyyy");
-                        //else                    qDebug()<<"                fDtPlanBegin (begin)=...";
-                        //qDebug()<<"                fPlanPeriod (time)="<<work->planPeriod();
-                        //if(work->dtPlanBegin()) qDebug()<<"                fDtPlanEnd (end)="<<work->dtPlanEnd()->toString("d.M.yyyy");
-                        //else                    qDebug()<<"                fDtPlanEnd (end)=...";
-                        //qDebug()<<"                fIsVolatile (flcorrect)="<<work->isVolatile();
+                        // Проверка. Любая работа должна иметь time - длительность
+                        if(!work->planPeriod()){
+                            flerror = true; // признак наличия ошибки
+                            numerror ++; // порядковый номер ошибки
+                            errs += QString("<br><b>%1</b>. Не определена продолжительность работы: %2.%3.%4").arg(numerror).arg(curTask->num()).arg(plan->num()).arg(proc->num()).arg(work->num());
+                        }
                     }
                     else { // пустая работа
-                        errs += QString("<br>Ошибка. Обнаружена пустая работа в процедуре с id=<b>%1</b>").arg(proc->id());
-                        //return 6;
+                        flerror = true; // признак наличия ошибки
+                        numerror ++; // порядковый номер ошибки
+                        errs += QString("<br><b>%1</b>. Пустая работа: %2.%3.%4").arg(numerror).arg(curTask->num()).arg(plan->num()).arg(proc->num());
                     }
                 } // конец цикла перебора работ
             } // конец цикла перебора процедур
         } // конец цикла перебора 2-ух планов: продукции и ОРД
     } // конец цикла перебора продукций
 
-    // Проверка. Были ли ошибки?
-    if(flerrs) return 1; // есть ошибки. Планирование отменяется
+    // Проверка. Были ли ошибки при проверке tasks?
+    if(flerror){
+        if(flprint>=2) qDebug()<<"Ошибка. Обнаружена ошибка при проверке tasks. Планирование отменяется";
+        return 1; // есть ошибки. Планирование отменяется
+    }
     else return 0;       // норм. завершение функции. Ошибок - нет
 }
 
-int TestPlan(QString &errs) // протестировать  сформированный план
+int TestData(QString &errs) // тестирование считанных данных из объекта tasks (векторы: executor и job)
 {
-    // Функция тестирует сформированный план на ошибки:
-    //- нарушение последовательности работ одной продукции (ошибка, если последующая работа начинается до завершения предыдущей)
-    //- дублирование исполнителя (ошибка, если исполнитель одновременно выполняет две или более работ в один момент времени)
-
-    // Проверка на последовательность работ
-    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
-        for(int j=1; j<(int)job[i].size(); ++j) { // цикл перебора работ (начиная с 1-ой, а не с 0-ой работы)
-           if(job[i][j-1].end > job[i][j].begin) {
-               qDebug()<<"Ошибка. В плане нарушена последовательность работ i="<<i<<"j="<<j;
-               errs += QString("<br>Ошибка. В сформированном плане нарушена последовательность работ i=<b>%1</b>. j=<b>%2</b>").arg(i).arg(j);
-               QMessageBox::information(0, "Ошибка", QString("Планирование невозможно. Нарушение последовательности работ")
-                                        + QString(". Работа i=")
-                                        + QString::number(i)
-                                        + QString(", j=")
-                                        + QString::number(j)
-                                        + QString(". Возможная причина в признаке НЕ ИЗМЕНЯТЬ"));
-               return 1; // прервать тестирование (отменить планирование), т.к. в найденном плане не выполняется последовательность выполнения работа продукции
-           }
-        }
-    } // конец цикла перебора продукций
-
-    // Проверка на дублирование одновременно выполняемых работ одним исполнителем
-    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
-        for(int j=0; j<(int)job[i].size(); ++j) { // цикл перебора работ
-            executor_type executor = job[i][j].executor; // текущий исполнитель
-
-            // Проверка. Если исполнитель внешний, то для него не надо проверять дублирование. Для внешних исполнителей допускается дублирование работ
-            if(executor.external){
-                //if(flprint>=3) qDebug()<<"Для внешнего исполнителя работы: i="<<i<<"j="<<j<<" дублирование не контролируется";
-                continue; // пропустить внешнего исполнителя
-            }
-            //else if(flprint>=3) qDebug()<<"Для внутреннего исполнителя работы: i="<<i<<"j="<<j<<" дублирование контролируется";
-
-            int begin = job[i][j].begin;
-            int end   = job[i][j].end;
-            // проверить на дублирование исполнителя
-            for(int ii=0; ii<(int)job.size(); ++ii){ // цикл перебора продукций
-                for(int jj=0; jj<(int)job[ii].size(); ++jj) { // цикл перебора работ
-                    if((i==ii) && (j==jj)) continue; // пропустить проверямую работу (не проверять саму с собой)
-                    if(job[ii][jj].executor.code != executor.code) continue; // пропустить ненужного исполнителя
-                    if(((begin>=job[ii][jj].begin) && (begin<=job[ii][jj].end)) || // точка begin проверяемого интервала попала внутрь текущего интервала
-                       ((end  >=job[ii][jj].begin) && (end  <=job[ii][jj].end)) || // точка end   проверяемого интервала попала внутрь текущего интервала
-                       ((begin<=job[ii][jj].begin) && (end  >=job[ii][jj].end))){   // проверяемый интервал полностью накрыл текущий интервал
-                         qDebug()<<"Ошибка. В плане дублируются работы i="<<i<<"j="<<j<<"и"<<"ii="<<ii<<"jj="<<jj<<". Код исполнителя:"<<job[ii][jj].executor.code;
-                         errs += QString("<br>Ошибка. В сформированном плане дублируются работы i=<b>%1</b>, j=<b>%2</b> и ii=<b>%1</b>, jj=<b>%2</b>").arg(i).arg(j).arg(ii).arg(jj);
-                    }
-                } // конец цикла перебора работ
-            } // конец цикла перебора продукции
-        } // конец цикла перебора работ
-    } // конец цикла перебора продукций
-}
-
-int TestData(QString &errs) // тест считанных данных из объекта tasks
-{
-    // Проверка на заполненность обязательных данных, их корректность и т.д. до начала планирования
+    // Проверка на корректность данных, без которых нельзя начинать планирование
 
     // Проверка на существование вектора об исполнителях executor
-    if(executor.size()==0) {
+    if(executor.size() == 0) {
         if(flprint>=1) qDebug()<<"Ошибка. Вектор executor (сведения об исполнителях) пустой";
-        errs += QString("<br>Ошибка. Не найден ни один исполнитель");
+        numerror ++; // порядковый номер ошибки
+        errs += QString("<br><b>%1</b>. Не найден ни один исполнитель");
         return 1;
     }
 
-    // Проверка на заполненность поля code исполнителя в векторе executor
+    // Проверка id исполнителя в векторе executor
     for(int i=0; i<(int)executor.size(); ++i){
-        if(executor[i].code==0) {
-            if(flprint>=1) qDebug()<<"Ошибка. Вектор executor, поле code=0";
-            errs += QString("<br>Ошибка. Обнаружен нулевой код исполнителя");
+        if(executor[i].id == 0) {
+            if(flprint>=1) qDebug()<<"Ошибка. Вектор executor, поле id=0";
+            numerror ++; // порядковый номер ошибки
+            errs += QString("<br><b>%1</b>. Обнаружен исполнитель с пустым идентификатором").arg(numerror);
             return 2;
         }
     }
 
-    // Проверка на уникальность кодов всех возможных исполнителей
+    // Проверка на уникальность id всех возможных исполнителей
     for(int i=0; i<(int)executor.size(); ++i){ // цикл перебора всех исполнителей
-        int tekcode = executor[i].code;
+        int tekid = executor[i].id;
         for(int j=0; j<(int)executor.size(); ++j){ // цикл поиска текущего кода tekcode
             if(j==i) continue; // пропустить проверямого исполнителя
-            if(executor[j].code==tekcode) {
-                if(flprint>=1) qDebug()<<"Ошибка. Вектор executor, поле code, нарушение уникальности. Код: "<<QString::number(tekcode);
-                errs += QString("<br>Ошибка. Вектор executor, поле code, нарушение уникальности. Код исполнителя:<b>%1</b>").arg(tekcode);
+            if(executor[j].id==tekid) { // обнаружена ошибка - повторение кода
+                if(flprint>=1) qDebug()<<"Ошибка. Нарушение уникальности id исполнителей: "<<QString::number(tekid);
+                numerror ++; // порядковый номер ошибки
+                errs += QString("<br><b>%1</b>. Нарушена уникальность id исполнителей").arg(numerror);
                 return 3;
             }
         } // конец цикла поиска текущего кода tekcode
     } // конец цикла перебора всех исполнителей
 
     // Проверка заполнения данных об работах
-    if(job.size()==0) qDebug("Ошибка. Вектор job (сведения о работах) пустой");
+    if(job.size()==0) {
+        qDebug("Ошибка. Вектор job (сведения о работах) пустой");
+        errs += QString("<br> Не найдена ни одна работа");
+    }
     for(int i=0; i<(int) job.size(); ++i){ // цикл перебора продукций
-        for(int j=0; j<(int) job[i].size(); ++j){ // цикл перебора работ текущей продукции
-
-            // Работа должна иметь заполненный код (поле code, не равное 0)
-            if(job[i][j].code==0) {
-                if(flprint>=1) qDebug()<<"Ошибка. Вектор job, поле code=0 (пустое). i: "<<QString::number(i)<<", j: "<<QString::number(j);
-                errs += QString("<br>Ошибка. Вектор job, поле code=0 (пустое). i=<b>%1</b>. j=<b>%2</b>").arg(i).arg(j);
-                return 4;
-            }
-
-            // Работа, даже "одинокая" должна входить в какую-либо процедуру. Т.е. поле procedure д.б. обязательно заполнено во всех работах
-            if(job[i][j].procedure==0) {
-                if(flprint>=1) qDebug()<<"Ошибка. Вектор job, поле procedure=0 (пустое). i: "<<QString::number(i)<<", j: "<<QString::number(j);
-                errs += QString("<br>Ошибка. Вектор job, поле procedure=0 (пустое). i=<b>%1</b>. j=<b>%2</b>").arg(i).arg(j);
-                return 5;
-            }
+        for(int j=0; j<(int) job[i].size(); ++j){ // цикл перебора процедур текущей продукции
+            for(int k=0; k<(int) job[i][j].size(); ++k){ // цикл перебора работ текущей продукции
 
             // Работа должна иметь "продолжительность"
-            if(job[i][j].time==0) {
+            if(job[i][j][k].time == 0) {
                 if(flprint>=1) qDebug()<<"Ошибка. Вектор job, поле time=0 (пустое). i: "<<QString::number(i)<<", j: "<<QString::number(j);
-                errs += QString("<br>Ошибка. Вектор job, поле time=0 (пустое). i=<b>%1</b>. j=<b>%2</b>").arg(i).arg(j);
+                numerror ++; // порядковый номер ошибки
+                errs += QString("<br><b>%1</b>. Обнаружено пустое время работы").arg(numerror);
                 return 6;
             }
 
             // Работа должна иметь список возможных исполнителей
-            if(job[i][j].people.size()==0) {
+            if(job[i][j][k].people.size() == 0) {
                 if(flprint>=1) qDebug()<<"Ошибка. Вектор job, поле people пустое. i: "<<QString::number(i)<<", j: "<<QString::number(j);
-                errs += QString("<br>Ошибка. Вектор job, поле people пустое. i=<b>%1</b>. j=<b>%2</b>").arg(i).arg(j);
+                numerror ++; // порядковый номер ошибки
+                errs += QString("<br><b>%1</b>. Пустой список возможных исполнителей процедуры").arg(numerror);
                 return 7;
             }
 
-            // Проверка защищенных работ (имеющие признак "нельзя изменять"). У этих работ д.б. заполнены поля: begin, end, executor
-            if(job[i][j].flcorrect==false) {
-//                if(job[i][j].end==0) {
-//                    if(flprint>=1) qDebug()<<"Ошибка. Защищенная работа. Вектор job, поле end=0 (пустое). i: "<<QString::number(i)<<", j: "<<QString::number(j);
-//                    //errs += QString("<br>Ошибка. Защищенная работа. Вектор job, поле end=0 (пустое). i=<b>%1</b>. j=<b>%2</b>").arg(i).arg(j);
-//                    errs += QString("<br>Ошибка. Защищенная работа. Вектор job, поле end=0 (пустое). i=<b>%1</b>. j=<b>%2</b>."
-//                                    " В работе, имеющей признак НЕ ИЗМЕНЯТЬ, не заполнена дата окончания работы ").arg(i).arg(j);
-//                    return 9;
-//                }
+            // Проверка защищенных работ. У этих работ д.б. заполнены поля: begin, end, executor
+            if(job[i][j][k].protection) {
+                if(job[i][j][k].end == 0) {
+                    if(flprint>=1) qDebug()<<"Ошибка. Защищенная работа. Вектор job, поле end=0 (пустое). i: "<<QString::number(i)<<", j: "<<QString::number(j);
+                    numerror ++; // порядковый номер ошибки
+                    errs += QString("<br><b>%1</b>Защищенная работа. Не заполнена дата окончания").arg(numerror);
+                    return 9;
+                }
                 // Д.б. заполнен исполнитель (поле executor)
-                if(job[i][j].executor.code==0) {
+                if(job[i][j][k].executor.id == 0) {
                     if(flprint>=1) qDebug()<<"Ошибка. Защищенная работа. Вектор job, поле executor.code=0 (пустое). i: "<<QString::number(i)<<", j: "<<QString::number(j);
-                    //errs += QString("<br>Ошибка. Защищенная работа. Вектор job, поле executor.code=0 (пустое). i=<b>%1</b>. j=<b>%2</b>").arg(i).arg(j);
-                    errs += QString("<br>Ошибка. Защищенная работа. Вектор job, поле executor.code=0 (пустое). i=<b>%1</b>. j=<b>%2</b>"
-                                    " В работе, имеющей признак НЕ ИЗМЕНЯТЬ, не заполнен исполнитель ").arg(i).arg(j);
+                    numerror ++; // порядковый номер ошибки
+                    errs += QString("<br><b>%1</b>. В защищенной работе пустой исполнитель").arg(numerror);
                     return 10;
                 }
             }
-
-        } // конец цикла перебора работ
-    } // конец цикла перебора продукций
-
-    // Проверка. Коды процедур д.б. уникальными среди всех продукций (не должны повторяться).
-    //Процедуры должны объединять только "смежные" работы.
-    std::vector<int>procedurecode; // вектор кодов процедур
-    // Перебрать подряд все работы всех продукциий для нахождения полного списка кодов всех процедур
-    int tekprocedure=job[0][0].procedure; // в качестве начальной взять процедуру из 0-ой работы 0-ой продукции
-    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
-        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора работ текущей продукции
-            if(tekprocedure!=job[i][j].procedure){ // проверка. изменилась ли процедура? Если "да", то предыдущая работа была "последней"
-                procedurecode.push_back(tekprocedure); // записать в вектор "предыдущую" процедуру
-                tekprocedure=job[i][j].procedure; // запомнить текущюю новую процедуру
-            }
+            } // конец цикла перебора работ
         } // конец цикла перебора продукций
-    } // конец цикла перебора продукций
-    // Вектор procedurecode должен содержать неповторяющийся список кодов процедур. Если коды повторяются, то это
-    //ошибка. Проверим это
-    for(int i=0; i<(int)procedurecode.size(); ++i){ // первичный цикл перебора процедур
-        // Проверка. Не повторяется ли процедура procedurecode[i]?
-        for(int ii=0; ii<(int)procedurecode.size(); ++ii){ // вторичный цикл перебора процедур
-            if(ii==i) continue; // пропустить текущую процедуру (не проверять саму с самой)
-            if(procedurecode[i]==procedurecode[ii]) {
-                if(flprint>=1) qDebug()<<"Ошибка. Дублирование кода процедур: "<<QString::number(ii);
-                errs += QString("<br>Ошибка. Дублирование кода процедур:<b>%1</b>").arg(ii);
-                return 10;
-            }
-        } // конец вторичного цикла перебора процедур
-    } // конец первичного цикла перебора процедур
-
-    // Проверка на уникальность кодов всех работ
-    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
-        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора работ текущей продукции
-            int tekcode = job[i][j].code;
-            //qDebug()<<"Ищем код="<<tekcode;
-            for(int ii=0; ii<(int)job.size(); ++ii){ // цикл перебора продукций
-                for(int jj=0; jj<(int)job[ii].size(); ++jj){ // цикл перебора работ текущей продукции
-                    if((j==jj) && (i==ii)) continue; // пропустить проверямую работу
-                    //qDebug()<<"Проверяемый код="<<job[ii][jj].code;
-                    if(job[ii][jj].code==tekcode) {
-                        if(flprint>=1) qDebug()<<"Ошибка. Вектор job, поле code, нарушение уникальности. Код: "<<QString::number(tekcode);
-                        errs += QString("<br>Ошибка. Вектор job, поле code, нарушение уникальности. Код:<b>%1</b>").arg(tekcode);
-                        return 11;
-                    }
-                } // конец цикла перебора работ
-            } // конец цикла перебора продукций
-        } // конец цикла перебора работ
     } // конец цикла перебора продукций
 
     // Проверка на уникальность id всех работ
     for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
-        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора работ текущей продукции
-            int tekid = job[i][j].id;
-            for(int ii=0; ii<(int)job.size(); ++ii){ // цикл перебора продукций
-                for(int jj=0; jj<(int)job[ii].size(); ++jj){ // цикл перебора работ текущей продукции
-                    if((j==jj) && (i==ii)) continue; // пропустить проверямую работу
-                    if(job[ii][jj].id==tekid) {
-                        if(flprint>=1) qDebug()<<"Ошибка. Вектор job, поле id, нарушение уникальности. id: "<<QString::number(tekid);
-                        errs += QString("<br>Ошибка. Вектор job, поле id, нарушение уникальности. Код:<b>%1</b>").arg(tekid);
-                        return 12;
-                    }
-                } // конец цикла перебора работ
-            } // конец цикла перебора продукций
-        } // конец цикла перебора работ
+        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора процедур текущей продукции
+            for(int k=0; k<(int)job[i][j].size(); ++k){ // цикл перебора работ текущей процедуры
+                int tekid = job[i][j][k].id;
+                for(int ii=0; ii<(int)job.size(); ++ii){ // цикл перебора продукций
+                    for(int jj=0; jj<(int)job[ii].size(); ++jj){ // цикл перебора процедур текущей продукции
+                        for(int kk=0; kk<(int)job[ii][jj].size(); ++kk){ // цикл перебора работ текущей процедуры
+                            if((j==jj) && (i==ii) && (k==kk)) continue; // пропустить проверямую работу
+                            if(job[ii][jj][kk].id==tekid) {
+                                if(flprint>=1) qDebug()<<"Ошибка. Вектор job, поле id, нарушение уникальности. id: "<<QString::number(tekid);
+                                numerror ++; // порядковый номер ошибки
+                                qDebug()<<"tekid"<<tekid;
+                                errs += QString("<br><b>%1</b>. "
+                                                "Нарушение уникальности id работы: "
+                                                "%2.%3.%4").arg(numerror).arg(job[i][j][k].productnum).
+                                        arg(job[i][j][k].procedurenum).arg(job[i][j][k].num);
+                                return 12;
+                            }
+                        } // конец цикла перебора работ
+                    } // конец цикла перебора процедур
+                } // конец цикла перебора продукции
+            } // конец цикла перебора работ
+        } // конец цикла перебора процедур
     } // конец цикла перебора продукций
-
-    //
-
-
-    // Проверка. Список возможных исполнителей всех работ одной процедуры д.б. одинаковыми
-    //Используется готовый вектор процедур procedurecode, содержащий неповторяющийся список кодов процедур
-    //for(int i=0; i<(int)procedurecode.size(); ++i){ // цикл перебора процедур
-    //    int tekprocedurecode=procedurecode[i];
-    //}
-    //НЕТ. ЭТОГО НЕ НАДО
-
-
-    // Проверка. Если среди всех работ любой процедуры есть работы с запретом на коррекцию и у них
-    //разные исполнители, то это ошибка. Исполнитель всех работ любой процедуры д.б. один и тот же.
-    //Вектор procedurecode, сформированный ранее, содержит коды всех процедур
-    //for(int iproc=0; iproc<(int)procedurecode.size(); ++iproc){ // цикл перебора процедур
-    //    int tekprocedurecode = procedurecode[iproc];
-    //    //qDebug()<<"procedurecode="<<procedurecode[iproc]; // вывести коды всех процедур
-    //    // отобрать все работы текущей процедуры
-    //    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
-    //        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора работ текущей продукции
-    //            if(job[i][j].flcorrect) continue; // пропустить не защищенную работу
-    //            //qDebug()<<"Есть защищенная работа:"<<i;
-    //            //...
-    //
-    //        } // конец цикла перебора продукций
-    //    } // конец цикла перебора продукций
-    //} // конец цикла перебора процедур
-
-    // Проверка. Если среди всех работ любой процедуры есть, хотя бы одна с запрещенной коррекцией, то
-    //надо для всех остальных работ этой продукции поставить того же исполнителя и в список возможных
-    //исполнителей всех остальных работ тоже оставить только одного этого исполнителя
-    //...
 
     return 0; // нормальное завершение функции. Ошибок в исходных данных не обнаружено
 }
 
-void PrintPlan() // вывести в консоль сформированный план
+int TestPlan(QString &errs) // протестировать  сформированный план
 {
-    // Вывести сформированный план в консоль (только для отладки)
-    qDebug("\n********** Результаты планирования **********");
-    int codetekold = 0;
-    QString str="";
-    int kol=250; // кол. дней выводимых на одной строке экрана (при kol>300 будет переносе строк и потеряется наглядность на экране)
+    // Тестирование сформированного плана на ошибки
 
-    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукции
-        qDebug()<<"Product id="<<job[i][0].product; // вывести наименование продукции
+    // Каждая последующая работа должна начинается после завершения предыдущей (в рамках одной продукции)
+    int endold; // конец предыдущей (старой) работы
+    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
+        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора процедур
+            for(int k=0; k<(int)job[i][j].size(); ++k) { // цикл перебора работ
 
-        // Сформировать и вывести информацию по работе (код исполнителя, код процедуры, код продукции, время  выполнения работы
-        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора работ текущей продукции
-            int codetek = job[i][j].executor.code; // код текущего исполнителя
-            // Сформировать и вывести строку-временную ось нерабочих дней исполнителя
-            str="";
-            for(int k=0; k<kol; ++k) { // цикл перебора дней, начиная с 0
-                int n = count(job[i][j].executor.rest.begin(), job[i][j].executor.rest.end(), k); // найти номер дня (k) в векторе rest
-                if(n) str = str + "*"; // выходной день вывести, как "*"
-                else  str = str + "="; // рабочий день вывести, как "="
-            }
-            // если тек. исполнитель изменился, то вывести календарь текущего исполнителя
-            if(codetekold != codetek) qDebug()<<(str + "calendar executor.code:" + QString::number(job[i][j].executor.code));
-            codetekold = codetek; // запомнить код текущего исполнителя
+                // Проверка. Если это начальная работа продукции, проверку не проводить(для нее нет предшествующей работы)
+                if((j==0) && (k==0)){
+                    endold = job[i][j][k].end; // запомнить конец начальной работы
+                    continue; // перейти к следующей работе
+                }
 
-            // Сформировать и вывести строку по работе
-            str="";
-            for(int l=0; l<job[i][j].begin; ++l) str = str + "-"; // сформировать строку из дефисов, количеством job[i][j].begin
-            str = str + "(ex:"   + QString::number(job[i][j].executor.code)  // код исполнителя
-                      + " job:"  + QString::number(job[i][j].code)           // код работы
-                      + " proc:" + QString::number(job[i][j].procedure)      // код процедуры
-                      + " time:" + QString::number(job[i][j].time)           // время выполнения работы
-                      + " id:"   + QString::number(job[i][j].id)             // id работы
-                      + ")";
-            qDebug()<<str;
-
-        } // конец цикла перебора работ
+                // Проверка нарушения последовательности выполнения работ
+                if(job[i][j][k].begin < endold){
+                    QMessageBox::information(0,"Отладка", "Нарушение последовательности работ в плане");
+                    numerror ++; // порядковый номер ошибки
+                    errs += QString("<br><b>%1</b>. Нарушение последовательности работы:"
+                                    "%2.%3.%4.%5").arg(numerror).arg(job[i][j][k].projectnum).arg(job[i][j][k].productnum).
+                                                                 arg(job[i][j][k].procedurenum).arg(job[i][j][k].num);
+                    return 1;
+                }
+                endold = job[i][j][k].end; // запомнить конец предыдущей работы
+            } // конец цикла перебора работ
+        } // конец цикла перебора процедур
     } // конец цикла перебора продукций
+
+    // Проверка на дублирование одновременно выполняемых работ одним исполнителем
+    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
+        for(int j=0; j<(int)job[i].size(); ++j) { // цикл перебора процедур
+            for(int k=0; k<(int)job[i][j].size(); ++k) { // цикл перебора работ
+
+                executor_type executor = job[i][j][k].executor; // запомнить проверямого исполнителя
+                int begin = job[i][j][k].begin;                 // запомнить начало проверяемой работы
+                int end   = job[i][j][k].end;                   // запомнить конец проверяемой работы
+
+                if(executor.external) continue; // пропустить внешнего исполнителя (для него не надо проверять дублирование)
+
+                // перебрать все работы для проверки
+                for(int ii=0; ii<(int)job.size(); ++ii){ // цикл перебора продукций
+                    for(int jj=0; jj<(int)job[ii].size(); ++jj) { // цикл перебора продукций
+                        for(int kk=0; kk<(int)job[ii][jj].size(); ++kk) { // цикл перебора работ
+                            if((i==ii) && (j==jj) && (k==kk)) continue; // пропустить проверямую работу (не проверять саму с собой)
+                            if(job[ii][jj][kk].executor.id != executor.id) continue; // пропустить ненужного исполнителя
+                            if(((begin>=job[ii][jj][kk].begin) && (begin<=job[ii][jj][kk].end)) || // точка begin проверяемого интервала попала внутрь текущего интервала
+                               ((end  >=job[ii][jj][kk].begin) && (end  <=job[ii][jj][kk].end)) || // точка end   проверяемого интервала попала внутрь текущего интервала
+                               ((begin<=job[ii][jj][kk].begin) && (end  >=job[ii][jj][kk].end))){  // проверяемый интервал полностью накрыл текущий интервал
+                                QMessageBox::information(0,"Отладка", "Дублирование работ одним исполнителем");
+                                numerror ++; // порядковый номер ошибки
+                                errs += QString("<br><b>%1</b>. Дублирование исполнителя в работе:"
+                                                "%2.%3.%4.%5").arg(numerror).arg(job[i][j][k].projectnum).arg(job[i][j][k].productnum).
+                                                                             arg(job[i][j][k].procedurenum).arg(job[i][j][k].num);
+                                return 2;
+                            }
+                        } // конец цикла перебора работ
+                    } // конец цикла перебора продукций
+                } // конец цикла перебора продукции
+
+            } // конец цикла перебора работ
+        } // конец цикла перебора процедур
+    } // конец цикла перебора продукций
+
+    return 0; // ошибок нет
 }
 
-void PrintJob() // вывести в консоль данные по всем работам (вектор job)
+void FindBeginEndJob(executor_type &executor, int &tstart, int &time, int &tbegin, int &tend) // найти начало и конец работы с учетом нерабочих дней
 {
-    // вывести содержимое вектора job в консоль (для отладки). Это перечень работ по каждой продукции
-    for(int i=0; i<(int)job.size(); i++){ // цикл перебора продукции-строк
-        qDebug()<<"---------Product "<<job[i][0].product<<"------------------";
-        for(int j=0; j<(int)job[i].size(); j++){
-            QString b; // список кодов возможных исполнителей работы
-            for(int k=0; k<(int)job[i][j].people.size(); ++k) b = b + QString::number(job[i][j].people[k].code) + " ";
-            qDebug()<<"job:"<<i<<j
-                    <<"id:"<<job[i][j].id<<"code:"<<job[i][j].code<<"procedure:"<<job[i][j].procedure<<"product:"<<job[i][j].product
-                    <<"begin:"<<job[i][j].begin<<"time:"<<job[i][j].time<<"end:"<<job[i][j].end<<"flcorrect:"<<job[i][j].flcorrect
-                    <<"people.code:"<<b
-                    <<"executor.code:"<<job[i][j].executor.code
-                    <<"executor.external:"<<job[i][j].executor.external;
+    // Для исполнителя executor найти время начала и время конца работы с учетом нерабочих дней (праздников, выходных, отпусков и т.д.)
+    //    Входные параметры:
+    //tstart - время, начиная с которого, надо искать допустимое начало работы tbegin;
+    //time   - заданное полное время выполнения работы;
+    //    Выходные параметры:
+    //tbegin - найденное время начала работы с учетом нерабочих дней;
+    //tend   - найденное время конца работы с учетом нерабочих дней.
+
+    int sum=0; // счетчик найденных рабочих дней
+    int ttek = tstart; // проверяемый день
+    while(sum <= time){ // цикл, пока не найдено нужное количество рабочих дней time
+        // проверка. Является ли день ttek нерабочим?
+        int kol = executor.rest.count(ttek); // поиск ttek - нужного дня среди списка нерабочих дней
+        if(kol == 0) { // проверяемый день - рабочий? (т.к. он не найден среди списка нерабочих дней)
+            ++sum; // счетчик найденных рабочих дней
+            if(sum == 1)    tbegin = ttek; // запомнить первый найденный рабочий день, как tbegin
+            if(sum == time) tend   = ttek; // запомнить последний найденный рабочий день, как tend
         }
-    } // конец цикла перебора продукции-строк
+        ++ttek; // переход к следующему дню для его проверки
+    }
+}
+
+job_type FindJob(int &id) // найти работу по ее идентификатору id
+{
+    // найти работу по ее идентификатору id. Если работа не найдена, то вернуть пустую работу
+    for(int i=0; i<(int)job.size(); i++){ // цикл перебора продукции
+        for(int j=0; j<(int)job[i].size(); j++){ // цикл перебора процедур
+            for(int k=0; k<(int)job[i][j].size(); k++){ // цикл перебора работ
+                if(id == job[i][j][k].id) return job[i][j][k];
+            } // конец цикла перебора работ
+        } // конец цикла перебора процедур
+    } // конец цикла перебора продукции
+    // не найдена работа
+
+    // Не найдена работа. Это ошибка. Работа по id должна быть найдена всегда
+    qDebug()<<"Ошибка. В объекте tasks не найдена работа с id: " + QString::number(id);
+    job_type wortempty; // сформировать и вернуть пустую работу
+    return wortempty;
+}
+
+void FillVectorJob(TCarryTaskList &tasks) // заполнить данные о работах
+{
+    // функция "заполнить вектор работ" извлекает из принятого параметра tasks все необходимые сведения по всеми
+    //работам, процедурам и продукциям. Заполняет трехмерный вектор job, необходимый для планирования.
+    // Вектор job[i][j][k] - трехмерный динамический массив. i - индекс продукции, j - индекс процедуры, k - индекс работы.
+    // Вся продукция в job перед началом планирования может быть отранжирована. "Самая верхняя" продукция (для i=0)
+    //имеет высший ранг (приоритет), который будет учтен при дальнешем планировании. "Самая нижняя" продукция с наименьшим
+    //рангом будет получать ресурсы исполнителей по остаточному принципу, в последнюю очередь. Т. об. путем сортировки
+    //вектора job можно учитывать приоритет рабодукций при планирования. Т.е., чем "выше" продукция, тем быстрее она выполнится
+
+    job.clear();     // предварительно очистить вектор работ
+    executor.clear(); // предварительно очистить вектор исполнителей
+
+    int codepeople=999999; // код для фиктивного исполнителя всегда >= 1000000, что бы отличать фиктивного исполнителя от реального
+
+    // прочитать данные tasks и записать их в рабочий вектор job, который является основным при планировании
+    foreach (TCarryTask *curTask, tasks){ // цикл перебора продукций
+
+        // План выпуска продукции и План выпуска ОРД - это две разные продукции. Надо загрузить последовательно обе продукции.
+        //В первом проходе считывается продукция "План выпуска продукции", а во втором проходе
+        //считывается продукция "План ОРД"
+        for(int i=0; i<=1; i++){ // цикл перебора двух планов (продукций): План выпуска продукции (i=0) и План ОРД (i=1)
+            TCarryPlan *plan;
+
+            // Проверка продукции. Это план выпуска продукции или план ОРД? Каждый план это продукция
+            if(i==0) plan = curTask->carryPlan(); // план выпуска продукции
+            else     plan = curTask->ordPlan();   // план ОРД
+
+            // Проверка. Если нет плана (продукции), то пропустить его
+            if(plan->procedures().size()==0)continue; // пропустить план (продукцию), в котором нет процедур
+
+            QVector<QVector<job_type>> tempvectorproc;
+            foreach (TCarryProcedure *proc, plan->procedures()){ // цикл перебора процедур
+
+                QVector<job_type> tempvectorwork;
+                foreach (TCarryWork *work, proc->works()){ // цикл перебора работ
+
+                    // Проверка "плохой" работы. Если в защищенной работе не заполнены: начало или конец или исполнитель, то
+                    //такую работу пропустить и не загружать в вектор job
+                    if(!work->isVolatile()){ // работа защищена (false)
+
+                        if(!work->dtPlanBegin()){
+                            if(flprint>=2) qDebug()<<"Обнаружена защищенная работа id:"<<work->id()<<"без времени начала. Работа не будет участвовать в планировании";
+                            continue; // пропустить защищенную работу с незаполненной датой начала. Не учитывать и не планировать такую работу
+                        }
+                        if(!work->dtPlanEnd()){
+                            if(flprint>=2) qDebug()<<"Обнаружена защищенная работа id:"<<work->id()<<"без времени окончания. Работа не будет участвовать в планировании";
+                            continue;   // пропустить защищенную работу с незаполненной датой конца. Не учитывать и не планировать такую работу
+                        }
+                        if(!proc->employee()) {
+                            if(flprint>=2) qDebug()<<"Обнаружена защищенная работа id:"<<work->id()<<"без исполнителя. Работа не будет участвовать в планировании";
+                            continue;    // пропустить защищенную работу с незаполненным исполнителем. Не учитывать и не планировать такую работу
+                        }
+                    }
+
+                    // Проверка "плохой" работы. Если в любой (защищенной или незащищенной) работе не задана длительность, то такую работу
+                    //пропустить и не загружать в вектор job
+                    if(!work->planPeriod()){
+                        if(flprint>=2) qDebug()<<"Обнаружена работа id:"<<work->id()<<"без времени выполнения. Работа не будет участвовать в планировании";
+                        continue;    // пропустить защищенную работу с незаполненным исполнителем. Не учитывать и не планировать такую работу
+                    }
+
+                    // Текущая работа работа может быть защищенной или незащищенная
+                    job_type jobtemp; // сформировать текущую работу jobtemp для записи ее в вектор работ job
+
+                    // вначале заполнить реквизиты для любой работы: защищенной или незащищенной
+                    jobtemp.id           = work->id();          // id идентификатор работы (из БД. Нужен для записи результатов планирования)
+                    jobtemp.num          = work->num();         // номер работы
+                    jobtemp.procedurenum = proc->num() ;        // номер процедуры, которой принадлежит данная работа
+                    jobtemp.productnum   = plan->num();         // номер продукции, которой принадлежит данная работа
+                    jobtemp.projectnum   = curTask->num();      // номер проекта, которому принадлежит данная работа
+                    jobtemp.time         = work->planPeriod();  // время выполнение работы
+                    jobtemp.protection   = !work->isVolatile(); // признак защиты работы
+
+                    // Проверка. Если работа незащищенная, то обнулить реквизиты (, кромер списка возможных исполнителей)
+                    if(!jobtemp.protection){
+                        jobtemp.begin             = 0;     // начала работы
+                        jobtemp.end               = 0;     // конец работы
+                        jobtemp.executor.id       = 0;     // исполнителя нет
+                        jobtemp.executor.rest     = {};    // исполнителя нет
+                        jobtemp.executor.external = false; // Пока так. Это поле будет заполнено позднее, при планировании
+                        // осталось заполнить один реквизит jobtemp.people. Сделаем это позднее
+                    }
+                    else{ // если работа защищена (стоит признак "не изменять"), т.е. работа уже спланирована. Защищенная. В ней ничего менять нельзя
+                        // Получить начало работы
+                        QDate beginQDate = work->dtPlanBegin()->date();
+                        int beginint = beginQDate.dayOfYear() - 1; // номер дня должен начинаться с 0
+                        jobtemp.begin = beginint; // записать день начала работы
+
+                        // Получить конец работы
+                        QDate endQDate = work->dtPlanEnd()->date();
+                        int endint = endQDate.dayOfYear() - 1; // номер дня должен начинаться с 0
+                        jobtemp.end = endint; // записать день конца работы
+
+                        // заполнить испольнителя (в защищенной работе он будет всегда)
+                        jobtemp.executor.id       = proc->employee()->id();               // код исполнителя
+                        for(int i=0; i<(int)holidey.size(); i++) jobtemp.executor.rest.push_back(holidey[i]); // заполнить календарь исполнителя
+                        jobtemp.executor.external = proc->employee()->role().isExtern();  // внешний или внутренний исполнитель
+                    }
+
+                    // заполнить список возможных исполнителей работы jobtemp.people
+                    // Проверка. В tasks cписок возможных исполнителей процедуры пустой? (Для внешней процедуре этот список пуст всегда)
+                    if(proc->possibleEmployees().empty()){ // Да, пустй. Надо добавить одного фиктивного возможного исполнителя для процедуры
+
+                        // Проверка. Если работа не защищенная
+                        if(!jobtemp.protection){ // если работу можно корректировать (исполнитель уже обнулен ранее)
+                            jobtemp.people.clear();         // очистиить список возможных исполнителей работы people
+                            executor_type executortemp;     // получить структуру фиктивного исполнителя, которую надо заполнить
+                            codepeople++;                   // получить код фиктивного исполнителя
+                            executortemp.id       = codepeople; // записать код фиктивного исполнителя
+                            for(int i=0; i<(int)holidey.size(); i++) executortemp.rest.push_back(holidey[i]); // заполнить календарь исполнителя
+                            executortemp.external = true;   // для фиктивного исполнителя всегда признак "внешний"
+                            jobtemp.people.push_back(executortemp); // записать фиктивного исполнителя в текущюю "работу"
+                            executor.push_back(executortemp); // доб. тек. фиктивного исполнителя в общий вектор всех исполнителей executor
+                        }
+                        else { // Если работа защищенная
+                            jobtemp.people.clear();         // очистиить список возможных исполнителей работы people
+                            executor_type executortemp;     // получить структуру фиктивного исполнителя, которую надо заполнить
+                            codepeople++;                   // получить код фиктивного исполнителя
+                            executortemp.id = proc->employee()->id(); // записать код исполнителя (это не фиктивный исполнитель)
+                            executortemp.external = true;   // для фиктивного исполнителя всегда признак "внешний"
+                            for(int i=0; i<(int)holidey.size(); i++) executortemp.rest.push_back(holidey[i]); //заполнить календарь исполнителя
+                            jobtemp.people.push_back(executortemp); // записать исполнителя в список возможных исполнителей работу
+
+                            // записать исполнителя работы
+                            jobtemp.executor.id       = executortemp.id;
+                            jobtemp.executor.external = executortemp.external;
+                            jobtemp.executor.rest     = executortemp.rest;
+
+                            // Здесь же заполнить общий вектор всех исполнителей executor (исключить дублирование)
+                            bool flfind=false; // признак, что исполнитель найден (true)
+                            for(int i=0; i<(int)executor.size(); i++){ // цикл перебора вектора исполнителей
+                                if(executor[i].id==executortemp.id){
+                                    flfind = true;
+                                    break;
+                                }
+                            } // конец цикла перебора вектора исполнителей
+                            // Проверка. Если исполнитель не найден, то добавить его в вектор executor
+                            if(flfind==false) executor.push_back(executortemp); // доб. тек. исполнителя в вектор исполнителей executor
+                        }
+                    }
+                    else { // если список возможных исполнителей не пустой
+                        foreach (TEmployee *empl, proc->possibleEmployees()) { // цикл перебора возможных исполнителей. Только для внутренней процедуры
+                            int codetek = empl->id();   // получить код текущего исполнителя
+
+                            // Проверка. Есть ли календарь у текущего исполнителя?
+                            if(empl->calendar()){
+                                qDebug()<<"*******************************************************календарь"<<empl->calendar();
+                                //qDebug()<<"календарь"<<empl->calendar()->fullRestDates();
+                                //QList<int> calendar;
+                                //TEmployeeCalendar a=empl->calendar()->id();
+                                //if(codetek==89){
+                                //qDebug()<<"proba"<<empl->calendar()->fullRestDates()->size();
+                                //qDebug()<<"proba"<<empl->calendar()->id();
+                                //qDebug()<<"proba"<<empl->calendar()->name();
+                                //TEmployeeCalendar calendar = empl->calendar();
+                            }
+
+                            executor_type executortemp; // структура исполнителя, которую надо заполнить
+                            executortemp.id = codetek;                     // записать код текущего исполнителя
+                            executortemp.external = empl->role().isExtern(); // записать внешний/внутренний исполнитель
+                            // Заполнить календарь для текущего исполнителя. Первой строкой идут праздники и выходные
+//                            switch(codetek){
+//                            case 89:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   22,23,24,25};                                           // личный календарь
+//                                break;
+//                            case 273:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   22,23,24,25};                                           // личный календарь
+//                                break;
+//                            case 287:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   15,16,17,18,19,20,21,22,23,24,25};                                           // личный календарь
+//                                break;
+//                            case 289:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   25,26,27,28,29,30,31,32,33,34,35};                                           // личный календарь
+//                                break;
+//                            case 290:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   35,36,37,50,51,};                                           // личный календарь
+//                                break;
+//                            case 292:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   30,31,32,33,34,35,36,37,38,39,40};                                           // личный календарь
+//                                break;
+//                            case 293:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   5,6,7,8,9,10,11,12,13,14,15};                                                // личный календарь
+//                                break;
+//                            case 288:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};                                 // личный календарь
+//                                break;
+//                            case 308:
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                   5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};                                 // личный календарь
+//                                break;
+
+//                            default:
+//                                //executortemp.rest={};// для остальных исполнителей выходных, праздничных дней и отпуска - не будет
+//                                executortemp.rest={0, 7,8, 14,15, 21,22, 28,29, 35,36, 42,43, 49,50, 56,57, // календарь предприятия
+//                                                  }; // календарь предприятия
+//                        }
+
+
+                            // Скопировать вектор календаря предприятия holidey (выходные и праздничные дни)
+                            //в календарь сотрудника rest
+                            for(int i=0; i<(int)holidey.size(); i++) executortemp.rest.push_back(holidey[i]);
+
+                            // Добавить в вектор rest отпускные дни сотрудника
+                            //...
+                            //ПРИМЕР добавление 10 дней отпуска сотруднику с кодом=89
+                            if(codetek == 89){
+                                executortemp.rest.push_back(22);
+                                executortemp.rest.push_back(23);
+                                executortemp.rest.push_back(24);
+                                executortemp.rest.push_back(25);
+                                executortemp.rest.push_back(26);
+                                executortemp.rest.push_back(27);
+                                executortemp.rest.push_back(28);
+                                executortemp.rest.push_back(29);
+                                executortemp.rest.push_back(30);
+                                executortemp.rest.push_back(31);
+                            }
+
+                            // добавить текущего исполнителя executortemp в список возможных исполнителей работы
+                            jobtemp.people.push_back(executortemp);
+
+                            // добавить текущего исполнителя executortemp в общий вектор всех исполнителей executor
+                            bool flfind = false; // признак, что исполнитель найден (true)
+                            for(int i=0; i<(int)executor.size(); i++){ // цикл перебора вектора исполнителей
+                                if(executor[i].id == codetek){ // исключить дублирование исполнителей в векторе executor
+                                    flfind = true;
+                                    break;
+                                }
+                            } // конец цикла перебора вектора исполнителей
+                            // Проверка. Если исполнитель не найден, то добавить его в вектор executor
+                            if(flfind==false) executor.push_back(executortemp); // доб. тек. исполнителя в вектор исполнителей executor
+                        } // цикл перебора возможных исполнителей процедуры
+                    } // конец else
+                    tempvectorwork.push_back(jobtemp); // записать текущую работу в вектор работ
+                } // конец цикла перебора работ
+                tempvectorproc.push_back(tempvectorwork); // записать заполненный вектор работ в вектор процедур
+            } // конец цикла перебора процедур
+            job.push_back(tempvectorproc); // записать заполненный вектор процедур в вектор продукций
+        } // конец цикла перебора 2-ух планов: продукции и ОРД.
+    } // конец цикла перебора продукций
 }
 
 void PrinTCarryTask(TCarryTaskList &tasks) // вывести в консоль объект tasks
@@ -415,15 +598,15 @@ void PrinTCarryTask(TCarryTaskList &tasks) // вывести в консоль �
     {
         qDebug()<<"Проект id="<<curTask->id();
 
-        for(int i=0; i<=1; i++){ // цикл перебора двух продуктов (планов): План выпуска продукции (i=0) и План ОРД (i=1)
-            TCarryPlan *plan;
+        for(int i=0; i<=1; i++){ // цикл перебора двух продукций (планов): План выпуска продукции (i=0) и План ОРД (i=1)
+            TCarryPlan *plan; // plan - это продукция
 
             // Проверка. Это план выпуска продукции или ОРД?
             if(i==0) plan = curTask->carryPlan(); // план выпуска продукции
             else     plan = curTask->ordPlan();   // план ОРД
 
-            // Проверка. Если нет плана, то пропустить этот блок
-            if(!plan) continue; // пропустить пустой план
+            // Проверка. Есть ли продукция?
+            if(!plan) continue; // пропустить пустую продукцию
             qDebug()<<"    Продукция (план) id="<<plan->id();
 
 
@@ -447,7 +630,8 @@ void PrinTCarryTask(TCarryTaskList &tasks) // вывести в консоль �
                 foreach (TCarryWork *work,proc->works()) // цикл перебора работ
                 {
                     if(work){ // проверка на нулевой указатель
-                        qDebug()<<"            Работа id="<<work->id();
+                        qDebug()<<"            Работа  id="<<work->id();
+                        qDebug()<<"            Работа num="<<work->num();
 
                         if(work->dtPlanBegin()) qDebug()<<"                fDtPlanBegin (begin)="<<work->dtPlanBegin()->toString("d.M.yyyy");
                         else                    qDebug()<<"                fDtPlanBegin (begin)=...";
@@ -457,7 +641,7 @@ void PrinTCarryTask(TCarryTaskList &tasks) // вывести в консоль �
                         if(work->dtPlanBegin()) qDebug()<<"                fDtPlanEnd (end)="<<work->dtPlanEnd()->toString("d.M.yyyy");
                         else                    qDebug()<<"                fDtPlanEnd (end)=...";
 
-                        qDebug()<<"                fIsVolatile (flcorrect)="<<work->isVolatile();
+                        qDebug()<<"                !fIsVolatile (protection)="<<!work->isVolatile();
                     }
                     else {qDebug()<<"            Работа id=...";
                     QMessageBox::information(0,"Ошибка", "Обнаружена пустая работа в процедуре с id=" + proc->id());
@@ -468,1125 +652,310 @@ void PrinTCarryTask(TCarryTaskList &tasks) // вывести в консоль �
     } // конец цикла перебора проектов
 }
 
-job_type FindJob(int &id) // найти работу по ее идентификатору id
+void PrintJob() // вывести в консоль данные по всем работам (вектор job) в виде таблицы
 {
-    // найти работу по ее идентификатору id. Если работа не найдена, то вернуть пустую работу
+    // вывести содержимое вектора job1 в консоль (для отладки). Это перечень работ по каждой продукции и каждой процедуре
     for(int i=0; i<(int)job.size(); i++){ // цикл перебора продукции-строк
-        for(int j=0; j<(int)job[i].size(); j++){ // цикл перебора работ тек. продукции
-            if(id==job[i][j].id) return job[i][j];
-        } // конец цикла перебора работ тек. продукции
-    } // конец цикла перебора продукции-строк
-    // не найдена работа
-    qDebug()<<"Ошибка. В объекте tasks не найдена работа с id: " + QString::number(id);
-    job_type wortempty; // сформировать и вернуть пустую работу
-    return wortempty;
+        for(int j=0; j<(int)job[i].size(); j++){ // цикл перебора процедур
+            for(int k=0; k<(int)job[i][j].size(); k++){ // цикл перебора работ
+                QString b; // список кодов возможных исполнителей процедуры
+                for(int l=0; l<(int)job[i][j][k].people.size(); ++l) b = b + QString::number(job[i][j][k].people[l].id) + " ";
+                qDebug()<<"i:"                <<i
+                        <<"j:"                <<j
+                        <<"k:"                <<k
+                        <<"prod num:"         <<job[i][j][k].productnum
+                        <<"proc num:"         <<job[i][j][k].procedurenum
+                        <<"job num:"          <<job[i][j][k].num
+                        <<"protection:"       <<job[i][j][k].protection
+                        <<"begin:"            <<job[i][j][k].begin
+                        <<"time:"             <<job[i][j][k].time
+                        <<"end:"              <<job[i][j][k].end
+                        <<"executor:"         <<job[i][j][k].executor.id
+                        <<"executor.external:"<<job[i][j][k].executor.external
+                        <<"people.code:"      <<b;
+            } // конец цикла перебора работ
+        } // конец цикла перебора процедур
+    } // конец цикла продукций
 }
 
-void FillVectorJob(TCarryTaskList &tasks) // заполнить данные о работах
+void PrintPlan() // вывести в консоль сформированный план
 {
-    // функция "заполнить вектор работ" извлекает из принятого параметра tasks все необходимые сведения по всеми
-    //работами всех продукциий и заполняет вектор job, необходимый для планирования.
-    // Поля структуры работы job_type для заполнения:
-    //id        - идентификатор объекта в БД
-    //code      - код работы (генерируется только в этом блоке и только для работы этого блока. Не сохраняется)
-    //procedure - код процедуры, которой принадлежит работа (генерируется только в этом блоке и только для работы этого блока. Не сохраняется)
-    //product   - код пропродукции, которой принадлежит работа (генерируется только в этом блоке и только для работы этого блока. Не сохраняется)
-    //begin     - время начала работы. Может быть пустым (будет заполнено в процессе планирования)
-    //time      - время выполнения работы. Обязательно должно быть заполнено
-    //end       - время окончания работы с учетом нерабочих дней. Может быть пустым (будет заполнено в процессе планирования)
-    //executor  - исполнитель. Может быть пустым (будет заполнено в процессе планирования)
-    //people    - список возможных исполнителей. Обязательно должно быть заполнено
-    //flcorrect - флаг запрета редактирования работы (true - разрешена корректировка; false-запрет)
-    // Вектор векторов job[i][j] - двумерный динамический массив. Каждая строка - это работы (j), принадлежащие
-    //i-ой продукции (в порядке их выполнения). Количество строк равно количеству продукций. Каждая
-    //продукция имеет разное количество задач (столбцов).
-    // Вся продукция в job (т.е. строки) перед началом планирования может быть отранжирована. "Самая верхняя" продукция (для i=0)
-    //имеет высший ранг (приоритет), который будет учтен при дальнешем планировании. "Самая нижняя" продукция с наименьшим
-    //рангом будет получать ресурсы исполнителей по остаточному принципу, в последнюю очередь. Путем сортировки
-    //строк вектора job можно учесть приоритет работ для планирования
+    // Вывести сформированный план в консоль (только для отладки)
+    qDebug("\n**********  Результаты планирования **********");
+    int codetekold = 0;
+    QString str="";
+    int kol=250; // кол. дней выводимых на одной строке экрана (при kol>300 будет переносе строк и потеряется наглядность на экране)
 
-    job.clear();     // предварительно очистить вектор работ
-    executor.clear(); // предварительно очистить вектор исполнителей
-
-    // Пока id не является уникальным, уникальные коды продукции, процедур и работ будем формировать вручную
-    int codeproduct=0;     // код продукции
-    int codeprocedure=0;   // код пороцедуры
-    int codejob=0;         // код работы
-    int codepeople=999999; // код фиктивного исполнителя всегда >= 1000000, что бы отличать фиктивного исполнителя от реального
-
-    // прочитать данные tasks и записать их в рабочий вектор job, который является основным при планировании
-    foreach (TCarryTask *curTask,tasks) // цикл перебора продукций
-    {
-
-        for(int i=0; i<=1; i++){ // цикл перебора двух планов: План выпуска продукции (i=0) и План ОРД (i=1)
-            TCarryPlan *plan;
-
-            // Проверка. Это план выпуска продукции или ОРД?
-            if(i==0) plan = curTask->carryPlan(); // план выпуска продукции
-            else     plan = curTask->ordPlan();   // план ОРД
-
-            // Проверка. Если нет плана, то пропустить его
-            if(plan->procedures().size()==0)continue; // пропустить план, в котором нет процедур
-
-            codeproduct++; // ручное формирование кода продукции. Важно: План выпуска продукции и План ОРД считаются разной продукцией
-            std::vector<job_type>tempvector; // создание временного вектора работ текущей продукции
-            foreach (TCarryProcedure *proc,plan->procedures()) // цикл перебора процедур
-            {
-                codeprocedure++; // ручное формирование кода продукций
-                foreach (TCarryWork *work,proc->works()) // цикл перебора работ
-                {
-
-                    // Проверка. Везде ли заполнено isExtern?
-                    //if(proc->employee()) qDebug()<<"isExtern()="<<proc->employee()->role().isExtern();
-                    //else qDebug()<<"isExtern()=...";
-                    //if(!proc->employee()) qDebug()<<"Ошибка. Обнаружено незаполнено поле: proc->employee()->role().isExtern()";
-                    //
-
-                    // Проверка. Если работа защищена, то проверить заполненность ее параметров (начало, конец, испонитель).
-                    //Если что то не заполнено, то пропустить эту работу. Планировать ее не будем
-                    if(!work->isVolatile()){ // работа защищена (false)
-                        if(!proc->employee()) {
-                            if(flprint>=2) qDebug()<<"Обнаружена защищенная работа id:"<<work->id()<<"без исполнителя. Работа не будет участвовать в планировании";
-                            continue;    // пропустить защищенную работу с незаполненным исполнителем. Не учитывать и не планировать такую работу
-                        }
-                        if(!work->dtPlanBegin()){
-                            if(flprint>=2) qDebug()<<"Обнаружена защищенная работа id:"<<work->id()<<"без времени начала. Работа не будет участвовать в планировании";
-                            continue; // пропустить защищенную работу с незаполненной датой начала
-                        }
-                        if(!work->dtPlanEnd()){
-                            if(flprint>=2) qDebug()<<"Обнаружена защищенная работа id:"<<work->id()<<"без времени окончания. Работа не будет участвовать в планировании";
-                            continue;   // пропустить защищенную работу с незаполненной датой конца
-                        }
-                    }
-
-                    // Текущая работа работа незащищенная и будем ее планировать (с предварительным обнулением реквизитов).
-                    //Или работа защищенная и у нее заполнены все реквизиты (тогда планировать ее не будем, но будем ее учитывать в планировании).
-                    //Такую работу надо записать в вектор job
-
-                    codejob++; // ручное формирование кода работ
-                    // сформировать текущую работу jobtemp для записи ее в вектор работ job
-                    job_type jobtemp;
-
-                    // вначале заполнить реквизиты для любой работы: защищенная или незащищенная
-                    jobtemp.id        = work->id();          // id идентификатор работы (из БД. Нужен для записи результатов планирования)
-                    jobtemp.code      = codejob;             // код работы (мой временный код)
-                    jobtemp.procedure = codeprocedure ;      // код процедуры, которой принадлежит данная работа (мой временный код)
-                    jobtemp.product   = codeproduct;         // код продукции, которой принадлежит данная работа. Ручное формирование (мой временный код)
-                    jobtemp.time      = work->planPeriod();  // время начала работы
-                    jobtemp.flcorrect = work->isVolatile();  // признак можно изменять/не изменять
-
-                    // теперь заполнить оставшиеся реквизиты: begin, end, executor, people (всего д.б. 10 реквизитов)
-                    // Проверка. Работу можно изменять?
-                    if(jobtemp.flcorrect){ // если работу "можно изменять",т.е. планировать, то обнулить предварительно ее данные
-                        jobtemp.begin             = 0;     // время (день) начала работы??? Надо доделать
-                        jobtemp.end               = 0;     // время (день) окончания работы??? Надо доделать
-                        jobtemp.executor.code     = 0;     // исполнителя нет
-                        jobtemp.executor.rest     = {};    // исполнителя нет
-                        jobtemp.executor.external = false; // Пока так. Это поле будет заполнено позднее, при планировании
-                        // осталось заполнить один реквизит jobtemp.people. Сделаем это позднее
-                    }
-                    else{ // если у работа защищена (стоит признак "не изменять"), т.е. работа уже спланирована. Защищенная
-                        // Получить начало работы
-                        QDate beginQDate = work->dtPlanBegin()->date();
-                        int beginint = beginQDate.dayOfYear() - 1; // номер дня должен начинаться с 0
-                        jobtemp.begin = beginint; // записать день начала работы
-
-                        // Получить конец работы
-                        QDate endQDate = work->dtPlanEnd()->date();
-                        int endint = endQDate.dayOfYear() - 1; // номер дня должен начинаться с 0
-                        jobtemp.end = endint; // записать день конца работы
-
-                        // заполнить испольнителя (в защищенной работе он будет всегда)
-                        jobtemp.executor.code     = proc->employee()->id();               // код исполнителя
-                        jobtemp.executor.external = proc->employee()->role().isExtern();  // внешний или внутренний исполнитель
-                        jobtemp.executor.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53}; //...??? Доделать
-                    }
-
-                    // заполнить список возможных исполнителей работы jobtemp.people
-                    // Проверка. В tasks cписок возможных исполнителей процедуры пустой? (Для внешней процедуре этот список пуст всегда)
-                    if(proc->possibleEmployees().empty()){ // Да, пустй. Надо добавить одного фиктивного возможного исполнителя для процедуры
-
-                        // Проверка. Если работа не защищенная, то очистить people и в people занести нового фиктивного  внешнего исполнителя
-                        if(jobtemp.flcorrect){ // если работу можно корректировать (исполнитель уже обнулен ранее)
-                            jobtemp.people.clear();         // очистиить список возможных исполнителей работы people
-                            executor_type executortemp;     // получить структуру фиктивного исполнителя, которую надо заполнить
-                            codepeople++;                   // получить код фиктивного исполнителя
-                            executortemp.code     = codepeople; // записать код фиктивного исполнителя
-                            executortemp.rest     = {0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53};  // это только календарь предприятия
-                            executortemp.external = true;   // для фиктивного исполнителя всегда признак "внешний"
-                            jobtemp.people.push_back(executortemp); // записать фиктивного исполнителя в текущюю "работу"
-                            executor.push_back(executortemp); // доб. тек. фиктивного исполнителя в общий вектор всех исполнителей executor
-                        }
-                        else { // Если работа защищенная, то очистить список people и занести в него исполнителя (, который д.б. обязательно)
-                            jobtemp.people.clear();         // очистиить список возможных исполнителей работы people
-                            executor_type executortemp;     // получить структуру фиктивного исполнителя, которую надо заполнить
-                            codepeople++;                   // получить код фиктивного исполнителя
-                            executortemp.code = proc->employee()->id(); // записать код исполнителя (это не фиктивный исполнитель)
-                            executortemp.external = true;   // для фиктивного исполнителя всегда признак "внешний"
-                            executortemp.rest = {0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53};  // это только календарь предприятия
-                            jobtemp.people.push_back(executortemp); // записать исполнителя в список возможных исполнителей работу
-                            // записать исполнителя работы
-                            jobtemp.executor.code     = executortemp.code;
-                            jobtemp.executor.external = executortemp.external;
-                            jobtemp.executor.rest     = executortemp.rest;
-
-                            // Здесь же заполнить общий вектор всех исполнителей executor (исключить дублирование)
-                            bool flfind=false; // признак, что исполнитель найден (true)
-                            for(int i=0; i<(int)executor.size(); i++){ // цикл перебора вектора исполнителей
-                                if(executor[i].code==executortemp.code){
-                                    flfind = true;
-                                    break;
-                                }
-                            } // конец цикла перебора вектора исполнителей
-                            // Проверка. Если исполнитель не найден, то добавить его в вектор executor
-                            if(flfind==false) executor.push_back(executortemp); // доб. тек. исполнителя в вектор исполнителей executor
-                        }
-                    }
-                    else { // если список возможных исполнителей не пустой
-                        foreach (TEmployee *empl, proc->possibleEmployees()) { // цикл перебора возможных исполнителей. Только для внутренней процедуры
-                            int codetek = empl->id();   // получить код текущего исполнителя
-                            //qDebug()<<"исполнитель id="<<codetek;
-                            executor_type executortemp; // структура исполнителя, которую надо заполнить
-                            executortemp.code = codetek;                     // записать код текущего исполнителя
-                            executortemp.external = empl->role().isExtern(); // записать внешний/внутренний исполнитель
-                            // Заполнить календарь для текущего исполнителя. Первой строкой идут праздники и выходные
-                            switch(codetek){
-                            case 89:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   22,23,24,25};                                           // личный календарь
-                                break;
-                            case 273:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   22,23,24,25};                                           // личный календарь
-                                break;
-                            case 287:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   15,16,17,18,19,20,21,22,23,24,25};                                           // личный календарь
-                                break;
-                            case 289:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   25,26,27,28,29,30,31,32,33,34,35};                                           // личный календарь
-                                break;
-                            case 290:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   35,36,37,50,51,};                                           // личный календарь
-                                break;
-                            case 292:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   30,31,32,33,34,35,36,37,38,39,40};                                           // личный календарь
-                                break;
-                            case 293:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   5,6,7,8,9,10,11,12,13,14,15};                                                // личный календарь
-                                break;
-                            case 288:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};                                 // личный календарь
-                                break;
-                            case 308:
-                                executortemp.rest={0,1,2,3, 5,6, 12,13, 19,20, 26,27, 33,34, 40,41, 50,51,52,53, // календарь предприятия
-                                                   5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};                                 // личный календарь
-                                break;
-
-                            default:
-                                executortemp.rest={}; // для остальных исполнителей выходных, праздничных дней и отпуска - не будет
-                            }
-                            jobtemp.people.push_back(executortemp); // записать текущего возможного исполнителя в "работу"
-
-                            // Здесь же заполнить общий вектор всех исполнителей executor
-                            bool flfind=false; // признак, что исполнитель найден (true)
-                            for(int i=0; i<(int)executor.size(); i++){ // цикл перебора вектора исполнителей
-                                if(executor[i].code==codetek){
-                                    flfind = true;
-                                    break;
-                                }
-                            } // конец цикла перебора вектора исполнителей
-                            // Проверка. Если исполнитель не найден, то добавить его в вектор executor
-                            if(flfind==false) executor.push_back(executortemp); // доб. тек. исполнителя в вектор исполнителей executor
-                        } // цикл перебора возможных исполнителей
-                    }
-                    tempvector.push_back(jobtemp); // записать текущую работу jobtemp в вектор job
-                } // конец цикла перебора работ
-            } // конец цикла перебора процедур
-            job.push_back(tempvector); // заполненный вектор работ поместить в вектор продукций
-        } // конец цикла перебора 2-ух планов: продукции и ОРД
-    } // конец цикла перебора продукций
-}
-
-void FillTek(int &l, int &m, std::vector<time_type> &tek){ // заполнить массив контрольных точек
-    // сформировать и заполнить вектор tek - массив контрольных точек (КТ). Это массив времен начала и конца уже
-    //спланированных работ исполнителя job[l][m].executor и защищенных работ
-
-    time_type tempjob; // временная работа (используется только для заполнения вектора tek)
-
-    // добавить в вектор tek уже спланированные работы (с учетом нерабочих дней)
-    for(int i=0; i<=l; ++i){ // перебор всех предыдущих и текущей продукции
-        for(int j=0; j<(int)job[i].size(); ++j){ // перебор всех работ (и неспланированных и спланированных)
-            if(i==l && j>=m) continue; // пропустить не спланированные работы "справа" от текущей работы
-            if(job[i][j].executor.code==job[l][m].executor.code){ // найден нужный исполнитель
-                tempjob.begin=job[i][j].begin;
-                tempjob.end  =job[i][j].end;
-                tek.push_back(tempjob); // записать в вектор tek времена начала и конца работы
-            }
-        } // конец перебора работ
-    } // конец перебора продукции
-
-    // добавить в вектор tek работы с запретом коррекции, которые спланированы ранее и их параметры нельзя
-    //менять. У этих работ д.б. обязательно заполнены поля: begin, time, end, executor
-    //и flcorrect=false (корректировать нельзя). По всем продукциям, по всем работвм.
-    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора всех продукций
+    // Сформировать и вывести информацию по работе (код исполнителя, код процедуры, код продукции, время  выполнения работы)
+    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукции
         for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора работ текущей продукции
-            if(job[i][j].flcorrect!=false) continue; // пропустить работы, которые можно корректировать
-            if(job[i][j].executor.code==job[l][m].executor.code){ // найден нужный исполнитель
-                tempjob.begin=job[i][j].begin;
-                tempjob.end  =job[i][j].end;
-                tek.push_back(tempjob); // записать в вектор tek времена начала и конца работы
-                //qDebug()<<"В tek записана работа с запрещенной коррекцией. i="<<i<<". j="<<j;
-            }
-        } // конец перебора работ
-    } // конец перебора продукции
-
-    // Добавить в вектор tek особую контрольную точку: время начала планирования для 0-ой работы или
-    //время конца предшествующей работы (для m!=0). Это упростит дальнейший алгоритм, т.к. в этом случае массив tek
-    //будет содержать все точки возможного начала искомой работы. Среди этих точек и будем искать подходящую (и самую раннюю)
-    if(m==0){ // для 0-ой работы задать время начала планирования всех работ (самая "левая" возможная точка для 0-ой работы)
-        tempjob.begin=tbeginplan-1; // именно здесь и только здесь задается время начала планирования tbeginplan
-        tempjob.end  =tempjob.begin; // конец работы указан, как начало работы!
-        tek.push_back(tempjob);
-    }
-    else{
-        tempjob.begin=job[l][m-1].end; // это тоже самая "левая" возможная точка для ненулевой работы
-        tempjob.end  =tempjob.begin; // конец работы указан, как начало работы!
-        tek.push_back(tempjob);
-    }
-
-    // отсортировать вектор tek по возрастанию времени конца работ (методом пузырька)
-    time_type temp;
-    bool perestanovka; // признак, была ли перестановка
-    do {
-        perestanovka=false;
-        for(int i=0; i<(int)tek.size()-1; ++i){ // цикл перебора строк (до предпоследней строки)
-            if(tek[i].end > tek[i+1].end){ // есть нарушение возрастания времени конца. Надо менять строки местами
-                temp=tek[i];
-                tek[i]=tek[i+1];
-                tek[i+1]=temp;
-                perestanovka=true;
-            }
-        } // конец цикл перебора строк
-    }while(perestanovka);
-
-    // Вывести вектор tek (времена начала и конца спланированных работ тек. исполнителя) в консоль (для отладки)
-    if(flprint>=3) {
-        qDebug()<<"___Code executor= "<<job[l][m].executor.code; // вывести текущего исполнителя
-        for(int i=0; i<(int)tek.size(); ++i) qDebug()<<tek[i].begin<<tek[i].end;
-    }
-}
-
-void FindBeginEndJob(executor_type &executor, int &tstart, int &time, int &tbegin, int &tend) // найти начало и конец работы с учетом нерабочих дней
-{
-    // Для исполнителя найти время начала и время конца работы с учетом нерабочих дней (праздников, выходных, отпусков и т.д.)
-    //    Входные параметры:
-    //tstart - время, начиная с которого, надо искать допустимое начало работы tbegin;
-    //time   - заданное полное время выполнения работы;
-    //    Выходные параметры:
-    //tbegin - найденное время начала работы с учетом нерабочих дней;
-    //tend   - найденное время конца работы с учетом нерабочих дней.
-
-    int sum=0; // счетчик найденных рабочих дней
-    int ttek=tstart; // проверяемый день
-    while(sum<=time){ // цикл, пока не найдено нужное количество рабочих дней time
-        // проверка. Является ли день ttek нерабочим?
-        int kol=count(executor.rest.begin(), executor.rest.end(), ttek); // поиск ttek - нужного дня среди нерабочих дней
-        if(kol==0) { // проверяемый день - рабочий? (т.к. он не найден среди списка нерабочих дней)
-            ++sum; // счетчик найденных рабочих дней
-            if(sum==1)    tbegin=ttek; // запомнить первый найденный рабочий день, как tbegin
-            if(sum==time) tend  =ttek; // запомнить последний найденный рабочий день, как tend
-        }
-        ++ttek; // переход к следующему дню для его проверки
-    }
-}
-
-void PlanJob(int &l, int &m) // спланировать конкретную работу
-{ // Спланировать работу. Найти (для работы job[l][m]) время начала и конца с учетом календаря (личного и календаря предприятия) и с учетом ограничений
-
-    // Проверка. Можно ли работу корректировать (планировать)? Если нельзя, то ничего не делать
-    if(job[l][m].flcorrect==false) return; // ВАЖНО проверить это???
-
-    std::vector<time_type>tek; // объявить вектор tek (для хранения tbegin и tend уже спланированных работ исполнителя и защищенных работ)
-    FillTek(l, m, tek); // заполнить вектор tek (найти все контрольные точки (КТ) - возможные времена начала работы)
-
-    // Перебрать все КТ из вектора tek, пока не встретится подходящая (, которая обязательно существует. Например, "самая правая")
-    for(int kt=0; kt<(int)tek.size(); ++kt){ // цикл перебора КТ
-        int tstart=tek[kt].end+1; // возможное время начала работы для тек. КТ (сразу после окончания предыдущей работы. Это "+1")
-
-        // Проверка. Если тек. работа начинается до окончания предыдущей (в рамках одной продукции), то пропустить эту КТ
-        if(m!=0) if(tstart<(job[l][m-1].end+1)) continue; // пропустить работу, которая нарушается последовательность "цепочки" работ одной продукции
-
-        // Найти время начала и конца работы с учетом нерабочих дней (начиная поиск со времени tstart) для исполнителя job[l][m].executor
-        int tbegin=0; // время начала работы, которое надо найти
-        int tend=0;   // время конца работы, которое надо найти
-        FindBeginEndJob(job[l][m].executor, tstart, job[l][m].time, tbegin, tend); // будут найдены tbegin и tend с учетом праздников
-
-        // проверка. Будет ли дублирования исполнителей, если искомая работа начнется в тек. КТ
-        bool fldubl=false; // нет дублирования
-        for(int i=0; i<(int)tek.size(); ++i){ // перебор всех уже спланированных работ
-            // Проверка. Есть ли дублирование?
-            if(((tbegin>=tek[i].begin) && (tbegin<=tek[i].end)) ||  // точка tbegin проверяемого интервала попала внутрь текущего интервала
-               ((tend  >=tek[i].begin) && (tend  <=tek[i].end)) ||  // точка tend   проверяемого интервала попала внутрь текущего интервала
-               ((tbegin<=tek[i].begin) && (tend  >=tek[i].end))){   // проверяемый интервал полностью накрыл текущий интервал
-                fldubl=true;  // есть дублирование
-                break; // прекратить перебор работ, т.к. есть дублирование. Перейти к проверке след. КТ
-            }
-        } // перебор всех работ
-
-        //+НОВОЕ ??? ДОРАБОТАТЬ
-        // Проверка. Надо ли проверять дублирование работ для текущего исполнителя? Если исполнитель "внешний", то для него могут
-        //дублироваться работы. Внешний исполнитель имеет isExtern()==true.
-        if(job[l][m].executor.external) fldubl = false; // считать, что для внешнего исполнителя никогда нет дублирования
-        //-НОВОЕ
-
-        // Проверка. Было ли дублирование для текущей КТ?
-        if(fldubl)  continue; // есть дублирование работ одним исполнителем. Плохо. Перейти к проверке следующей КТ
-        else {     // нет дублирования. Хорошо. Найдено новое время начала искомой работы
-            if(job[l][m].flcorrect){ // если разрешена корректировка работы
-                job[l][m].begin = tbegin;// сохранить найденное время начала работы
-                job[l][m].end   = tend;  // сохранить найденное время конца работы
-                break; // прекратить перебор КТ, т.к. все дальнейшие варианты будут хуже (т.к. работа начнется позже)
-            }
-        }
-    } // конец перебора всех контрольных точек
-}
-
-void SetExecutor(int &l, int &m) // установить единого исполнителя всех работ одной процедуры
-{
-    // Зная исполнителя "последней" работы текущей процедуры job[l][m].executor, установить этого исполнителей для
-    //всех остальных работ текущей процедуры
-
-    int           tekprocedure = job[l][m].procedure; // текущая процедура
-    executor_type executormin  = job[l][m].executor;  // найденный ранее лучший исполнитель работы job[l][m]
-
-    for(int i=0; i<(int)job.size(); ++i) // цикл перебора продукций
-        for(int j=0; j<(int)job[i].size(); ++j) { // цикл перебора работ тек. продукции
-            if((i==l) && (j==m)) continue; // пропустить "последнюю" работу, в которой исполнитель уже назначен ранее (до вызова этой процедуры)
-            if(tekprocedure==job[i][j].procedure) job[i][j].executor=executormin; // если процедура совпадает, то назначить лучшего исполнителя
-        } // конец цикла перебора работ тек. продукции
-}
-
-// Новая процедура. Проверить каждую процедуру. Если в ней есть защищенная работа (т.е. известен исполнитель), то надо этого исполнителя поставить
-//во все остальные работы. И в списке возможных исполнителей каждой работы оставить только одного этого исполнителя
-//...
-
-int Plan(TCarryTaskList &tasks, QString &errs) // основная процедура
-{
-    if(TestTCarryTask(tasks, errs)!=0) return 5; // проверить содержимое объекта tasks до начала планирования
-
-    // вывести в консоль содержимое объекта tasks до начала планирования
-    if(flprint>=2){
-        qDebug()<<"\n********** Принятое содержимое tasks до начала планирования **********";
-        PrinTCarryTask(tasks); // для этой процедуры errs формировать не надо
-    }
-
-    // заполнить вектор job данными из объекта tasks
-    FillVectorJob(tasks); // для этой процедуры errs формировать не надо
-
-    // вывести в консоль данные по работам job[][] до начала планирования
-    if(flprint>=2) {
-        qDebug()<<"\n********** Данные по работам job до начала планирования **********";
-        PrintJob(); // для этой процедуры errs формировать не надо
-    }
-
-    if(TestData(errs)!=0) return 1; // проверить исходные данные в векторе job, считанные из tasks
-
-    // Планирование. Вариант 1. Разные работы одной процедуры могут исполнять разные исполнители. Простейший вариант. М.б. использован в будущем
-    //for(int i=0; i<(int)job.size(); ++i) // цикл перебора продукций
-    //    for(int j=0; j<(int)job[i].size(); ++j) {
-    //        job[i][j].executor=job[i][j].people[0]; // назначить исполнителем работы первого по списку
-    //        PlanJob(i, j);} // цикл перебора работ
-
-
-    // Планирование. Вариант 2. Все работы одной процедуры может исполнять только один исполнитель
-
-    // Найти все последние работы каждой из процедур (по времени окончания этих "последних" работ будет выбран "лучший" исполнитель каждой процедуры).
-    //Надо найти индексы i и j последних работ и записать эти индексы в вектор joblast (последние работы). Без деления на продукции
-    struct joblast_type { // структура последней работы
-        int i; // индекс i последней работы процедуры (индекс продукции)
-        int j; // индекс j последней работы процедуры (индекс работы в тек. продукции)
-    } temp;
-    std::vector<joblast_type>joblast; // вектор, содержащий индексы последних работ в каждой процедуре (по всем работам всех продукций)
-    for(int i=0; i<(int)job.size(); ++i){ // цикл перебора продукций
-        int tekprocedure=job[i][0].procedure; // в качестве начальной взять процедуру из 0-ой работы
-        for(int j=0; j<(int)job[i].size(); ++j){ // цикл перебора работ продукции
-            if(tekprocedure!=job[i][j].procedure){ // проверка. изменилась ли процедура? Если "да", то предыдущая работа была "последней"
-                tekprocedure=job[i][j].procedure; // запомнить текущюю процедуру
-                temp.i=i;
-                temp.j=j-1; // взять индекс предыдущей работы, которая является последней
-                joblast.push_back(temp); // записать в вектор индексы "предыдущей" работы. Это и есть "последняя" работа процедуры
-            }
-        } // конец цикла перебора продукций
-        temp.i=i;// самую последнюю работу каждой продукции надо дописать отдельно вне цикла
-        temp.j=(int)job[i].size()-1; // индекс j последней работы продукции
-        joblast.push_back(temp); // записать в вектор
-    } // конец цикла перебора продукций
-
-    // Проверка. Существует (заполнен) вектор последних работ?
-    if(joblast.size()==0) {
-        //QMessageBox::information(0, "Information", "Планирование не выполнено. Не найдено ни одной процедуры");
-        return 2;
-    }
-
-    // Планирование работ "попроцедурно". Перебор процедур (т.е. перебор найденных "последних" работ). В каждом таком цикле будет
-    //выбран единый исполнитель для всех работ текущей процедуры
-    for(int indproc=0; indproc<(int)joblast.size(); ++indproc){ // цикл перебора всех процедур
-        int i=joblast[indproc].i; // это индекс i последней работы тек. процедуры, для которой будем искать лучшего исполнителя
-        int j=joblast[indproc].j; // это индекс j последней работы тек. процедуры, для которой будем искать лучшего исполнителя
-
-        // Проверка. Если коррекция последней работы  запрещена, то исполнителя искать не надо. Поле executor заполнено, исполнитель найден ранее
-        //if(job[i][j].flcorrect==false) goto stop1; //ВАЖНО проверить ??? Должно все работать и без этого
-
-        // Каждая процедура м.б. выполнена одним или несколькими исполнителями. Надо проверить каждого из списка job[][].people[] и
-        //выбрать лучшего исполнителя (по мин. времени окончания последней работы процедуры)
-        int endmin=999999999; // для поиска минимального времени конца последней работы (т.е. минимального времени выполнения процедуры)
-        executor_type executormin=job[i][j].people[0]; // лучший исполнитель. Пока. Список исполнителей не м.б. пустым. Проверяется ранее
-        for(int indexecutor=0; indexecutor<(int)job[i][j].people.size(); ++indexecutor){ // цикл перебора исполнителей процедуры
-            job[i][j].executor=job[i][j].people[indexecutor]; // назначить в последней работе job[i][j] исполнителя
-            SetExecutor(i, j); // назначить этого же исполнителя всем работам процедуры, которой принадлежит текущая работа job[i][j]
-            // проверить план c текущим исполнителем tekexecutor (найти время конца работы job[i][j].end с исполнителем job[i][j].people[indexecutor])
-            for(int ii=0; ii<(int)job.size(); ++ii){
-                for(int jj=0; jj<(int)job[ii].size(); ++jj){
-                    PlanJob(ii, jj); // планирование работы
-                    if((ii==i) && (jj==j)) // если нужная работа спланирована, то
-                        goto stop1; // прервать цикл для быстродействия. Т.к. дальнейшее планирование бессмысленно
+            for(int k=0; k<(int)job[i][j].size(); ++k){ // цикл перебора работ
+                int codetek = job[i][j][k].executor.id; // код текущего исполнителя
+                // Сформировать и вывести строку-временную ось нерабочих дней исполнителя
+                str="";
+                for(int h=0; h<kol; ++h) { // цикл перебора дней, начиная с 0
+                    int n = job[i][j][k].executor.rest.count(h); // найти номер дня (h) в векторе rest
+                    if(n) str = str + "*"; // выходной день вывести, как "*"
+                    else  str = str + "="; // рабочий день вывести, как "="
                 }
-            }
-stop1: // выход из цикла планирования в случае завершения планирования нужной работы job[i][j]
-            if(flprint>=3) qDebug()<<"Перебор исполнителей job:"<<i<<j<<"executor.code"<<job[i][j].executor.code<<"job.end"<<job[i][j].end;
-            // запомнить найденные "лучшие" параметры работы работы job[i][j]: время окончания и исполнителя
-            int end=job[i][j].end; // время конца последней работы текущей процедуры (т.е. время конца процедуры)
-            if(end<endmin){ // если найдено лучшее время, то запомнить это время и этого исполнителя
-                endmin      = job[i][j].end;
-                executormin = job[i][j].executor;
-            }
-        } // цикл перебора исполнителей процедуры
+                // если тек. исполнитель изменился, то вывести календарь текущего исполнителя (будет меньше осей времени, больше наглядности)
+                if(codetekold != codetek) qDebug()<<(str + "calendar executor.code:" + QString::number(job[i][j][k].executor.id));
+                codetekold = codetek; // запомнить код текущего исполнителя
+                // Сформировать и вывести информационную строку по работе
+                str="";
+                for(int l=0; l<job[i][j][k].begin; ++l) str = str + "-"; // сформировать строку из дефисов, количеством job[i][j].begin
+                str = str
+                        + "(proj:" + QString::number(job[i][j][k].projectnum)   // num проекта
+                        + " prod:" + QString::number(job[i][j][k].productnum)   // num продукции
+                        + " proc:" + QString::number(job[i][j][k].procedurenum) // num процедуры
+                        + " job:"  + QString::number(job[i][j][k].num)          // num работы
+                        + " ex:"   + QString::number(job[i][j][k].executor.id)  // id исполнителя
+                        + " time:" + QString::number(job[i][j][k].time)         // время выполнения работы
+                        + ")";
+                qDebug()<<str;
+            } // конец цикла перебора работ
+        } // конец цикла перебора работ
+    } // конец цикла перебора продукций
+}
 
-        // т.к. лучший исполнитель найден, то окончательно (еще раз!) спланировать работы с найденным лучшим исполнителем
-        job[i][j].executor=executormin; // окончательно назначить лучшего исполнителя
-        SetExecutor(i, j); // назначить этого же исполнителя всем работам процедуры, которой принадлежит текущая работа job[i][j]
-        for(int ii=0; ii<(int)job.size(); ++ii){
-            for(int jj=0; jj<(int)job[ii].size(); ++jj){
-                PlanJob(ii, jj); // полный цикл планирования работ
-                if((ii==i) && (jj==j)) // если нужная работа спланирована, то
-                    goto stop2; // прервать цикл для быстродействия. Т.к. дальнейшее планирование бессмысленно
-            }
-        }
-stop2: // выход из цикла планирования в случае завершения планирования нужной работы job[i][j]
-        if(flprint>=3) qDebug()<<"*****************Лучший исполнитель job:"<<i<<j<<"executor.code"<<job[i][j].executor.code<<"job.end"<<job[i][j].end;
-    } // конец цикла перебора процедур
-
-    //TestPlan(errs); // проверка сформированного плана
-    if(TestPlan(errs)!=0) return 1; // проверка сформированного плана
-
-    // Вывести данные для контроля по работам job[][] после планирования
-    if(flprint>=2) {
-        qDebug()<<"\n********** Данные по работам job после планирования **********";
-        PrintJob();
-    }
-
-    if(flprint>=1) PrintPlan(); // вывести в консоль сформированный план
-
+void WritePlan(TCarryTaskList &tasks) // записать результаты планирования в объект tasks
+{
     // записать найденные результаты планирования в объект tasks:
-    //- для каждой продукции записать время начала и конца;
-    //- для каждой процедуры записать время начала и конца, исполнителя;
-    //- для каждой задачи записать время начала и конца.
-    foreach (TCarryTask *curTask,tasks) // цикл перебора продукций
+    foreach (TCarryTask *curTask,tasks) // цикл перебора проектов
     {
-
         // Время начала и конца текущего проекта (которые надо найти)
         int curTaskbegin = 999999;
         int curTaskend   = 0;
 
-        for(int i=0; i<=1; i++){ // цикл перебора двух планов: План выпуска продукции (i=0) и План ОРД (i=1)
-            TCarryPlan *plan;
-
+        for(int i=0; i<=1; i++){ // цикл перебора продукций (двух планов): План выпуска продукции (i=0) и План ОРД (i=1)
+            TCarryPlan *plan; // plan - это продукция
             // Проверка. Это план выпуска продукции или ОРД?
             if(i==0) plan = curTask->carryPlan(); // план выпуска продукции
             else     plan = curTask->ordPlan();   // план ОРД
 
-            // Проверка. Если нет плана, то пропустить этот блок
-            if(plan->procedures().size()==0)continue; // пропустить план, в котором нет процедур
+            if(!plan->procedures().size())continue; // пропустить пустую продукцию
 
             // Время начала и конца текущей продукции (которые надо найти)
             int productbegin = 999999;
             int productend   = 0;
-
             foreach (TCarryProcedure *proc,plan->procedures()) // цикл перебора процедур
             {
                 // Время начала и конца текущей процедуры (которые надо найти)
                 int procedurebegin = 999999;
                 int procedureend   = 0;
-
                 foreach (TCarryWork *work,proc->works()) // цикл перебора работ
                 {
-                    // зная id работы, найти из сформированного вектора job: время начала, конца и код исполнителя работы
-
-                    int idtemp = work->id(); // id работы, который будем искать
-                    job_type jobtemp = FindJob(idtemp); // найти работу в векторе job по ее id
-                    int jobbegin     = jobtemp.begin;         // найденное время начала текущей работы
-                    int jobend       = jobtemp.end;           // найденное время конца текущей работы
-                    int executorcode = jobtemp.executor.code; // найденный исполнитель работы (он же исполнитель процедуры)
+                    // зная id работы, найти из сформированного вектора job: время начала, конца и id исполнителя
+                    int idtemp = work->id();                // id работы, который будем искать
+                    job_type jobtemp = FindJob(idtemp);     // найти работу jobtemp в векторе job по ее id
+                    int jobbegin     = jobtemp.begin;       // найденное время начала текущей работы
+                    int jobend       = jobtemp.end;         // найденное время конца текущей работы
+                    int executorid   = jobtemp.executor.id; // найденный исполнитель работы (он же исполнитель процедуры)
 
                     work->setDtPlanBegin(jobbegin); // записать время начала текущей работы в формате QDateTime
                     work->setDtPlanEnd(jobend);     // записать время конца текущей работы в формате QDateTime
 
-                    // зная id исполнителя найти его среди возможных исполнителей процедуры (работы)
+                    // зная id исполнителя найти его среди списка возможных исполнителей процедуры
                     foreach (TEmployee *empl, proc->possibleEmployees()) // цикл перебора возможных исполнителей процедуры
                     {
-                        int codetek = empl->id(); // код текущего возможного исполнителя
-                        if(executorcode==codetek) { // проверка. Найден ли исполнитель?
-                            //work->setEmployee(empl); // записать найденного исполнителя для работы
+                        int tekid = empl->id(); // код текущего возможного исполнителя
+                        if(executorid == tekid) { // проверка. Найден ли исполнитель?
+                            work->setEmployee(empl); // записать найденного исполнителя для работы
                             proc->setEmployee(empl); // записать найденного исполнителя для процедуры
                             break;
                         }
                     } // цикл перебора возможных исполнителей процедуры
-
                     // Поиск времени начала и конца текущей процедуры
                     if(jobbegin < procedurebegin) procedurebegin = jobbegin;
                     if(jobend > procedureend) procedureend = jobend;
-
                     // Поиск времени начала и конца текущей продукции
                     if(jobbegin < productbegin) productbegin = jobbegin;
                     if(jobend > productend) productend = jobend;
-
                     // Поиск времени начала и конца текущего проекта
                     if(jobbegin < curTaskbegin) curTaskbegin = jobbegin;
                     if(jobend > curTaskend) curTaskend = jobend;
-
                 } // конец цикла перебора работ
-
                 proc->setDtPlanBegin(procedurebegin); // записать время начала текущей процедуры в формате QDateTime
                 proc->setDtPlanEnd(procedureend);     // записать время конца текущей процедуры формате QDateTime
-
             } // конец цикла перебора процедур
-
             plan->setDtPlanBegin(productbegin); // записать время начала текущей продукции в формате QDateTime
             plan->setDtPlanEnd(productend);     // записать время конца текущей продукции в формате QDateTime
-
         } // конец плана
-
         curTask->setDtPlanBegin(curTaskbegin); // записать время начала текущего проекта в формате QDateTime
         curTask->setDtPlanEnd(curTaskend);     // записать время начала текущего проекта в формате QDateTime
-
     } // конец цикла перебора продукций
 
-    // вывести содержимое объекта tasks после планирования
-    if(flprint>=2){
-        qDebug()<<"\n ********** Содержимое tasks после планирования **********";
-        PrinTCarryTask(tasks);
-    }
+}
 
+void PlanJob(int &l, int &m, int &n) // спланировать конкретную работу с конкретным исполнителем
+{
+    // Спланировать работу job[l][m][n] (найти время начала и конца с учетом всех ограничений)
+    //Исполнитель job[l][m][n].executor уже записан в работе
+
+    int tbegin, tend; // время начала и конца работы, которые надо найти
+
+    // ПРОВЕРКА. Если работа защищенная, то ничего не делать
+    if(job[l][m][n].protection) return;
+
+    // Бесконечный цикл перебора возможных дней начала тек. работы job[l][m][n]. Из цикла выйдем тогда, когда
+    //найдем самое раннее время начала тек. работы, удовлетворяющее всем ограничениям
+    for(int ttek=0;  ; ++ttek){ // бесконечный цикл перебора дней ttek
+
+        tbegin = tend = 0; // время начала и конца работы, которые надо найти
+
+        // ПРОВЕРКА. Любая работа не может начаться ранее времени "начала общего планирования" (tbeginplan)
+        if(ttek < tbeginplan) continue; // пропустить текущий день ttek
+
+        // ПРОВЕРКА. Если текущий день есть в списке нерабочих дней исполнителя job1[l][m][n].executor, то пропустить его
+        if(job[l][m][n].executor.rest.count(ttek)) continue; // пропустить текущий день ttek
+
+        // ПРОВЕРКА. Работа не может начаться ранее, чем завершится предыдущая (1-ый вариант проверки)
+        //Если это не начальная работа процедуры, то для проверки нужна предыдущая работа той же процедуры
+        if(n!=0) if(ttek <= job[l][m][n-1].end) continue; // пропустить текущий день ttek
+
+        // ПРОВЕРКА. Работа не может начаться ранее, чем завершится предыдущая (2-ой вариант проверки)
+        //Если это начальная работа процедуры, то для проверки нужна последняя работа предыдущей процедуры.
+        if(m!=0 && n==0){  // это начальная работа процедуры. Надо найти конец последней работы предыдущей процедуры
+            int klast = job[l][m-1].size()-1; // индекс последней работы в предыдущей процедуре
+            if(ttek <= job[l][m-1][klast].end) continue; // пропустить текущий день ttek
+        }
+
+        // ПРОВЕРКА. Работа не может начаться ранее, чем завершится предыдущая (3-ий вариант проверки)
+        //Если это начальная работа начальной процедуры (т.е. это начальная работа продукции), то она не имеет
+        //предшествуюшей работы (этот вариант для m==0 && n==0) и она не проверяется
+
+        // Найти время начала (tbegin) и конца (tend) работы job[l][m][n] с учетом нерабочих дней (начиная поиск со времени ttek) для
+        //исполнителя job[l][m][n].executor. Задана продолжительность работы: job[l][m][n].time
+        FindBeginEndJob(job[l][m][n].executor, ttek, job[l][m][n].time, tbegin, tend); // нашли tbegin и tend
+
+        // ПРОВЕРКА. Если исполнитель внешний, то дублирование работ не проверять. Время начала и конца - найдены.
+        //Внешний(внутренний) исполнитель определяется, как: proc->employee()->role().isExtern()==true (внешний)
+        if(job[l][m][n].executor.external) break; // внешний исполнитель. Не проверять на дублирование. Работа спланирована
+
+        // ПРОВЕРКА предшествующих незащищенных работ. Если исполнитель внутренний, то проверить найденные tbegin и tend на
+        //дублирование уже спланированных ранее незащищенных работ. Проверить незащищенные работы предшествующие индексу [l][m][n].
+        bool flduplicate = false; // нет дублирования
+        if(!job[l][m][n].executor.external){  // внутренний исполнитель
+            for(int i=0; i<(int)job.size(); i++){ // цикл перебора продукции
+                for(int j=0; j<(int)job[i].size(); j++){ // цикл перебора процедур
+                    for(int k=0; k<(int)job[i][j].size(); k++){ // цикл перебора работ
+                        if(job[i][j][k].executor.id != job[l][m][n].executor.id) continue; // пропустить работу с ненужным исполнителем
+                        if(job[i][j][k].protection) continue; // пропустить защищенные работы, которые будут проверены в следующей проверке
+                        // Проверка. Как только дойдем до тек. работы, проверку прервать
+                        if((l==i) && (m==j) && (n==k)) // дошли до текущей работы, ее и последующие проверять не надо
+                            goto metkastop1; // прервать все циклы, т.к. проверяем только прешествующие работы
+                        // Проверка. Найдена предшествующая незащищенная работа с нужным исполнителем. Есть ли дублирование?
+                        if(((tbegin >= job[i][j][k].begin) && (tbegin <= job[i][j][k].end)) || // точка tbegin проверяемого интервала попала внутрь текущего интервала
+                           ((tend   >= job[i][j][k].begin) && (tend   <= job[i][j][k].end)) || // точка tend   проверяемого интервала попала внутрь текущего интервала
+                           ((tbegin <= job[i][j][k].begin) && (tend   >= job[i][j][k].end))){  // проверяемый интервал полностью накрыл текущий интервал
+                            flduplicate = true; // есть дублирование
+                            goto metkastop1; // прервать все циклы, т.к. обнаружено дублирование
+                        }
+                    } // конец цикла перебора работ
+                } // конец цикла перебора процедур
+            } // конец цикла перебора продукции
+metkastop1:; // метка досрочного выхода из цикла (,когда дошли до проверяемой работы или обнаружено дублирование
+        }
+        if(flduplicate) continue; // если есть дублирование, то пропустить текущий день ttek
+
+        // ПРОВЕРКА всех защищенных оабот. Если исполнитель внутренний, то проверить найденные tbegin и tend на дублирование с защищенными
+        //работами (по всем индексам работ: i, j, k). Проверить все только защищенные работы
+        flduplicate = false; // нет дублирования
+        if(!job[l][m][n].executor.external){  // внутренний исполнитель
+            for(int i=0; i<(int)job.size(); i++){ // цикл перебора продукции
+                for(int j=0; j<(int)job[i].size(); j++){ // цикл перебора процедур
+                    for(int k=0; k<(int)job[i][j].size(); k++){ // цикл перебора работ
+                        if(job[i][j][k].executor.id != job[l][m][n].executor.id) continue; // пропустить работу с ненужным исполнителем
+                        if(!job[i][j][k].protection) continue; // пропустить незащищенную работу
+                        // Проверка. Найдена защищенная работа job[i][j][k] с нужным исполнителем. Есть ли дублирование?
+                        if(((tbegin >= job[i][j][k].begin) && (tbegin <= job[i][j][k].end)) || // точка tbegin проверяемого интервала попала внутрь текущего интервала
+                           ((tend   >= job[i][j][k].begin) && (tend   <= job[i][j][k].end)) || // точка tend   проверяемого интервала попала внутрь текущего интервала
+                           ((tbegin <= job[i][j][k].begin) && (tend   >= job[i][j][k].end))){  // проверяемый интервал полностью накрыл текущий интервал
+                            flduplicate = true;  // есть дублирование
+                            goto metkastop2; // прервать все циклы, т.к. обнаружено дублирование
+                        }
+                    } // конец цикла перебора работ
+                } // конец цикла перебора процедур
+            } // конец цикла перебора продукции
+metkastop2:; // метка выхода из цикла
+        }
+        if(flduplicate) continue; // если есть дублирование, то пропустить текущий день ttek
+
+        // Если дошли до конца цикла перебора возможных дней начала ttek, значит все проверки пройдены. Даты начала и конца найдены.
+        break; // выйти из цикла перебора дней, планирование работы job[l][m][n] - успешно завершено
+    } // конец цикла перебора дней планирования
+
+    // Из цикла вышли только тогда, когда работа спланирована
+    job[l][m][n].begin = tbegin; // записать найденное время начала
+    job[l][m][n].end   = tend;   // записать найденное время конца
+
+    return;
+}
+
+int Plan(TCarryTaskList &tasks, QString &errs) // основная процедура
+{
+    FillHoliday();                               // заполнить календарь предприятия (выходные и праздничные дне)
+    if(TestTCarryTask(tasks, errs)!=0) return 5; // проверить содержимое объекта tasks до начала планирования    
+    if(flprint>=2) PrinTCarryTask(tasks);        // вывести в консоль содержимое объекта tasks до начала планирования
+    FillVectorJob(tasks);                        // заполнить вектор job данными из объекта tasks
+    if(flprint>=2) PrintJob();                   // вывести в консоль данные вектора job в табличной форме до начала планирования
+    if(TestData(errs)!=0) return 1;              // проверить данные в векторе job
+
+    // Планирование. Цикл перебор всех работ попроцедурно, т.к. работы одной процедуры исполняет один исполнитель из списка возможных
+    for(int i=0; i<(int)job.size(); i++){ // цикл перебора продукций
+        for(int j=0; j<(int)job[i].size(); j++){ // цикл перебора процедур
+            // Каждая процедура м.б. выполнена несколькими исполнителями. Проверить каждого. Кто быстрее выполнит, того и выбрать
+            int endmin = 999999999; // минимальное время конца процедуры
+            executor_type executormin = job[i][j][0].people[0]; // лучший исполнитель (из начальной работы процедуры)
+            for(int indexecutor = 0; indexecutor<(int)job[i][j][0].people.size(); indexecutor++){ // цикл перебора возможных исполнителей тек. процедуры
+                // назначить текущего исполнителя: job[i][j][k].people[indexecutor] всем работам текущей процедуры
+                for(int k=0; k<(int)job[i][j].size(); k++) job[i][j][k].executor = job[i][j][k].people[indexecutor];
+                // спланировать все работы текущей процедуры: job[i][j] текущим исполнителем: job[i][j][k].people[indexecutor]
+                for(int k=0; k<(int)job[i][j].size(); k++) PlanJob(i, j, k); // планирование работ процедуры
+                // Определить время окончания текущей процедуры, как время конца последней работы в текущей процедуре
+                int klast = job[i][j].size()-1; // индекс k последней работы в текущей процедуре
+                int end = job[i][j][klast].end; // время конца последней работы текущей процедуры (т.е. время конца тек. процедуры)
+                // Проверка. Если это лучшее время выполнения всей тек. процедуры, то запомнить это время и этого исполнителя
+                if(end < endmin){
+                    endmin      = job[i][j][klast].end;
+                    executormin = job[i][j][klast].executor;
+                }
+            } // конец цикла перебора возможных исполнителей процедуры. Найден лучший исполнитель executormin
+            // назначить найденного лучшего исполнителя: executormin всем работам текущей процедуры
+            for(int k=0; k<(int)job[i][j].size(); k++) job[i][j][k].executor = executormin;
+            // Окончательно (еще раз) спланировать все работы текущей процедуры: job[i][j] теперь уже с лучшим исполнителем
+            for(int k=0; k<(int)job[i][j].size(); k++) PlanJob(i, j, k); // планирование работ процедуры
+        } // конец цикла перебора процедур
+    } // конец цикла перебора продукций
+
+    if(TestPlan(errs)!=0) return 1;       // проверить сформированный план на грубые ошибки
+    if(flprint>=2) PrintJob();            // вывести данные вектора job после планирования
+    if(flprint>=1) PrintPlan();           // вывести в консоль сформированный план
+    WritePlan(tasks);                     // записать результаты планирования в объект tasks
+    if(flprint>=2) PrinTCarryTask(tasks); // вывести содержимое объекта tasks после записи в него результатов планирования
     return 0; // успешное завершение планирования
 }
 
-void TModulePlans::testPlanData()
-{
-
-    //PR(0,"TModulePlans::testPlanData()");
-
-    QString errs;
-    TCarryTaskList tasks;
-    tasks.setAutoDelete(true);
-
-    // Объявить заранее нужные объекты по всем 4 уровням
-    TCarryTask      *carryTask(NULL);
-    TCarryPlan      *carryPlan(NULL);
-    TCarryProcedure *carryProcedure(NULL);
-    TCarryWork      *carryWork(NULL);
-    int year(QDate::currentDate().year());
-
-  MODULE(Employees);
-    //Продукция 0------------------------------------------------------------
-    carryTask = new TCarryTask(year,prtNone,7,1,"0");
-        //План 0 (пока не используется)
-        carryPlan = new TCarryPlan(carryTask,10,1,"0");
-
-            //Процедура 0
-            carryProcedure = new TCarryProcedure(carryPlan,100,1,"0");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293)); // Селиверстов
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(288)); // Сазонов
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 0
-                carryWork = new TCarryWork(carryProcedure,emtNone,1000,1,"0");
-                carryWork->setDtPlanBegin(0,1111); // время начала. Инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(6);       // время выполнения работы
-                carryWork->setDtPlanEnd(0,1111);   // время конца. Инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 1
-                carryWork = new TCarryWork(carryProcedure,emtNone,1001,1,"1");
-
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                //carryWork->setDtPlanBegin(10,2016); // инициализация, соответствует дате "1.1.1111"
-
-                carryWork->setPlanPeriod(4);
-
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                //carryWork->setDtPlanEnd(14,2016);   // инициализация, соответствует дате "1.1.1111"
-
-                carryWork->setVolatile(true); // работу можно перепланировать
-                //carryWork->setVolatile(false); // работу нельзя перепланировать
-
-            carryProcedure->insertWork(carryWork);
-
-                carryWork = new TCarryWork(carryProcedure,emtNone,1002,1,"1");
-                carryWork->setDtPlanBegin(50,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(4);
-                carryWork->setDtPlanEnd(54,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-                carryWork->setEmployee(modEmployees->findEmployee(288));
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 1
-            carryProcedure = new TCarryProcedure(carryPlan,101,1,"1");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(289));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 2
-                carryWork = new TCarryWork(carryProcedure,emtNone,1003,1,"2");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(6);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 3
-                carryWork = new TCarryWork(carryProcedure,emtNone,1004,1,"3");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(10);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-    carryTask->setCarryPlan(carryPlan);
-    tasks.append(carryTask); // записать Продукция 0
-
-    //Продукция 1-----------------------------------------------------------
-    carryTask = new TCarryTask(year,prtNone,1,1,"1");
-        //План 0 (пока не используется)
-        carryPlan = new TCarryPlan(carryTask,10,1,"0");
-
-            //Процедура 2
-            carryProcedure = new TCarryProcedure(carryPlan,102,1,"2");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(287));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(289));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 4
-                carryWork = new TCarryWork(carryProcedure,emtNone,1005,1,"4");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 3
-            carryProcedure = new TCarryProcedure(carryPlan,103,1,"3");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(287));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 5
-                carryWork = new TCarryWork(carryProcedure,emtNone,1006,1,"5");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 6
-                carryWork = new TCarryWork(carryProcedure,emtNone,1007,1,"6");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 4
-            carryProcedure = new TCarryProcedure(carryPlan,104,1,"4");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 7
-                carryWork = new TCarryWork(carryProcedure,emtNone,1008,1,"7");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 8
-                carryWork = new TCarryWork(carryProcedure,emtNone,1009,1,"8");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-    carryTask->setCarryPlan(carryPlan);
-    tasks.append(carryTask); // записать Продукция 1
-
-    //Продукция 2--------------------------------------------------------
-    carryTask = new TCarryTask(year,prtNone,2,1,"2");
-        //План 0 (пока не используется)
-        carryPlan = new TCarryPlan(carryTask,10,1,"0");
-
-            //Процедура 5
-            carryProcedure = new TCarryProcedure(carryPlan,105,1,"5");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 9
-                carryWork = new TCarryWork(carryProcedure,emtNone,1010,1,"9");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 10
-                carryWork = new TCarryWork(carryProcedure,emtNone,1011,1,"10");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 6
-            carryProcedure = new TCarryProcedure(carryPlan,106,1,"6");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 11
-                carryWork = new TCarryWork(carryProcedure,emtNone,1012,1,"11");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 12
-                carryWork = new TCarryWork(carryProcedure,emtNone,1013,1,"12");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 7
-            carryProcedure = new TCarryProcedure(carryPlan,107,1,"7");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(287));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 13
-                carryWork = new TCarryWork(carryProcedure,emtNone,1014,1,"13");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 8
-            carryProcedure = new TCarryProcedure(carryPlan,108,1,"8");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(289));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(288));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 14
-                carryWork = new TCarryWork(carryProcedure,emtNone,1015,1,"14");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 15
-                carryWork = new TCarryWork(carryProcedure,emtNone,1016,1,"15");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-    carryTask->setCarryPlan(carryPlan);
-    tasks.append(carryTask); // записать Продукция 2
-
-    //Продукция 3--------------------------------------------------------------
-    carryTask = new TCarryTask(year,prtNone,3,1,"3");
-        //План 0 (пока не используется)
-        carryPlan = new TCarryPlan(carryTask,10,1,"0");
-
-            //Процедура 9
-            carryProcedure = new TCarryProcedure(carryPlan,109,1,"9");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 16
-                carryWork = new TCarryWork(carryProcedure,emtNone,1017,1,"16");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 10
-            carryProcedure = new TCarryProcedure(carryPlan,110,1,"10");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(288));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 17
-                carryWork = new TCarryWork(carryProcedure,emtNone,1018,1,"17");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 18
-                carryWork = new TCarryWork(carryProcedure,emtNone,1019,1,"18");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 19
-                carryWork = new TCarryWork(carryProcedure,emtNone,1020,1,"19");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 11
-            carryProcedure = new TCarryProcedure(carryPlan,111,1,"11");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 20
-                carryWork = new TCarryWork(carryProcedure,emtNone,1021,1,"20");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-    carryTask->setCarryPlan(carryPlan);
-    tasks.append(carryTask); // записать Продукция 3
-
-    //Продукция 4---------------------------------------------------------
-    carryTask = new TCarryTask(year,prtNone,4,1,"4");
-        //План 0 (пока не используется)
-        carryPlan = new TCarryPlan(carryTask,10,1,"0");
-
-            //Процедура 12
-            carryProcedure = new TCarryProcedure(carryPlan,112,1,"12");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(289));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 21
-                carryWork = new TCarryWork(carryProcedure,emtNone,1022,1,"21");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 22
-                carryWork = new TCarryWork(carryProcedure,emtNone,1023,1,"22");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 13
-            carryProcedure = new TCarryProcedure(carryPlan,113,1,"13");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 23
-                carryWork = new TCarryWork(carryProcedure,emtNone,1024,1,"23");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 24
-                carryWork = new TCarryWork(carryProcedure,emtNone,1025,1,"24");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 25
-                carryWork = new TCarryWork(carryProcedure,emtNone,1026,1,"25");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-    carryTask->setCarryPlan(carryPlan);
-    tasks.append(carryTask); // записать Продукция 4
-
-    //Продукция 5---------------------------------------------------------
-    carryTask = new TCarryTask(year,prtNone,5,1,"5");
-        //План 0 (пока не используется)
-        carryPlan = new TCarryPlan(carryTask,10,1,"0");
-
-            //Процедура 14
-            carryProcedure = new TCarryProcedure(carryPlan,114,1,"14");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(289));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(288));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 26
-                carryWork = new TCarryWork(carryProcedure,emtNone,1027,1,"26");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-                //Работа 27
-                carryWork = new TCarryWork(carryProcedure,emtNone,1028,1,"27");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 15
-            carryProcedure = new TCarryProcedure(carryPlan,115,1,"15");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(292));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 28
-                carryWork = new TCarryWork(carryProcedure,emtNone,1029,1,"28");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(5);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-        carryPlan->insertProcedure(carryProcedure);
-
-            //Процедура 16
-            carryProcedure = new TCarryProcedure(carryPlan,116,1,"16");
-                carryProcedure->clearPossibleEmployeess();
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(287));
-                carryProcedure->insertPossibleEmployee(modEmployees->findEmployee(293));
-                carryProcedure->setEmployee(0); // пустой исполнитель
-
-                //Работа 29
-                carryWork = new TCarryWork(carryProcedure,emtNone,1030,1,"29");
-                carryWork->setDtPlanBegin(0,1111); // инициализация, соответствует дате "1.1.1111"
-                carryWork->setPlanPeriod(15);
-                carryWork->setDtPlanEnd(0,1111);   // инициализация, соответствует дате "1.1.1111"
-                carryWork->setVolatile(true); // работу можно перепланировать
-            carryProcedure->insertWork(carryWork);
-
-    carryPlan->insertProcedure(carryProcedure);
-
-    carryTask->setCarryPlan(carryPlan);
-    tasks.append(carryTask); // записать Продукция 5
-
-
-    createCarryPlans(tasks,errs); // вызвать основную функцию планирования
-    qDebug()<<"******* Ошибки (errs):"<<errs;
+void TModulePlans::testPlanData() // УДАЛИТЬ. ЭТО СТАРАЯ ФУНКЦИЯ ПО КНОПКЕ "ЦЕНТРИРОВАТЬ"
+{ // не удалять. Будет ошибка
+    QMessageBox::information(0,"Отладка", "Работает пустая процедура, которую надо удалить");
 }
-//-----------------------------------------------------------------------------
 
 // Основная функция планирования
 // tasks - список проектов      - ВХОД и ВЫХОД
-// errs  - сообщение об ошибках - ВЫХОД
+// ers  - сообщение об ошибках - ВЫХОД
 // ВОЗВРАТ - признак успешности
 bool TModulePlans::createCarryPlans(TCarryTaskList &tasks, QString &errs)
 {
-    //QMessageBox::information(0,"Отладка", "Начало планирования");
+    numerror = 0; // обнулить порядковый номер ошибки
 
     errs = "";
-    if (!tasks.count())
-    {
+    if (!tasks.count()){
         errs += QString("<br>Ошибка. Список проектов пуст");
         return false;
     }
-    //return Plan(tasks, errs); // errs
 
     int kodvozvrata = Plan(tasks, errs);
-
-    if(kodvozvrata){
-        //QMessageBox::information(0,"Отладка", "Планирование аварийно завершено");
-        return false;
-    }
-    else {
-        //QMessageBox::information(0,"Отладка", "Планирование успешно завершено");
-        return true;
-    }
-
+    if(kodvozvrata) return false;
+    else return true;
 }
-//-----------------------------------------------------------------------------
-
