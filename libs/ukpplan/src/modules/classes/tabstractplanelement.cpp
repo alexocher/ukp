@@ -3,7 +3,7 @@
 #include <TIdent>
 #include <TAbstractPlanElement>
 
-TAbstractPlanElement::TAbstractPlanElement(int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id,n,nm,parent), fCondition(cocNone), fProblem(copNone), fSourcesTitle(""), fResultsTitle(""), fEmployee(NULL), fTemplatePeriod(0), fPlanPeriod(0), fDtPlanBegin(NULL), fDtPlanEnd(NULL), fDtRealBegin(NULL), fDtRealEnd(NULL), fIsSaved(false), fIsVolatile(false), fDescr(""), fUnitId(0)
+TAbstractPlanElement::TAbstractPlanElement(int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id,n,nm,parent), fCondition(cocNone), fProblem(copNone), fSourcesTitle(""), fResultsTitle(""), fEmployee(NULL), fTemplatePeriod(0), fPlanPeriod(0), fDtPlanBegin(NULL), fDtPlanEnd(NULL), fDtRealBegin(NULL), fDtRealEnd(NULL), fIsSaved(false), fIsVolatile(false), fDescr(""), fUnitId(0), fCarryOutPercent(0)
 {
     fSources.setAutoDelete(true);
     fResults.setAutoDelete(true);
@@ -11,7 +11,7 @@ TAbstractPlanElement::TAbstractPlanElement(int id, int n, QString nm, TAbstractO
 }
 //-----------------------------------------------------------------------------
 
-TAbstractPlanElement::TAbstractPlanElement(const TAbstractPlanElement &ape) : TAbstractObject(ape), fCondition(ape.fCondition), fProblem(ape.fProblem), fSourcesTitle(ape.fSourcesTitle), fResultsTitle(ape.fResultsTitle), fTemplateRoles(ape.fTemplateRoles), fEmployee(ape.fEmployee), fTemplatePeriod(ape.fTemplatePeriod), fPlanPeriod(ape.fPlanPeriod), fDtPlanBegin(ape.fDtPlanBegin ? new QDateTime(*ape.fDtPlanBegin) : NULL), fDtPlanEnd(ape.fDtPlanEnd ? new QDateTime(*ape.fDtPlanEnd) : NULL), fDtRealBegin(ape.fDtRealBegin ? new QDateTime(*ape.fDtRealBegin) : NULL), fDtRealEnd(ape.fDtRealEnd ? new QDateTime(*ape.fDtRealEnd) : NULL), fStatuses(ape.fStatuses), fIsSaved(ape.fIsSaved), fIsVolatile(ape.fIsVolatile), fDescr(ape.fDescr), fUnitId(ape.fUnitId)
+TAbstractPlanElement::TAbstractPlanElement(const TAbstractPlanElement &ape) : TAbstractObject(ape), fCondition(ape.fCondition), fProblem(ape.fProblem), fSourcesTitle(ape.fSourcesTitle), fResultsTitle(ape.fResultsTitle), fTemplateRoles(ape.fTemplateRoles), fEmployee(ape.fEmployee), fTemplatePeriod(ape.fTemplatePeriod), fPlanPeriod(ape.fPlanPeriod), fDtPlanBegin(ape.fDtPlanBegin ? new QDateTime(*ape.fDtPlanBegin) : NULL), fDtPlanEnd(ape.fDtPlanEnd ? new QDateTime(*ape.fDtPlanEnd) : NULL), fDtRealBegin(ape.fDtRealBegin ? new QDateTime(*ape.fDtRealBegin) : NULL), fDtRealEnd(ape.fDtRealEnd ? new QDateTime(*ape.fDtRealEnd) : NULL), fStatuses(ape.fStatuses), fIsSaved(ape.fIsSaved), fIsVolatile(ape.fIsVolatile), fDescr(ape.fDescr), fUnitId(ape.fUnitId), fCarryOutPercent(ape.fCarryOutPercent)
 {
     fSources.setAutoDelete(true);
     foreach (TAbstractAttachment *el,ape.fSources)
@@ -89,6 +89,7 @@ TAbstractPlanElement &TAbstractPlanElement::operator=(const TAbstractPlanElement
     fIsVolatile = ape.fIsVolatile;
     fDescr = ape.fDescr;
     fUnitId = ape.fUnitId;
+    fCarryOutPercent = ape.fCarryOutPercent;
     return *this;
 }
 //-----------------------------------------------------------------------------
@@ -116,6 +117,7 @@ void TAbstractPlanElement::reset(bool thisonly)
     fIsVolatile = false;
     fDescr = "";
     fUnitId = 0;
+    fCarryOutPercent = 0;
 }
 //-----------------------------------------------------------------------------
 
@@ -378,26 +380,10 @@ QDateTime *TAbstractPlanElement::dtPlanBegin() const
 {
     return fDtPlanBegin;
 }
-//-----------------------------------------------------------------------------
-
-int TAbstractPlanElement::dayPlanBegin() const
-{
-    return fDtPlanBegin ? fDtPlanBegin->date().dayOfYear()-1 : -1;
-}
-//-----------------------------------------------------------------------------
 
 void TAbstractPlanElement::setDtPlanBegin(const QDateTime &dt)
 {
-    DELETE(fDtPlanBegin);
-    fDtPlanBegin = new QDateTime(dt);
-}
-//-----------------------------------------------------------------------------
-
-void TAbstractPlanElement::setDtPlanBegin(int dt, int year)
-{
-    DELETE(fDtPlanBegin);
-    if (!year) year = QDate::currentDate().year();
-    fDtPlanBegin = new QDateTime(QDate(year,1,1).addDays(dt),QTime(0,0,0));
+    if (dt.isValid()) fDtPlanBegin = new QDateTime(dt);
 }
 //-----------------------------------------------------------------------------
 
@@ -405,26 +391,10 @@ QDateTime *TAbstractPlanElement::dtPlanEnd() const
 {
     return fDtPlanEnd;
 }
-//-----------------------------------------------------------------------------
-
-int TAbstractPlanElement::dayPlanEnd() const
-{
-    return fDtPlanEnd ? fDtPlanEnd->date().dayOfYear()-1 : -1;
-}
-//-----------------------------------------------------------------------------
 
 void TAbstractPlanElement::setDtPlanEnd(const QDateTime &dt)
 {
-    DELETE(fDtPlanEnd);
-    fDtPlanEnd = new QDateTime(dt);
-}
-//-----------------------------------------------------------------------------
-
-void TAbstractPlanElement::setDtPlanEnd(int dt, int year)
-{
-    DELETE(fDtPlanEnd);
-    if (!year) year = QDate::currentDate().year();
-    fDtPlanEnd = new QDateTime(QDate(year,1,1).addDays(dt),QTime(23,59,59));
+    if (dt.isValid()) fDtPlanEnd = new QDateTime(dt);
 }
 //-----------------------------------------------------------------------------
 
@@ -432,26 +402,10 @@ QDateTime *TAbstractPlanElement::dtRealBegin() const
 {
     return fDtRealBegin;
 }
-//-----------------------------------------------------------------------------
-
-int TAbstractPlanElement::dayRealBegin() const
-{
-    return fDtRealBegin ? fDtRealBegin->date().dayOfYear()-1 : -1;
-}
-//-----------------------------------------------------------------------------
 
 void TAbstractPlanElement::setDtRealBegin(const QDateTime &dt)
 {
-    DELETE(fDtRealBegin);
-    fDtRealBegin = new QDateTime(dt);
-}
-//-----------------------------------------------------------------------------
-
-void TAbstractPlanElement::setDtRealBegin(int dt, int year)
-{
-    DELETE(fDtRealBegin);
-    if (!year) year = QDate::currentDate().year();
-    fDtRealBegin = new QDateTime(QDate(year,1,1).addDays(dt),QTime(0,0,0));
+    if (dt.isValid()) fDtRealBegin = new QDateTime(dt);
 }
 //-----------------------------------------------------------------------------
 
@@ -459,26 +413,10 @@ QDateTime *TAbstractPlanElement::dtRealEnd() const
 {
     return fDtRealEnd;
 }
-//-----------------------------------------------------------------------------
-
-int TAbstractPlanElement::dayRealEnd() const
-{
-    return fDtRealEnd ? fDtRealEnd->date().dayOfYear()-1 : -1;
-}
-//-----------------------------------------------------------------------------
 
 void TAbstractPlanElement::setDtRealEnd(const QDateTime &dt)
 {
-    DELETE(fDtRealEnd);
-    fDtRealEnd = new QDateTime(dt);
-}
-//-----------------------------------------------------------------------------
-
-void TAbstractPlanElement::setDtRealEnd(int dt, int year)
-{
-    DELETE(fDtRealEnd);
-    if (!year) year = QDate::currentDate().year();
-    fDtRealEnd = new QDateTime(QDate(year,1,1).addDays(dt),QTime(23,59,59));
+    if (dt.isValid()) fDtRealEnd = new QDateTime(dt);
 }
 //-----------------------------------------------------------------------------
 
@@ -486,13 +424,6 @@ QDateTime *TAbstractPlanElement::dtRealEndPrognos() const
 {
     if (fDtRealBegin && !fDtRealEnd) return new QDateTime(fDtRealBegin->addSecs(fPlanPeriod*3600));
     return NULL;
-}
-//-----------------------------------------------------------------------------
-
-int TAbstractPlanElement::dayRealEndPrognos() const
-{
-    if (fDtRealBegin && !fDtRealEnd) return QDateTime(fDtRealBegin->addSecs(fPlanPeriod*3600)).date().dayOfYear()-1;
-    return -1;
 }
 //-----------------------------------------------------------------------------
 
@@ -553,6 +484,18 @@ int TAbstractPlanElement::unitId() const
 void TAbstractPlanElement::setUnitId(int id)
 {
     fUnitId = id;
+}
+//-----------------------------------------------------------------------------
+
+int TAbstractPlanElement::carryOutPercent() const
+{
+    return fCarryOutPercent;
+}
+//-----------------------------------------------------------------------------
+
+void TAbstractPlanElement::setCarryOutPercent(int cop)
+{
+    fCarryOutPercent = cop;
 }
 //-----------------------------------------------------------------------------
 

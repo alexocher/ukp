@@ -167,8 +167,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
             tskGit->setBrush(GANT_IND_PLAN,planItemsTaskBrash);
             tskGit->setLevel(0);
             tskGit->setOpen(true);
-            tskGit->setBegin(GANT_IND_PLAN,tsk->dayPlanBegin());
-            tskGit->setEnd(GANT_IND_PLAN,tsk->dayPlanEnd());
+            tskGit->setBegin(GANT_IND_PLAN,tsk->dtPlanBegin() ? *tsk->dtPlanBegin() : QDateTime());
+            tskGit->setEnd(GANT_IND_PLAN,tsk->dtPlanEnd() ? *tsk->dtPlanEnd() : QDateTime());
             for (int i=0; i<2; i++)
                 if (TCarryPlan *plan = plans[i])
                     if (plan->isChecked())
@@ -179,8 +179,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                         planGit->setBrush(GANT_IND_PLAN,planItemsPlanBrash);
                         planGit->setLevel(1);
                         planGit->setOpen(true);
-                        planGit->setBegin(GANT_IND_PLAN,plan->dayPlanBegin());
-                        planGit->setEnd(GANT_IND_PLAN,plan->dayPlanEnd());
+                        planGit->setBegin(GANT_IND_PLAN,plan->dtPlanBegin() ? *plan->dtPlanBegin() : QDateTime());
+                        planGit->setEnd(GANT_IND_PLAN,plan->dtPlanEnd() ? *plan->dtPlanEnd() : QDateTime());
                         foreach (TCarryProcedure *pr,plan->procedures())
                         {
                           TGantItem *prGit(new TGantItem(TGantItem::gitProcedure,pr->scrName(),planGit));
@@ -189,8 +189,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                             prGit->setBrush(GANT_IND_PLAN,planItemsProcedureBrash);
                             prGit->setLevel(2);
                             prGit->setOpen(true);
-                            prGit->setBegin(GANT_IND_PLAN,pr->dayPlanBegin());
-                            prGit->setEnd(GANT_IND_PLAN,pr->dayPlanEnd());
+                            prGit->setBegin(GANT_IND_PLAN,pr->dtPlanBegin() ? *pr->dtPlanBegin() : QDateTime());
+                            prGit->setEnd(GANT_IND_PLAN,pr->dtPlanEnd() ? *pr->dtPlanEnd() : QDateTime());
                             foreach (TCarryWork *wrk,pr->works())
                             {
                               TGantItem *wrkGit(new TGantItem(TGantItem::gitWork,wrk->scrName(),prGit));
@@ -199,8 +199,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                                 wrkGit->setBrush(GANT_IND_PLAN,planItemsWorkBrash);
                                 wrkGit->setLevel(3);
                                 wrkGit->setOpen(true);
-                                wrkGit->setBegin(GANT_IND_PLAN,wrk->dayPlanBegin());
-                                wrkGit->setEnd(GANT_IND_PLAN,wrk->dayPlanEnd());
+                                wrkGit->setBegin(GANT_IND_PLAN,wrk->dtPlanBegin() ? *wrk->dtPlanBegin() : QDateTime());
+                                wrkGit->setEnd(GANT_IND_PLAN,wrk->dtPlanEnd() ? *wrk->dtPlanEnd() : QDateTime());
                             //PR3((wrkGit->level()+1)*4,"%1 [%2..%3]",wrkGit->name(),wrkGit->begin(0),wrkGit->end(0));
                                 prGit->insertChild(wrkGit);
                             }
@@ -231,8 +231,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
             tskGit->setBrush(GANT_IND_REAL,realItemsTaskBrash);
             tskGit->setLevel(0);
             tskGit->setOpen(true);
-            tskGit->setBegin(GANT_IND_REAL,tsk->dayRealBegin());
-            tskGit->setEnd(GANT_IND_REAL,tsk->dayRealEnd());
+            tskGit->setBegin(GANT_IND_REAL,tsk->dtPlanBegin() ? *tsk->dtPlanBegin() : QDateTime());
+            tskGit->setEnd(GANT_IND_REAL,tsk->dtPlanEnd() ? *tsk->dtPlanEnd() : QDateTime());
             for (int i=0; i<2; i++)
                 if (TCarryPlan *plan = plans[i])
                     if (plan->isChecked())
@@ -242,8 +242,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                         planGit->setBrush(GANT_IND_REAL,realItemsPlanBrash);
                         planGit->setLevel(1);
                         planGit->setOpen(true);
-                        planGit->setBegin(GANT_IND_REAL,plan->dayRealBegin());
-                        planGit->setEnd(GANT_IND_REAL,plan->dayRealEnd());
+                        planGit->setBegin(GANT_IND_REAL,plan->dtPlanBegin() ? *plan->dtPlanBegin() : QDateTime());
+                        planGit->setEnd(GANT_IND_REAL,plan->dtPlanEnd() ? *plan->dtPlanEnd() : QDateTime());
                         foreach (TCarryProcedure *pr,plan->procedures())
                         {
                           TGantItem *prGit(new TGantItem(TGantItem::gitProcedure,pr->scrName(),planGit));
@@ -251,8 +251,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                             prGit->setBrush(GANT_IND_REAL,realItemsProcedureBrash);
                             prGit->setLevel(2);
                             prGit->setOpen(true);
-                            prGit->setBegin(GANT_IND_REAL,pr->dayRealBegin());
-                            prGit->setEnd(GANT_IND_REAL,pr->dayRealEnd());
+                            prGit->setBegin(GANT_IND_REAL,pr->dtPlanBegin() ? *pr->dtPlanBegin() : QDateTime());
+                            prGit->setEnd(GANT_IND_REAL,pr->dtPlanEnd() ? *pr->dtPlanEnd() : QDateTime());
                             foreach (TCarryWork *wrk,pr->works())
                             {
                               TGantItem *wrkGit(new TGantItem(TGantItem::gitWork,wrk->scrName(),prGit));
@@ -260,8 +260,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                                 wrkGit->setBrush(GANT_IND_REAL,realItemsWorkBrash);
                                 wrkGit->setLevel(3);
                                 wrkGit->setOpen(true);
-                                wrkGit->setBegin(GANT_IND_REAL,wrk->dayRealBegin());
-                                wrkGit->setEnd(GANT_IND_REAL,wrk->dayRealEnd());
+                                wrkGit->setBegin(GANT_IND_REAL,wrk->dtPlanBegin() ? *wrk->dtPlanBegin() : QDateTime());
+                                wrkGit->setEnd(GANT_IND_REAL,wrk->dtPlanEnd() ? *wrk->dtPlanEnd() : QDateTime());
                                 prGit->insertChild(wrkGit);
                             }
                             planGit->insertChild(prGit);
@@ -288,16 +288,16 @@ void WGantDiagramm::printDiagrammTree()
     PR(0,"GantGraphicsView:");
     foreach (TGantItem *topIt,gd.topItems())
     {
-    PR3((topIt->level()+1)*4,"%1 [%2..%3]",topIt->name(),topIt->begin(0),topIt->end(0)); // task
+    PR3((topIt->level()+1)*4,"%1 [%2..%3]",topIt->name(),topIt->begin(0).isValid() ? topIt->begin(0).toString("dd.MM hh:00") : "",topIt->end(0).isValid() ? topIt->end(0).toString("dd.MM hh:00") : ""); // task
         foreach (TGantItem *planIt,topIt->childs())
         {
-        PR3((planIt->level()+1)*4,"%1 [%2..%3]",planIt->name(),planIt->begin(0),planIt->end(0)); // plan
+        PR3((planIt->level()+1)*4,"%1 [%2..%3]",planIt->name(),planIt->begin(0).isValid() ? planIt->begin(0).toString("dd.MM hh:00") : "",planIt->end(0).isValid() ? planIt->end(0).toString("dd.MM hh:00") : ""); // plan
             foreach (TGantItem *procIt,planIt->childs())
             {
-            PR3((procIt->level()+1)*4,"%1 [%2..%3]",procIt->name(),procIt->begin(0),procIt->end(0)); // procedure
+            PR3((procIt->level()+1)*4,"%1 [%2..%3]",procIt->name(),procIt->begin(0).isValid() ? procIt->begin(0).toString("dd.MM hh:00") : "",procIt->end(0).isValid() ? procIt->end(0).toString("dd.MM hh:00") : ""); // procedure
                 foreach (TGantItem *workIt,procIt->childs())
                 {
-                PR3((workIt->level()+1)*4,"%1 [%2..%3]",workIt->name(),workIt->begin(0),workIt->end(0)); // work
+                PR3((workIt->level()+1)*4,"%1 [%2..%3]",workIt->name(),workIt->begin(0).isValid() ? workIt->begin(0).toString("dd.MM hh:00") : "",workIt->end(0).isValid() ? workIt->end(0).toString("dd.MM hh:00") : ""); // work
                 }
             }
         }

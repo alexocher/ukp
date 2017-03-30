@@ -3,6 +3,7 @@
 
 #include <QGraphicsView>
 #include <QMap>
+#include <QDateTime>
 #include <defUkpCommon>
 
 class UKPCOMMONSHARED_EXPORT TGantItem;
@@ -14,9 +15,9 @@ typedef UKPCOMMONSHARED_EXPORT QList<TGantItem*> TGantItemList;
 
 //typedef QList<TGantItem*> TGantItemList;
 
-#define GANT_IND_PLAN    0 // индекс плановая работа
-#define GANT_IND_REAL    1 // индекс реальная работа
-#define GANT_KOL_DAY   366 //
+#define GANT_IND_PLAN         0 // индекс плановая работа
+#define GANT_IND_REAL         1 // индекс реальная работа
+#define GANT_KOL_DAY        366 //
 
 // Элемент диаграммы
 class UKPCOMMONSHARED_EXPORT TGantItem
@@ -47,10 +48,10 @@ public:
     void setLevel(int lvl);
     bool isOpen() const;               // признак открытого узла дерева
     void setOpen(bool op);
-    int begin(int ind) const;          // время начала
-    void setBegin(int ind, int val);
-    int end(int ind) const;            // время окончания
-    void setEnd(int ind, int val);
+    QDateTime begin(int ind) const;          // время начала
+    void setBegin(int ind, const QDateTime &dt);
+    QDateTime end(int ind) const;            // время окончания
+    void setEnd(int ind, const QDateTime &dt);
     QPen &pen(int ind) const;          // перо
     void setPen(int ind, const QPen &p);
     QBrush &brush(int ind) const;      // кисть
@@ -65,6 +66,8 @@ public:
     void clearChilds();                // ... очистка
     TGantItem *findChild(int n, bool onid=false); // ... поиск по id или по номеру
     TGantItem *findChild(const QString &nm); // ... поиск по name
+    int carryOutPercent() const;       // Процент выполненной работы
+    void setCarryOutPercent(int cop);
 
 private:
     // идентификаторы
@@ -74,8 +77,8 @@ private:
     TGantItemType       m_type;
     TGantItemView       m_view;
     int                 m_level;
-    // временные параметры
-    int                 m_begin[2],
+    // временные параметры (проверка установленного времени - isValid())
+    QDateTime           m_begin[2],
                         m_end[2];
     // параметры отрисовки элементов
     QPen                m_pen[2];
@@ -87,6 +90,8 @@ private:
     TGantItemList       m_childs;
     // признак открытого узла
     bool                m_isOpen;
+    // Процент выполненной работы
+    int                 m_carryOutPercent;
 };
 
 // Диаграмма
@@ -101,10 +106,10 @@ class UKPCOMMONSHARED_EXPORT TGantGraphicsView : public QGraphicsView
 
 public:
     enum ContentDraw { cdPlan=0, cdReal=1, cdAll=2 };
+    enum ScaleView { svHour=0, svDay=1, svWeek=2, svMonth=3 };
 
 public:
     explicit TGantGraphicsView( int year=0,  int curday=-1, QWidget *prnt=NULL); // year: если 0, то текущий год; curday: если < 0, то не отображать
-    //  explicit TGantGraphicsView( int year=0,  int curday=-1, QGraphicsScene *pscene=NULL, QWidget *prnt=NULL); // year: если 0, то текущий год; curday: если < 0, то не отображать
     ~TGantGraphicsView();
 
     int year() const;                  // год графика
@@ -134,6 +139,8 @@ public:
     void setWeekendPen(const QPen &p);
     QBrush &weekendBrush() const;      // кисть выходных
     void setWeekendBrush(const QBrush &b);
+    ScaleView scaleView() const;       // Вид шкалы
+    void setScaleView(ScaleView sv);
 
     void prepare(int hdrH, int colW, int rowH); // ??? подготовить диаграмму
     void draw(ContentDraw cd);         // отрисовать диаграмму
@@ -187,6 +194,7 @@ private:
     QString             m_monthLabels[ 12 ]; // наименования месяцев
     // общие параметры отрисовки
     ContentDraw         m_contentDraw;
+    ScaleView           m_scaleView;
 
     //начальная отрисовка (для появления ползунка)
     bool nachalo;

@@ -32,6 +32,7 @@ protected:
                         fIsVolatile;   // Признак изменчивости (можно перепланировать)
     QString             fDescr;        // Дескриптор
     int                 fUnitId;       // id формирования, кому принадлежит элемент
+    int                 fCarryOutPercent; // Процент выполненной работы
 
 public:
     explicit TAbstractPlanElement(int id=0, int n=0, QString nm="", TAbstractObject *parent=NULL);
@@ -75,23 +76,14 @@ public:
     void setPlanPeriod(int t);
     int realPeriod() const;            //                                              фактическая (вычисляется)
     QDateTime *dtPlanBegin() const;    // Моменты времени: начала по плану
-    int dayPlanBegin() const;
     void setDtPlanBegin(const QDateTime &dt);
-    void setDtPlanBegin(int dt, int year=0);
     QDateTime *dtPlanEnd() const;      //                  окончания по плану
-    int dayPlanEnd() const;
     void setDtPlanEnd(const QDateTime &dt);
-    void setDtPlanEnd(int dt, int year=0);
     QDateTime *dtRealBegin() const;    //                  начала фактического
-    int dayRealBegin() const;
     void setDtRealBegin(const QDateTime &dt);
-    void setDtRealBegin(int dt, int year=0);
     QDateTime *dtRealEnd() const;      //                  окончания фактического
-    int dayRealEnd() const;
     void setDtRealEnd(const QDateTime &dt);
-    void setDtRealEnd(int dt, int year=0);
     QDateTime *dtRealEndPrognos() const; //                окончания прогнозируемого (рассчитывается)
-    int dayRealEndPrognos() const;
     TStatusList &statuses() const;     // Список статусов
     void setStatuses(const TStatusList &stss);
     bool isSaved() const;              // Признак сохраненного плана
@@ -102,6 +94,8 @@ public:
     void setDescr(const QString &dscr);
     int unitId() const;                // id формирования, кому принадлежит элемент
     void setUnitId(int id);
+    int carryOutPercent() const;       // Процент выполненной работы
+    void setCarryOutPercent(int cop);
 
     TAbstractPlanElement &operator=(const TAbstractPlanElement &att);
 

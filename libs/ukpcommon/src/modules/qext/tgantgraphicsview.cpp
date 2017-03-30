@@ -17,10 +17,10 @@
 //*****************************************************************************
 // Элемент диаграммы - TGantItem
 
-TGantItem::TGantItem(TGantItem::TGantItemType tp, QString nm, TGantItem *prnt, int id, int n) : m_id(id), m_num(n), m_name(nm), m_type(tp), m_view(gitRect), m_level(0), m_parent(prnt), m_isOpen(false)
+TGantItem::TGantItem(TGantItem::TGantItemType tp, QString nm, TGantItem *prnt, int id, int n) : m_id(id), m_num(n), m_name(nm), m_type(tp), m_view(gitRect), m_level(0), m_parent(prnt), m_isOpen(false), m_carryOutPercent(0)
 {
-    m_begin[0] = m_begin[1] = 0;
-    m_end[0] = m_end[1] = 0;
+//    m_begin[0] = m_begin[1] = 0;
+//    m_end[0] = m_end[1] = 0;
     m_label[0] = m_label[1] = "";
 }
 
@@ -117,7 +117,7 @@ void TGantItem::setOpen(bool op)
 }
 //-----------------------------------------------------------------------------
 
-int TGantItem::begin(int ind) const
+QDateTime TGantItem::begin(int ind) const
 {
   int curInd(GANT_IND_PLAN);
     if (ind==GANT_IND_PLAN || ind==GANT_IND_REAL) curInd = ind;
@@ -125,15 +125,15 @@ int TGantItem::begin(int ind) const
 }
 //-----------------------------------------------------------------------------
 
-void TGantItem::setBegin(int ind, int val)
+void TGantItem::setBegin(int ind, const QDateTime &dt)
 {
   int curInd(GANT_IND_PLAN);
     if (ind==GANT_IND_PLAN || ind==GANT_IND_REAL) curInd = ind;
-    m_begin[curInd] = val;
+    m_begin[curInd] = dt;
 }
 //-----------------------------------------------------------------------------
 
-int TGantItem::end(int ind) const
+QDateTime TGantItem::end(int ind) const
 {
   int curInd(GANT_IND_PLAN);
     if (ind==GANT_IND_PLAN || ind==GANT_IND_REAL) curInd = ind;
@@ -141,11 +141,11 @@ int TGantItem::end(int ind) const
 }
 //-----------------------------------------------------------------------------
 
-void TGantItem::setEnd(int ind, int val)
+void TGantItem::setEnd(int ind, const QDateTime &dt)
 {
   int curInd(GANT_IND_PLAN);
     if (ind==GANT_IND_PLAN || ind==GANT_IND_REAL) curInd = ind;
-    m_end[curInd] = val;
+    m_end[curInd] = dt;
 }
 //-----------------------------------------------------------------------------
 
@@ -259,13 +259,25 @@ TGantItem *TGantItem::findChild(const QString &nm)
 }
 //-----------------------------------------------------------------------------
 
+int TGantItem::carryOutPercent() const
+{
+    return m_carryOutPercent;
+}
+//-----------------------------------------------------------------------------
+
+void TGantItem::setCarryOutPercent(int cop)
+{
+    m_carryOutPercent = cop;
+}
+//-----------------------------------------------------------------------------
+
 //*****************************************************************************
 // Диаграмма - TGantGraphicsView
 
 
 TGantGraphicsView::TGantGraphicsView(int year, int curday, QWidget *prnt) :
     QGraphicsView(prnt),
-    m_year(year ? year : QDate::currentDate().year()), m_currentDay(curday), m_headerHeight(0), m_columnWidth(0), m_rowHeight(0), m_contentDraw(cdAll)
+    m_year(year ? year : QDate::currentDate().year()), m_currentDay(curday), m_headerHeight(0), m_columnWidth(0), m_rowHeight(0), m_contentDraw(cdAll), m_scaleView(svDay)
 {
 //TGantGraphicsView::TGantGraphicsView(int year, int curday, QGraphicsScene *pscene, QWidget *prnt) :
 //      QGraphicsView(pscene, prnt),
@@ -818,6 +830,18 @@ void TGantGraphicsView::setWeekendBrush(const QBrush &b)
 }
 //-----------------------------------------------------------------------------
 
+TGantGraphicsView::ScaleView TGantGraphicsView::scaleView() const
+{
+    return m_scaleView;
+}
+//-----------------------------------------------------------------------------
+
+void TGantGraphicsView::setScaleView(TGantGraphicsView::ScaleView sv)
+{
+    m_scaleView = sv;
+}
+//-----------------------------------------------------------------------------
+
 void TGantGraphicsView::prepare(int hdrH, int colW, int rowH)
 {
     m_headerHeight = hdrH;
@@ -1146,6 +1170,7 @@ void  TGantGraphicsView::set_open(TGantItem *items, bool op)
 //------------------------------------------------------------------------------
 void  TGantGraphicsView::draw_curr_items(TGantItem *items)
 {
+/*
   if (items==NULL) return;
   kol_curr ++;
 #ifdef DEBUG_INFO
@@ -1155,7 +1180,7 @@ void  TGantGraphicsView::draw_curr_items(TGantItem *items)
   QPen pen;
   QBrush brush;
   QString txt;
-  int m_begin(0), m_end(0);
+  QDateTime m_begin, m_end;
 
     switch (m_contentDraw)
     {
@@ -1165,7 +1190,7 @@ void  TGantGraphicsView::draw_curr_items(TGantItem *items)
             m_begin = items->begin(GANT_IND_PLAN);//
             m_end = items->end(GANT_IND_PLAN);
 
-            if (m_begin<0 || m_end<0) break;
+            if (!m_begin.isValid() || !m_end.isValid()) break;
 
             // параметры отрисовки элементов
             pen = items->pen(GANT_IND_PLAN);
@@ -1284,11 +1309,13 @@ void  TGantGraphicsView::draw_curr_items(TGantItem *items)
       TGantItem *curr = *it2;
         draw_curr_items(curr);
     }
+*/
 }
 
 //------------------------------------------------------------------------------
 void  TGantGraphicsView::draw_curr_items_n(TGantItem *items)
 {
+/*
   if (items==NULL) return;
   kol_curr ++;
 #ifdef DEBUG_INFO
