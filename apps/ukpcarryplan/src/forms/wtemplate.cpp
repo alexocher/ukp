@@ -161,6 +161,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
             mb.setButtonText(QMessageBox::No,tr("Отмена"));
             if (mb.exec()==QMessageBox::No) return;
         }
+        rbTime_hours->setChecked(true); rbTime_days->setChecked(false);
         modPlans->fromDB("Temlates");
         modPlans->reflectTemplatesToCb(modPlans->planTemplates(),*cbTemplates);
         selectPattern(cbTemplates->currentText());
@@ -309,7 +310,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
             {
                 if (TIdent *curIdnt = qtools::ident(*curIt))
                 {
-                  MODULE(Plans); MODULE(Units);
+                  MODULE(Plans);
                     if ((TPlanElementType)curIdnt->tag==petProcedure)
                     {
                         if (TCarryProcedure *pr = curTemplate->findProcedure(curIdnt->num))
@@ -357,7 +358,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                                         //lwSources
                                         wrk->setResultsTitle(edResults->text());
                                         //lwResults
-                                        wrk->setTemplatePeriod(sbTime->value());
+                                        wrk->setTemplatePeriod(sbTime_hours->value());
                                         wrk->setOptional(pbOptional->isChecked());
                                         wrk->setSaved(false);
                                         pr->setSaved(false);
@@ -381,7 +382,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
         lwResults->clear();
         cbEmployee->setCurrentIndex(0);
         modUnits->findUnitForTemplateInCb(*cbExtUnit,-modUnits->selfUnit()->level());
-        sbTime->setValue(0);
+        sbTime_hours->setValue(0); sbTime_days->setValue(0);
         pbOptional->setChecked(false);
         pbOptional->setIcon(ICONPIX(""));
     }
@@ -453,7 +454,7 @@ void WTemplate::selectPattern(const QString &) //scrnm
 void WTemplate::setEnabledControls(bool isenbl)
 {
   QList<QWidget*> lstW;
-    lstW<<lblNum<<sbNum<<lblName<<edName<<lblExtProcedure<<cbExtProcedure<<lblSources<<edSources<<lwSources<<pbAddSources<<pbClearSources<<lblResults<<edResults<<lwResults<<pbAddResults<<pbClearResults<<lblEmployee<<cbEmployee<<lblExtUnit<<cbExtUnit<<lblTime<<sbTime<<lblOptional<<pbOptional<<pbApplyCurrentItem<<pbClearCurrentItem;
+    lstW<<lblNum<<sbNum<<lblName<<edName<<lblExtProcedure<<cbExtProcedure<<lblSources<<edSources<<lwSources<<pbAddSources<<pbClearSources<<lblResults<<edResults<<lwResults<<pbAddResults<<pbClearResults<<lblEmployee<<cbEmployee<<lblExtUnit<<cbExtUnit<<lblTime<<sbTime_hours<<sbTime_days<<rbTime_hours<<rbTime_days<<lblOptional<<pbOptional<<pbApplyCurrentItem<<pbClearCurrentItem;
     foreach (QWidget *w,lstW) w->setEnabled(isenbl);
 }
 //-----------------------------------------------------------------------------
@@ -478,7 +479,10 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
         lblExtUnit->setEnabled(isProcedure);
         cbExtUnit->setEnabled(isProcedure);
         lblTime->setEnabled(!isProcedure);
-        sbTime->setEnabled(!isProcedure);
+        sbTime_hours->setEnabled(!isProcedure);
+        sbTime_days->setEnabled(!isProcedure);
+        rbTime_hours->setEnabled(!isProcedure);
+        rbTime_days->setEnabled(!isProcedure);
         lblOptional->setEnabled(!isProcedure);
         pbOptional->setEnabled(!isProcedure);
       TCarryProcedure *curProc(NULL);
@@ -540,7 +544,8 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
                 cbEmployee->setCurrentIndex(cbEmployee->findText(convertEnums::enumToStr(rl.type())));
                 modUnits->findUnitForTemplateInCb(*cbExtUnit,rl.unitId());
             }
-            sbTime->setValue(curWork->templatePeriod());
+            sbTime_hours->setValue(curWork->templatePeriod());
+            sbTime_days->setValue(curWork->templatePeriod()); // ??? пересчитать часы в рабочие дни
             pbOptional->setChecked(curWork->isOptional());
             pbOptional->setIcon(ICONPIX(curWork->isOptional() ? PIX_CHECKED : ""));
         }

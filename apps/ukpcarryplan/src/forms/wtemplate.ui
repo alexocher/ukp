@@ -618,41 +618,6 @@
         <property name="spacing">
          <number>10</number>
         </property>
-        <item row="0" column="1">
-         <widget class="QSpinBox" name="sbNum">
-          <property name="minimumSize">
-           <size>
-            <width>70</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>100</number>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3" colspan="2">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>438</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="lblNum">
           <property name="minimumSize">
@@ -681,7 +646,70 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1" colspan="4">
+        <item row="0" column="1">
+         <widget class="QSpinBox" name="sbNum">
+          <property name="minimumSize">
+           <size>
+            <width>70</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>70</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>100</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" colspan="2">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>438</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="lblName">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>220</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Наименование</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="3">
          <widget class="QLineEdit" name="edName">
           <property name="minimumSize">
            <size>
@@ -697,8 +725,36 @@
           </property>
          </widget>
         </item>
-        <item row="6" column="1" colspan="4">
-         <widget class="QLineEdit" name="edResults">
+        <item row="2" column="0">
+         <widget class="QLabel" name="lblExtProcedure">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>220</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Внешняя процедура</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" colspan="3">
+         <widget class="QComboBox" name="cbExtProcedure">
           <property name="minimumSize">
            <size>
             <width>520</width>
@@ -713,7 +769,51 @@
           </property>
          </widget>
         </item>
-        <item row="4" column="1" rowspan="2" colspan="3">
+        <item row="3" column="0">
+         <widget class="QLabel" name="lblSources">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>220</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Исходные данные</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" colspan="3">
+         <widget class="QLineEdit" name="edSources">
+          <property name="minimumSize">
+           <size>
+            <width>520</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>520</width>
+            <height>40</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" rowspan="2" colspan="2">
          <widget class="QListWidget" name="lwSources">
           <property name="verticalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOn</enum>
@@ -723,7 +823,33 @@
           </property>
          </widget>
         </item>
-        <item row="5" column="4">
+        <item row="4" column="3">
+         <widget class="QPushButton" name="pbAddSources">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="icon">
+           <iconset resource="../res.qrc">
+            <normaloff>:/images/table_add_t.png</normaloff>:/images/table_add_t.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="3">
          <widget class="QPushButton" name="pbClearSources">
           <property name="minimumSize">
            <size>
@@ -777,7 +903,23 @@
           </property>
          </widget>
         </item>
-        <item row="7" column="1" rowspan="2" colspan="3">
+        <item row="6" column="1" colspan="3">
+         <widget class="QLineEdit" name="edResults">
+          <property name="minimumSize">
+           <size>
+            <width>520</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>520</width>
+            <height>40</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1" rowspan="2" colspan="2">
          <widget class="QListWidget" name="lwResults">
           <property name="verticalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOn</enum>
@@ -787,7 +929,33 @@
           </property>
          </widget>
         </item>
-        <item row="8" column="4">
+        <item row="7" column="3">
+         <widget class="QPushButton" name="pbAddResults">
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="icon">
+           <iconset resource="../res.qrc">
+            <normaloff>:/images/table_add_t.png</normaloff>:/images/table_add_t.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>48</width>
+            <height>48</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="3">
          <widget class="QPushButton" name="pbClearResults">
           <property name="minimumSize">
            <size>
@@ -841,7 +1009,7 @@
           </property>
          </widget>
         </item>
-        <item row="9" column="1" colspan="4">
+        <item row="9" column="1" colspan="3">
          <widget class="QComboBox" name="cbEmployee">
           <property name="minimumSize">
            <size>
@@ -885,7 +1053,7 @@
           </property>
          </widget>
         </item>
-        <item row="10" column="1" colspan="4">
+        <item row="10" column="1" colspan="3">
          <widget class="QComboBox" name="cbExtUnit">
           <property name="minimumSize">
            <size>
@@ -907,65 +1075,157 @@
           </property>
          </widget>
         </item>
-        <item row="11" column="0">
-         <widget class="QLabel" name="lblTime">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
+        <item row="11" column="0" colspan="4">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <property name="spacing">
+           <number>10</number>
           </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
+          <property name="rightMargin">
+           <number>0</number>
           </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Продолжит., раб. дней</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="1">
-         <widget class="QSpinBox" name="sbTime">
-          <property name="minimumSize">
-           <size>
-            <width>70</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="maximum">
-           <number>365</number>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="3" colspan="2">
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>438</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
+          <item>
+           <widget class="QLabel" name="lblTime">
+            <property name="minimumSize">
+             <size>
+              <width>220</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>220</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Продолжительность</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rbTime_days">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>рабочих дней</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="sbTime_days">
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>70</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>365</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="minimumSize">
+             <size>
+              <width>10</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>10</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <property name="lineWidth">
+             <number>-1</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="rbTime_hours">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>часов</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="sbTime_hours">
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>70</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>365</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>28</width>
+              <height>37</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item row="12" column="0">
          <widget class="QLabel" name="lblOptional">
@@ -995,187 +1255,6 @@
           </property>
          </widget>
         </item>
-        <item row="12" column="3" colspan="2">
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>438</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="lblExtProcedure">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Внешняя процедура</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="4">
-         <widget class="QPushButton" name="pbAddResults">
-          <property name="minimumSize">
-           <size>
-            <width>50</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>50</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/images/table_add_t.png</normaloff>:/images/table_add_t.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>48</width>
-            <height>48</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="4">
-         <widget class="QPushButton" name="pbAddSources">
-          <property name="minimumSize">
-           <size>
-            <width>50</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>50</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="icon">
-           <iconset resource="../res.qrc">
-            <normaloff>:/images/table_add_t.png</normaloff>:/images/table_add_t.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>48</width>
-            <height>48</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1" colspan="4">
-         <widget class="QComboBox" name="cbExtProcedure">
-          <property name="minimumSize">
-           <size>
-            <width>520</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>520</width>
-            <height>40</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="lblName">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Наименование</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="lblSources">
-          <property name="minimumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>220</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Исходные данные</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1" colspan="4">
-         <widget class="QLineEdit" name="edSources">
-          <property name="minimumSize">
-           <size>
-            <width>520</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>520</width>
-            <height>40</height>
-           </size>
-          </property>
-         </widget>
-        </item>
         <item row="12" column="1">
          <widget class="QPushButton" name="pbOptional">
           <property name="minimumSize">
@@ -1200,6 +1279,19 @@
            <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item row="12" column="2" colspan="2">
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>438</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
