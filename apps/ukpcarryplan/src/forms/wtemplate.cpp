@@ -1,3 +1,4 @@
+#include <math.h>
 #include <QMessageBox>
 #include <defMacro>
 #include <defPictures>
@@ -62,6 +63,12 @@ WTemplate::WTemplate(QWidget *parent) : QFrame(parent)
     connect(pbSaveAllTemplates,SIGNAL(clicked()),this,SLOT(resetTemplates()));
 
     connect(cbTemplates,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(selectPattern(const QString&)));
+
+    connect(sbTime_hours,SIGNAL(valueChanged(int)),this,SLOT(periodChanged(int)));
+    connect(sbTime_days,SIGNAL(valueChanged(int)),this,SLOT(periodChanged(int)));
+
+    connect(rbTime_hours,SIGNAL(toggled(bool)),this,SLOT(toggledTimeVariant(bool)));
+    connect(rbTime_days,SIGNAL(toggled(bool)),this,SLOT(toggledTimeVariant(bool)));
 
     resetTemplates(*pbRefreshTemplate);
 
@@ -545,11 +552,38 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
                 modUnits->findUnitForTemplateInCb(*cbExtUnit,rl.unitId());
             }
             sbTime_hours->setValue(curWork->templatePeriod());
-            sbTime_days->setValue(curWork->templatePeriod()); // ??? пересчитать часы в рабочие дни
+            rbTime_hours->setChecked(true); toggledTimeVariant(false);
+            periodChanged(*sbTime_hours); // пересчитать часы в рабочие дни
+            sbTime_days->setValue(curWork->templatePeriod());
             pbOptional->setChecked(curWork->isOptional());
             pbOptional->setIcon(ICONPIX(curWork->isOptional() ? PIX_CHECKED : ""));
         }
         else setEnabledControls(false);
     }
+}
+
+void WTemplate::periodChanged(int)
+{
+    if (QSpinBox *sb = dynamic_cast<QSpinBox*>(sender())) periodChanged(*sb);
+}
+//-----------------------------------------------------------------------------
+
+void WTemplate::periodChanged(const QSpinBox &sb, int)
+{
+    if (&sb==sbTime_hours)
+    {
+        if (rbTime_hours->isChecked()) sbTime_days->setValue((int)ceil(sbTime_hours->value()/8.));
+    }
+    else if (&sb==sbTime_days)
+    {
+        if (rbTime_days->isChecked()) sbTime_hours->setValue(sbTime_days->value()*8);
+    }
+}
+//-----------------------------------------------------------------------------
+
+void WTemplate::toggledTimeVariant(bool)
+{
+    sbTime_hours->setEnabled(rbTime_hours->isChecked());
+    sbTime_days->setEnabled(rbTime_days->isChecked());
 }
 //-----------------------------------------------------------------------------

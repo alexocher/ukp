@@ -10,6 +10,7 @@ class WTemplate : public QFrame, private Ui::WTemplate
 private:
     void setEnabledControls(bool isenbl);
     void resetTemplates(const QPushButton &btn);
+    void periodChanged(const QSpinBox &sb, int val=0);
 
 public:
     explicit WTemplate(QWidget *parent = 0);
@@ -19,6 +20,8 @@ public slots:
     void resetTemplates();
     void selectPattern(const QString &nm);
     void selectPlanElement(QTreeWidgetItem *cur, QTreeWidgetItem *prev);
+    void periodChanged(int);
+    void toggledTimeVariant(bool);
 
 };
 
