@@ -499,6 +499,13 @@ void TAbstractPlanElement::setCarryOutPercent(int cop)
 }
 //-----------------------------------------------------------------------------
 
+// Выполняется ли элемент в настоящий момент
+bool TAbstractPlanElement::isCarryOutNow()
+{
+    return fDtRealBegin && !fDtRealEnd;
+}
+//-----------------------------------------------------------------------------
+
 void TAbstractPlanElement::reflectAttachmentsToLw(const TAbstractAttachmentList &atchmts, QListWidget &lw)
 {
     lw.clear();

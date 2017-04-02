@@ -173,7 +173,7 @@ private:
 
     // параметры календаря
     int                 m_year,
-                        m_currentDay;
+                        m_currentDay;  // текущий день календаря
     bool                m_weekends[ GANT_KOL_DAY ];
     // размеры ячеек и заголовка
     int                 m_headerHeight,
@@ -195,6 +195,7 @@ private:
     // общие параметры отрисовки
     ContentDraw         m_contentDraw;
     ScaleView           m_scaleView;
+    int                 m_currentViewDay; // текущий день просмотра (устанавливается moveToDay)
 
     //начальная отрисовка (для появления ползунка)
     bool nachalo;

@@ -2,6 +2,7 @@
 #include <defMacro>
 #include <defPictures>
 #include <qtools>
+#include <gen>
 #include <TModulePlans>
 #include <TModuleUnits>
 #include <TModuleEmployees>
@@ -39,10 +40,12 @@ WPlan::WPlan(QWidget *parent) : QFrame(parent)
     connect(twProjects,SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),this,SLOT(selectPlanElement(QTreeWidgetItem*,QTreeWidgetItem*)));
     connect(twProjects,SIGNAL(itemChanged(QTreeWidgetItem*,int)),this,SLOT(onItemChanged(QTreeWidgetItem*,int)));
 
-    dtEnd->setDate(QDate(QDate::currentDate().year(),1,1));
+    dtBegin->setDate(QDate::currentDate());
 
+    connect(pbPriorityOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
+    connect(pbCurrentDate,SIGNAL(clicked()),this,SLOT(resetPlan()));
+    connect(pbDtBeginOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbTemplatesOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbDtEndOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbPeriodQuery,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbPeriodOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
     connect(pbEmployeesOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
@@ -90,7 +93,30 @@ void WPlan::resetPlan()
 
 void WPlan::resetPlan(const QPushButton &btn)
 {
-    if (&btn==pbTemplatesOk)
+    if (&btn==pbPriorityOk)
+    {
+        if (QTreeWidgetItem *curIt = twProjects->currentItem())
+        {
+          QStringList scrnms = qtools::hierarchyTexts(*curIt);
+          MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+                if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(plEl)) tsk->setPriority(sbPriority->value());
+        }
+    }
+    else if (&btn==pbCurrentDate)
+    {
+        dtBegin->setDate(QDate::currentDate());
+    }
+    else if (&btn==pbDtBeginOk)
+    {
+        if (QTreeWidgetItem *curIt = twProjects->currentItem())
+        {
+          QStringList scrnms = qtools::hierarchyTexts(*curIt);
+          MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms)) plEl->setDtPlanBegin(QDateTime(dtBegin->date(),QTime(9,0,0)));
+        }
+    }
+    else if (&btn==pbTemplatesOk)
     {
       QString sErr("");
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
@@ -129,15 +155,6 @@ void WPlan::resetPlan(const QPushButton &btn)
             mb.exec();
         }
     }
-    else if (&btn==pbDtEndOk)
-    {
-        if (QTreeWidgetItem *curIt = twProjects->currentItem())
-        {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms)) plEl->setDtPlanEnd(QDateTime(dtEnd->date(),QTime(23,59,59)));
-        }
-    }
     else if (&btn==pbPeriodQuery)
     {
 
@@ -148,7 +165,11 @@ void WPlan::resetPlan(const QPushButton &btn)
         {
           QStringList scrnms = qtools::hierarchyTexts(*curIt);
           MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms)) plEl->setPlanPeriod(sbPeriod->value());
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            {
+                plEl->setPlanPeriod(sbPeriod->value());
+                curIt->setText(2,gen::intToStr(sbPeriod->value()));
+            }
         }
     }
     else if (&btn==pbEmployeesOk)
@@ -266,7 +287,7 @@ void WPlan::resetPlan(const QPushButton &btn)
         wGantDiagramm->setGeometry(frmMainUkpCarryPlan->centralWidgetGlobalRect());
         //wGantDiagramm->setGeometry(frmMainUkpCarryPlan->formRect());
       MODULE(Plans);
-        wGantDiagramm->prepare(modPlans->carryTasks(),TGantGraphicsView::cdPlan);
+        wGantDiagramm->prepare(modPlans->carryTasks(),TGantGraphicsView::cdPlan,TGantGraphicsView::svDay);
         wGantDiagramm->exec();
     }
     else if (&btn==pbPlan)
@@ -327,22 +348,35 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
         if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
         {
             params = plEl->toHtml(!cbIsShort->isChecked());
-          bool isPlan(false), isProcedure(false), isWork(false); // isTask(false),
-            //if (dynamic_cast<TCarryTask*>(plEl)) isTask = true; // TCarryTask *tsk =
-            //else
+          bool isTask(false), isPlan(false), isProcedure(false), isWork(false);
           MODULE(Employees);
-            if (dynamic_cast<TCarryPlan*>(plEl)) isPlan = true; // TCarryPlan *plan =
+            if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(plEl))
+            {
+                isTask = true;
+                sbPriority->setValue(tsk->priority());
+                dtBegin->setDate(tsk->dtPlanBegin() ? tsk->dtPlanBegin()->date() : QDate(QDate::currentDate().year(),1,1));
+            }
+            else if (dynamic_cast<TCarryPlan*>(plEl)) isPlan = true; // TCarryPlan *plan =
             else if (TCarryProcedure *pr = dynamic_cast<TCarryProcedure*>(plEl))
             {
                 modEmployees->reflectEmployeesToLw(pr->possibleEmployees(),*lwEmployees);
                 isProcedure = true;
             }
-            else if (dynamic_cast<TCarryWork*>(plEl)) isWork = true; // TCarryWork *wrk =
+            else if (TCarryWork *wrk = dynamic_cast<TCarryWork*>(plEl))
+            {
+                isWork = true;
+                sbPeriod->setValue(wrk->planPeriod());
+            }
             if (!isProcedure) lwEmployees->clear();
+            pbPriorityOk->setEnabled(isTask);
+            sbPriority->setEnabled(isTask);
+            pbCurrentDate->setEnabled(isTask);
+            pbDtBeginOk->setEnabled(isTask);
+            dtBegin->setEnabled(isTask);
             pbTemplatesOk->setEnabled(isPlan);
-            pbDtEndOk->setEnabled(isPlan);
             pbPeriodQuery->setEnabled(isWork);
             pbPeriodOk->setEnabled(isWork);
+            sbPeriod->setEnabled(isWork);
             pbEmployeesOk->setEnabled(isProcedure);
             pbEmployeesCalendar->setEnabled(isProcedure);
             pbEmployeesReset->setEnabled(isProcedure);

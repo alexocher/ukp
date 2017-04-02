@@ -17,10 +17,11 @@ public:
     explicit WGantDiagramm(QWidget *parent = 0);
     ~WGantDiagramm();
 
-    void prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDraw whatdraw);
+    void prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDraw whatdraw, TGantGraphicsView::ScaleView sc);
 
 public slots:
     void resetGantDiagramm();
+    void scaleChanged(int ind);
 
 private:
     Ui::WGantDiagramm *ui;

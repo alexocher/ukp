@@ -84,6 +84,7 @@ public:
     QDateTime *dtRealEnd() const;      //                  окончания фактического
     void setDtRealEnd(const QDateTime &dt);
     QDateTime *dtRealEndPrognos() const; //                окончания прогнозируемого (рассчитывается)
+    bool isCarryOutNow();              // Выполняется ли элемент в настоящий момент
     TStatusList &statuses() const;     // Список статусов
     void setStatuses(const TStatusList &stss);
     bool isSaved() const;              // Признак сохраненного плана

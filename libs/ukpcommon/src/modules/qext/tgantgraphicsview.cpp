@@ -277,7 +277,7 @@ void TGantItem::setCarryOutPercent(int cop)
 
 TGantGraphicsView::TGantGraphicsView(int year, int curday, QWidget *prnt) :
     QGraphicsView(prnt),
-    m_year(year ? year : QDate::currentDate().year()), m_currentDay(curday), m_headerHeight(0), m_columnWidth(0), m_rowHeight(0), m_contentDraw(cdAll), m_scaleView(svDay)
+    m_year(year ? year : QDate::currentDate().year()), m_currentDay(curday), m_headerHeight(0), m_columnWidth(0), m_rowHeight(0), m_contentDraw(cdAll), m_scaleView(svDay), m_currentViewDay(0)
 {
 //TGantGraphicsView::TGantGraphicsView(int year, int curday, QGraphicsScene *pscene, QWidget *prnt) :
 //      QGraphicsView(pscene, prnt),
@@ -852,7 +852,7 @@ void TGantGraphicsView::prepare(int hdrH, int colW, int rowH)
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::moveToDay(int day)
 {
-    m_currentDay = day;
+    m_currentViewDay = day;
     // ??? draw(m_contentDraw);
 }
 //-----------------------------------------------------------------------------

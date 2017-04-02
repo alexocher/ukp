@@ -2,6 +2,7 @@
 #include <QTreeWidget>
 #include <QGridLayout>
 #include <QPushButton>
+#include <QLabel>
 #include <QStack>
 #include <QScrollBar>
 #include <defMacro>
@@ -25,6 +26,8 @@ namespace
     QPushButton *BTN_ALL(NULL),
                 *BTN_PLAN(NULL),
                 *BTN_REAL(NULL);
+
+    QComboBox *CB_SCALE(NULL);
 
     const int HEADER_H(60),
               COLUMN_W(30),
@@ -66,20 +69,54 @@ WGantDiagramm::WGantDiagramm(QWidget *parent) : QDialog(parent)
     FR_BUTTONS = new QFrame(this);
     EL_MINMAX_HEIGHT(FR_BUTTONS,50);
 
+  QHBoxLayout *hbl(new QHBoxLayout(FR_BUTTONS));
+
+  QLabel *LBL_SCALE(new QLabel("Масштаб",FR_BUTTONS));
+
+    CB_SCALE = new QComboBox(FR_BUTTONS);
+    EL_RESIZE(CB_SCALE,120,40);
+  QStringList scales; scales<<"Часы"<<"Дни"<<"Недели"<<"Месяцы";
+    CB_SCALE->addItems(scales);
+    CB_SCALE->setCurrentIndex(1);
+    connect(CB_SCALE,SIGNAL(currentIndexChanged(int)),this,SLOT(scaleChanged(int)));
+
+  QFrame *LINE1(new QFrame(FR_BUTTONS));
+    EL_RESIZE(LINE1,30,50);
+    LINE1->setFrameShadow(QFrame::Raised);
+    LINE1->setFrameShape(QFrame::VLine);
+
     BTN_ALL = new QPushButton("Все",FR_BUTTONS);
-    BTN_ALL->setGeometry(0,0,200,50);
-    //FONT_BOLD(BTN_ALL,true);
+    EL_RESIZE(BTN_ALL,200,50);
+    BTN_ALL->setCheckable(true);
     connect(BTN_ALL,SIGNAL(clicked()),this,SLOT(resetGantDiagramm()));
 
     BTN_PLAN = new QPushButton("План",FR_BUTTONS);
-    BTN_PLAN->setGeometry(210,0,200,50);
-    //FONT_BOLD(BTN_PLAN,true);
+    EL_RESIZE(BTN_PLAN,200,50);
+    BTN_PLAN->setCheckable(true);
     connect(BTN_PLAN,SIGNAL(clicked()),this,SLOT(resetGantDiagramm()));
 
     BTN_REAL = new QPushButton("Выполнение",FR_BUTTONS);
-    BTN_REAL->setGeometry(420,0,200,50);
-    //FONT_BOLD(BTN_REAL,true);
+    EL_RESIZE(BTN_REAL,200,50);
+    BTN_REAL->setCheckable(true);
     connect(BTN_REAL,SIGNAL(clicked()),this,SLOT(resetGantDiagramm()));
+
+  QFrame *LINE2(new QFrame(FR_BUTTONS));
+    EL_RESIZE(LINE2,30,50);
+    LINE2->setFrameShadow(QFrame::Raised);
+    LINE2->setFrameShape(QFrame::VLine);
+
+    hbl->addWidget(LBL_SCALE);
+    hbl->addWidget(CB_SCALE);
+    hbl->addWidget(LINE1);
+    hbl->addWidget(BTN_ALL);
+    hbl->addWidget(BTN_ALL);
+    hbl->addWidget(BTN_PLAN);
+    hbl->addWidget(BTN_REAL);
+    hbl->addWidget(LINE2);
+    hbl->addStretch();
+
+    hbl->setMargin(0);
+    hbl->setSpacing(10);
 
     grl->addWidget(FR_BUTTONS,1,0,1,2);
 
@@ -104,43 +141,55 @@ void WGantDiagramm::resetGantDiagramm()
 void WGantDiagramm::resetGantDiagramm(const QPushButton &btn)
 {
   MODULE(Plans);
+  TGantGraphicsView::ScaleView sc((TGantGraphicsView::ScaleView)CB_SCALE->currentIndex());
     if (&btn==BTN_ALL)
     {
-        prepare(modPlans->carryTasks(),TGantGraphicsView::cdAll);
+        prepare(modPlans->carryTasks(),TGantGraphicsView::cdAll,sc);
     }
     else if (&btn==BTN_PLAN)
     {
-        prepare(modPlans->carryTasks(),TGantGraphicsView::cdPlan);
+        prepare(modPlans->carryTasks(),TGantGraphicsView::cdPlan,sc);
     }
     else if (&btn==BTN_REAL)
     {
-        prepare(modPlans->carryTasks(),TGantGraphicsView::cdReal);
+        prepare(modPlans->carryTasks(),TGantGraphicsView::cdReal,sc);
     }
 }
 //-----------------------------------------------------------------------------
 
-// ??? Раскрасить ???
-
-void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDraw whatdraw)
+void WGantDiagramm::scaleChanged(int ind)
 {
+  TGantGraphicsView &gd = *DIAGR;
+    gd.setScaleView((TGantGraphicsView::ScaleView)ind);
+}
+//-----------------------------------------------------------------------------
+
+void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDraw whatdraw, TGantGraphicsView::ScaleView sc)
+{
+    BTN_ALL->setChecked(whatdraw==TGantGraphicsView::cdAll);
+    BTN_PLAN->setChecked(whatdraw==TGantGraphicsView::cdPlan);
+    BTN_REAL->setChecked(whatdraw==TGantGraphicsView::cdReal);
+
   MODULE(Plans);
     modPlans->reflectCarryTasksToTree(tasks,*TREE,true,ROW_H); // только отмеченные
     TREE->sortItems(0,Qt::AscendingOrder);
     qtools::expand(*TREE);
 
-  QPen planItemsPen(Qt::darkBlue);
+  QPen planItemsPen(Qt::blue);
   QBrush planItemsTaskBrash(Qt::darkGray);
   QBrush planItemsPlanBrash(Qt::darkGray);
   QBrush planItemsProcedureBrash(Qt::darkGray);
   QBrush planItemsWorkBrash(Qt::blue);
 
-  QPen realItemsPen(Qt::darkGreen);
-  QBrush realItemsTaskBrash(Qt::blue);
-  QBrush realItemsPlanBrash(Qt::blue);
-  QBrush realItemsProcedureBrash(Qt::blue);
-  QBrush realItemsWorkBrash(Qt::blue);
+  QPen realItemsPen(Qt::red);
+  QBrush realItemsTaskBrash(Qt::darkRed);
+  QBrush realItemsPlanBrash(Qt::darkRed);
+  QBrush realItemsProcedureBrash(Qt::darkRed);
+  QBrush realItemsWorkBrash(Qt::red);
+  QBrush realItemsCurrentWorkBrash(Qt::magenta);
 
   TGantGraphicsView &gd = *DIAGR;
+    gd.setScaleView(sc);
     gd.setHeaderHeight(HEADER_H);
     gd.setColumnWidth(COLUMN_W);
     gd.setRowHeight(ROW_H);
@@ -257,7 +306,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                             {
                               TGantItem *wrkGit(new TGantItem(TGantItem::gitWork,wrk->scrName(),prGit));
                                 wrkGit->setPen(GANT_IND_REAL,realItemsPen);
-                                wrkGit->setBrush(GANT_IND_REAL,realItemsWorkBrash);
+                                wrkGit->setBrush(GANT_IND_REAL,wrk->isCarryOutNow() ? realItemsCurrentWorkBrash : realItemsWorkBrash);
                                 wrkGit->setLevel(3);
                                 wrkGit->setOpen(true);
                                 wrkGit->setBegin(GANT_IND_REAL,wrk->dtPlanBegin() ? *wrk->dtPlanBegin() : QDateTime());

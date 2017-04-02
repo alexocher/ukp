@@ -102,6 +102,7 @@ QString TCarryTask::toHtml(bool) // fullinfo
     sHtml += QString("<br>ОРД: <b>%1</b>").arg(fOrdPlan ? (fOrdPlan->procedures().count() ? "заполнен" : "не заполнен"): "нет");
     sHtml += QString("<br>План: <b>%1</b>").arg(fCarryPlan ? (fCarryPlan->procedures().count() ? "заполнен" : "не заполнен"): "нет");
 
+    sHtml += QString("<br>Приоритет: <b>%1</b>").arg(fPriority);
     sHtml += QString("<br>Сосотояние: <b>%1</b>").arg(convertEnums::enumToStr(fCondition));
     if (fProblem!=copNone) sHtml += QString("<br>Проблемы: <b>%1</b>").arg(convertEnums::enumToStr(fProblem));
     sHtml += QString("<br>Исх. данные: <b>%1</b>").arg(fSourcesTitle.isEmpty() ? "---" : fSourcesTitle);
@@ -122,10 +123,10 @@ QString TCarryTask::toHtml(bool) // fullinfo
     sHtml += QString("<br>Закрепленное ДЛ: <b>%1</b>").arg(fEmployee ? fEmployee->scrName() : "---");
     sHtml += QString("<br>Продолж. тип.: <b>%1</b>").arg(fTemplatePeriod);
     sHtml += QString("<br>Продолж. план.: <b>%1</b>").arg(fPlanPeriod);
-    sHtml += QString("<br>Tн (план): <b>%1</b>").arg(fDtPlanBegin ? fDtPlanBegin->toString("MM.dd") : "---");
-    sHtml += QString("<br>Tк (план): <b>%1</b>").arg(fDtPlanEnd ? fDtPlanEnd->toString("MM.dd") : "---");
-    sHtml += QString("<br>Tн (факт): <b>%1</b>").arg(fDtRealBegin ? fDtRealBegin->toString("MM.dd (hh:mm)") : "---");
-    sHtml += QString("<br>Tк (факт): <b>%1</b>").arg(fDtRealEnd ? fDtRealEnd->toString("MM.dd (hh:mm)") : "---");
+    sHtml += QString("<br>Tн (план): <b>%1</b>").arg(fDtPlanBegin ? fDtPlanBegin->toString("dd.MM.yy") : "---");
+    sHtml += QString("<br>Tк (план): <b>%1</b>").arg(fDtPlanEnd ? fDtPlanEnd->toString("dd.MM.yy") : "---");
+    sHtml += QString("<br>Tн (факт): <b>%1</b>").arg(fDtRealBegin ? fDtRealBegin->toString("dd.MM.yy (hh:mm)") : "---");
+    sHtml += QString("<br>Tк (факт): <b>%1</b>").arg(fDtRealEnd ? fDtRealEnd->toString("dd.MM.yy (hh:mm)") : "---");
     sHtml += QString("<br>Статусы: <b>%1</b>").arg(fStatuses.count());
     n = 0;
     foreach (TStatus st,fStatuses)
