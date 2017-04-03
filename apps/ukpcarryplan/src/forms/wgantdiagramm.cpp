@@ -282,6 +282,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
             tskGit->setOpen(true);
             tskGit->setBegin(GANT_IND_REAL,tsk->dtPlanBegin() ? *tsk->dtPlanBegin() : QDateTime());
             tskGit->setEnd(GANT_IND_REAL,tsk->dtPlanEnd() ? *tsk->dtPlanEnd() : QDateTime());
+            tskGit->setCarryOutPercent(tsk->carryOutPercent());
             for (int i=0; i<2; i++)
                 if (TCarryPlan *plan = plans[i])
                     if (plan->isChecked())
@@ -293,6 +294,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                         planGit->setOpen(true);
                         planGit->setBegin(GANT_IND_REAL,plan->dtPlanBegin() ? *plan->dtPlanBegin() : QDateTime());
                         planGit->setEnd(GANT_IND_REAL,plan->dtPlanEnd() ? *plan->dtPlanEnd() : QDateTime());
+                        planGit->setCarryOutPercent(plan->carryOutPercent());
                         foreach (TCarryProcedure *pr,plan->procedures())
                         {
                           TGantItem *prGit(new TGantItem(TGantItem::gitProcedure,pr->scrName(),planGit));
@@ -302,6 +304,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                             prGit->setOpen(true);
                             prGit->setBegin(GANT_IND_REAL,pr->dtPlanBegin() ? *pr->dtPlanBegin() : QDateTime());
                             prGit->setEnd(GANT_IND_REAL,pr->dtPlanEnd() ? *pr->dtPlanEnd() : QDateTime());
+                            prGit->setCarryOutPercent(pr->carryOutPercent());
                             foreach (TCarryWork *wrk,pr->works())
                             {
                               TGantItem *wrkGit(new TGantItem(TGantItem::gitWork,wrk->scrName(),prGit));
@@ -311,6 +314,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                                 wrkGit->setOpen(true);
                                 wrkGit->setBegin(GANT_IND_REAL,wrk->dtPlanBegin() ? *wrk->dtPlanBegin() : QDateTime());
                                 wrkGit->setEnd(GANT_IND_REAL,wrk->dtPlanEnd() ? *wrk->dtPlanEnd() : QDateTime());
+                                wrkGit->setCarryOutPercent(wrk->carryOutPercent());
                                 prGit->insertChild(wrkGit);
                             }
                             planGit->insertChild(prGit);
