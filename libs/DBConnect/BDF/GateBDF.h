@@ -31,6 +31,11 @@ public:
      */
     GateBDF();
     /*!
+     * \brief получение регионов
+     * \return данные по регионам
+     */
+    QByteArray getRegions();
+    /*!
      * \brief getNewID получить новый идентификатор для объекта
      * \return строка идентификатора
      */

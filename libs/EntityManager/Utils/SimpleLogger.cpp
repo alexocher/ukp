@@ -72,8 +72,8 @@ void SimpleLogger::write_log(SimpleLogger::SEVERITY type,const QString& mes){
     qDebug().noquote()<<"LOG: "<<mes;
     QString stype;
     switch(type){
-    case SimpleLogger::WARNING: stype = "WARNING"; break;
-    case SimpleLogger::ERROR: stype = "ERROR"; break;
+    case SimpleLogger::_WARNING: stype = "WARNING"; break;
+    case SimpleLogger::_ERROR: stype = "ERROR"; break;
     default:
         stype = "INFO";
     }
@@ -86,6 +86,6 @@ SimpleLogger::~SimpleLogger(){
     _flog->close();
     delete _flog;
 }
-void SimpleLogger::warn(QString mes){write_log(SimpleLogger::WARNING,mes);}
-void SimpleLogger::err(QString mes){write_log(SimpleLogger::ERROR,mes);}
-void SimpleLogger::log(QString mes){write_log(SimpleLogger::INFO,mes);}
+void SimpleLogger::warn(QString mes){write_log(SimpleLogger::_WARNING,mes);}
+void SimpleLogger::err(QString mes){write_log(SimpleLogger::_ERROR,mes);}
+void SimpleLogger::log(QString mes){write_log(SimpleLogger::_INFO,mes);}

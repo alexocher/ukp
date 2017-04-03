@@ -27,9 +27,10 @@
                                     " i.custom_number, "\
                                     " i.template_employee, "\
                                     " i.oshs_item_id, "\
+                                    " i.progress, " \
                                     " s.main_state, "\
-                                    " s.state, "\
-                                    " s.problem "\
+                                    " s.state, " \
+                                    " s.problem " \
                                     " FROM "\
                                     "   plan.planitem AS i "\
                                     " JOIN plan.planitem_state AS s ON s.planitem_suid = i.suid "\
@@ -60,14 +61,14 @@
                                     " parent_suid, ftitle, stitle, "\
                                     " itemtype, yearplan_suid, production_id, typal_duration, priority, "\
                                     " is_optional, is_present, ext_module_type, descr, src_title, res_title, "\
-                                    " ext_proc, custom_number, template_employee, oshs_item_id, duration " \
+                                    " ext_proc, custom_number, template_employee, oshs_item_id, duration, progress " \
                                     " ) "\
                                     " VALUES "\
                                     " ("\
                                     " :parent_suid, :ftitle, :stitle, "\
                                     " :itemtype, :yearplan_suid, :production_id, :typal_duration, :priority, "\
                                     " :is_optional, :is_present, :ext_module_type, :descr, :src_title, :res_title, "\
-                                    " :ext_proc, :custom_number, :template_employee, :oshs_item_id, :duration " \
+                                    " :ext_proc, :custom_number, :template_employee, :oshs_item_id, :duration, :progress " \
                                     " ) "\
                                     " RETURNING suid"
 
@@ -79,7 +80,7 @@
                                     " is_optional = :is_optional, is_present=:is_present, "\
                                     " ext_module_type=:ext_module_type, descr=:descr, src_title=:src_title, res_title=:res_title, "\
                                     " ext_proc=:ext_proc, custom_number=:custom_number, template_employee=:template_employee, oshs_item_id=:oshs_item_id, " \
-                                    " duration=:duration " \
+                                    " duration=:duration, progress=:progress " \
                                     " WHERE suid = :suid "
 // Добавление/Обновление статусов узла
 #define query_InsertPlanItemState   "INSERT INTO plan.planitem_state "\
@@ -343,6 +344,9 @@ TEmployeeType  EM_BasePlanItem::getTemplEmployee() const{
 int EM_BasePlanItem::getOshsItemID() const{
     return _oshs_item_id;
 }
+int EM_BasePlanItem::getProgress() const{
+    return _progress;
+}
 TCarryOutProblem EM_BasePlanItem::getProblem() const{
     return _problem;
 }
@@ -428,6 +432,11 @@ void    EM_BasePlanItem::setOshsItemID(int value){
     _oshs_item_id = value;
     setModify();
 }
+void EM_BasePlanItem::setProgress(int value){
+    _progress = value;
+    setModify();
+}
+
 void    EM_BasePlanItem::addStatus(TStatus value){
     if(!_status.contains(value)){
         _status<<value;
@@ -1135,6 +1144,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
     int l_custom_number;
     TEmployeeType l_templ_employee;
     int l_oshs_item_id;
+    int l_progress;
 
     // индексы столбцов
     rec = q->record();
@@ -1160,7 +1170,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
     const int ind_custom_number = rec.indexOf("custom_number");
     const int ind_templ_employee = rec.indexOf("template_employee");
     const int ind_oshs_item_id = rec.indexOf("oshs_item_id");
-
+    const int ind_progress = rec.indexOf("progress");
     QMap<int,EM_BasePlanItem*> mTree;
     EM_BasePlanItem *root = 0;
 
@@ -1194,6 +1204,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
         l_custom_number = q->value(ind_custom_number).toInt();
         l_templ_employee = (TEmployeeType)q->value(ind_templ_employee).toInt();
         l_oshs_item_id = q->value(ind_oshs_item_id).toInt();
+        l_progress = q->value(ind_progress).toInt();
 
         int pkey = l_parent_suid;
         int key = l_suid;
@@ -1254,6 +1265,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
             newItem->setNum(l_custom_number);
             newItem->setTemplEmployee(l_templ_employee);
             newItem->setOshsItemID(l_oshs_item_id);
+            newItem->setProgress(l_progress);
             if(newItem->getType()==PROJECT){
                 EM_Production* prud = produc_dic.by(l_production_type);
                 ((EM_ProjectPlanItem*)newItem)->setProduction(prud);
@@ -1527,6 +1539,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
             pq->bindValue(":custom_number",cur->getNum());
             pq->bindValue(":template_employee",cur->getTemplEmployee());
             pq->bindValue(":oshs_item_id",cur->getOshsItemID());
+            pq->bindValue(":progress",cur->getProgress());
             if(isNewItem){
                 pq->bindValue(":yearplan_suid", suid());
             }else{

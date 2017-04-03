@@ -46,6 +46,9 @@ QByteArray GateBDF::putSchemaByID(const QString &schema_id, const QByteArray &sc
 QByteArray GateBDF::delSchemaByID(const QString &schema_id){
     return del("/schemas/"+schema_id,CONTENT_TYPE_JSON);
 }
+QByteArray GateBDF::getRegions(){
+    return get("/regions",CONTENT_TYPE_JSON);
+}
 QByteArray GateBDF::getAssets(){
     return get("/assets",CONTENT_TYPE_JSON);
 }

@@ -17,6 +17,7 @@
 #define KEY_REQUIRED    "required"
 #define KEY_PROPERTIES  "properties"
 #define KEY_DEFINITIONS "definitions"
+#define KEY_ITEMS       "items"
 
 #define DEFAULT_LOCALIZATION "ru"
 
@@ -351,24 +352,34 @@ void ModelBDF::Schema::SchemaDic::parse(const QByteArray &data)throw (JSONFormat
     QJsonParseError  parseError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
     if(parseError.error == QJsonParseError::NoError){
-        if(doc.isArray()){
-            QJsonArray top_level = doc.array();
-            int i = 0;
-            foreach (QJsonValue iter, top_level) {
-                if(!iter.isObject()){
-                    qDebug()<<"Skip item, wrong object ("<<QString::number(i++)<<")";
-                    continue;
+        if(doc.isObject()){
+            QJsonObject o = doc.object();
+            if(o.contains(KEY_ITEMS)){
+                QJsonValue items = o[KEY_ITEMS];
+                if(items.isArray()){
+                    QJsonArray top_level = items.toArray();
+                    int i = 0;
+                    foreach (QJsonValue iter, top_level) {
+                        if(!iter.isObject()){
+                            qDebug()<<"Skip item, wrong object ("<<QString::number(i++)<<")";
+                            continue;
+                        }
+                        QJsonObject obj = iter.toObject();
+                        BaseSchemaObject* item = parse(obj,QString());
+                        if(item==0){
+                            qDebug()<<"Skip item, error while parse ("<<QString::number(i++)<<")";
+                            continue;
+                        }
+                        add(getRoot(),item);
+                    }
+                }else{
+                    throw JSONFormatException::FormatException("Wrong items type (not array)");
                 }
-                QJsonObject obj = iter.toObject();
-                BaseSchemaObject* item = parse(obj,QString());
-                if(item==0){
-                    qDebug()<<"Skip item, error while parse ("<<QString::number(i++)<<")";
-                    continue;
-                }
-                add(getRoot(),item);
+            }else{
+                throw JSONFormatException::FormatException("Not found items");
             }
         }else{
-            throw JSONFormatException::FormatException("Wrong root item type (not array)");
+            throw JSONFormatException::FormatException("Wrong root item type (not object)");
         }
     }else{
         throw JSONFormatException::FormatException(parseError.errorString());
@@ -740,29 +751,41 @@ QMap<QString,ModelBDF::Asset::EM_Asset*> ModelBDF::Asset::EM_AssetDic::parseAsse
     QJsonParseError  parseError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
     if(parseError.error == QJsonParseError::NoError){
-        if(doc.isArray()){
-            QJsonArray arr = doc.array();
-            int count = 0;
+        if(doc.isObject()){
+            QJsonObject o = doc.object();
+            if(o.contains(KEY_ITEMS)){
+                QJsonValue items = o[KEY_ITEMS];
+                if(items.isArray()){
+                    QJsonArray arr = items.toArray();
+                    int count = 0;
 
-            if(dic.isNull()){
-                dic = QSharedPointer<Schema::SchemaDic>(new Schema::SchemaDic());
-                dic->load();
-            }
-
-            foreach (QJsonValue asset_data, arr) {
-                if(asset_data.isObject()){
-                    EM_Asset* newItem = new  EM_Asset( asset_data.toObject(), dic );
-                    if(newItem->internal_state()==ModelBDF::Asset::EM_Asset::BAD_ASSET){
-                        qDebug()<<"Error while parse asset #: "<<QString::number(count);
+                    if(dic.isNull()){
+                        dic = QSharedPointer<Schema::SchemaDic>(new Schema::SchemaDic());
+                        dic->load();
                     }
-                    ret[newItem->id()] = newItem;
+
+                    foreach (QJsonValue asset_data, arr) {
+                        if(asset_data.isObject()){
+                            EM_Asset* newItem = new  EM_Asset( asset_data.toObject(), dic );
+                            if(newItem->internal_state()==ModelBDF::Asset::EM_Asset::BAD_ASSET){
+                                qDebug()<<"Error while parse asset #: "<<QString::number(count);
+                            }
+                            ret[newItem->id()] = newItem;
+                        }else{
+                            qDebug()<<"Asset data #: "<<QString::number(count)<<" wrong";
+                        }
+                        count++;
+                    }
                 }else{
-                    qDebug()<<"Asset data #: "<<QString::number(count)<<" wrong";
+                    qDebug()<<"loadAssetsFromBDF: "<<"Input items data not array";
+                    throw BDFException::ParseInputJSONException();
                 }
-                count++;
+            }else{
+                qDebug()<<"loadAssetsFromBDF: "<<"Input data not contains items ";
+                throw BDFException::ParseInputJSONException();
             }
         }else{
-            qDebug()<<"loadAssetsFromBDF: "<<"Input data not object";
+            qDebug()<<"loadAssetsFromBDF: "<<"Input root data not object";
             throw BDFException::ParseInputJSONException();
         }
     }else{
@@ -791,4 +814,119 @@ ModelBDF::Asset::EM_AssetDic::~EM_AssetDic(){
         delete iter;
     }
 }
+// ===========================================================================================================
+ModelBDF::Region::EM_RegionItem::EM_RegionItem(const QString id, const QString& type, const QString& name, const QString& url):BaseTreeItem(id,-1){
+    _type = type; // группирование
+    _name = name;
+    _url = url;
+}
+ModelBDF::Region::EM_RegionItem::EM_RegionItem(const QString id):BaseTreeItem(id,-1){
 
+}
+const QString& ModelBDF::Region::EM_RegionItem::getType() const{
+    return _type;
+}
+const QString& ModelBDF::Region::EM_RegionItem::getName() const{
+    return _name;
+}
+const QString& ModelBDF::Region::EM_RegionItem::getURL() const{
+    return _url;
+}
+ModelBDF::Region::EM_RegionItem::~EM_RegionItem(){
+    ;
+}
+// ===========================================================================================================
+ModelBDF::Region::EM_Regions::EM_Regions():BaseTree(0){
+    ;
+}
+ModelBDF::Region::EM_Regions::~EM_Regions(){
+    ;
+}
+void ModelBDF::Region::EM_Regions::parse(const QByteArray& data)throw (JSONFormatException::FormatException){
+    QJsonParseError  parseError;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
+    if(parseError.error == QJsonParseError::NoError){
+        if(doc.isArray()){
+            QJsonArray top_level = doc.array();
+            int i = 0;
+            EM_RegionItem* rootitem = new EM_RegionItem("-000000000000000000","root","root","/");
+            setRootItem(rootitem);
+
+            QMap<QString,EM_RegionItem*> mTree;
+            EM_RegionItem* item = 0;
+            EM_RegionItem* pitem = 0;
+            foreach (QJsonValue iter, top_level) {
+                if(!iter.isObject()){
+                    qDebug()<<"Skip item, wrong object ("<<QString::number(i++)<<")";
+                    continue;
+                }
+                QJsonObject obj = iter.toObject();
+                // --------
+                item = 0;
+                pitem = 0;
+                try{
+                    QString type = obj["type"].toString();
+                    QString name = obj["name"].toString();
+                    QString url = obj["_url"].toString();
+                    QString id = obj["_id"].toString();
+                    QString pid;
+                    bool is_top = true;
+                    if(obj.contains("parentId")){
+                        pid = obj["parentId"].toString();
+                        is_top = false;
+                    }
+                    if(mTree.contains(id)){
+                        item = mTree[id];
+                        item->_name = name;
+                        item->_type = type;
+                        item->_url = url;
+                    }else{
+                        item = new EM_RegionItem(id, type, name, url);
+                        mTree[id] = item;
+                    }
+
+
+                    if(_mapType.contains(type)){
+                        _mapType[type]<<item;
+                    }else{
+                        _mapType[type] = QList<EM_RegionItem*>();
+                        _mapType[type]<<item;
+                        _types<<type;
+                    }
+
+                    if(is_top){
+                        pitem = rootitem;
+                    }else{
+                        if(mTree.contains(pid)){
+                            pitem = mTree[pid];
+                        }else{
+                            pitem = new EM_RegionItem(pid);
+                            mTree[pid] = pitem;
+                        }
+                    }
+
+
+                    //add(pitem,item);
+                }catch(...){
+                    qDebug()<<"Skip item, error while parse ("<<QString::number(i++)<<")";
+                    continue;
+                }
+
+                // ---------
+
+                add(pitem,item);
+            }
+        }else{
+            throw JSONFormatException::FormatException("Wrong root item type (not array)");
+        }
+    }else{
+        throw JSONFormatException::FormatException(parseError.errorString());
+    }
+}
+QList<ModelBDF::Region::EM_RegionItem*>& ModelBDF::Region::EM_Regions::byType(const QString& type)throw (CommonException::ObjNotFoundException){
+    if(!_mapType.contains(type)) throw CommonException::ObjNotFoundException();
+    return _mapType[type];
+}
+QList<QString> ModelBDF::Region::EM_Regions::types(){
+    return _mapType.keys();
+}

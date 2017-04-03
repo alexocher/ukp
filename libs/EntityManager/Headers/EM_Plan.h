@@ -79,6 +79,8 @@ private:
 
 
     int                      _oshs_item_id;         // идентификатор внешнего элемента ошс
+
+    int                      _progress;             // прогресс
 protected:
     QList<TEmployeeType>     _template_employee;    // список возможных исполителей (роли)
     TEmployeeType            _templ_employee;       // возможный исполнитель
@@ -207,6 +209,7 @@ public:
 
     virtual TEmployeeType   getTemplEmployee() const;
     int                     getOshsItemID() const;
+    int                     getProgress() const;
 
     bool    isVisualHide() const; // признак видимости
 
@@ -242,6 +245,7 @@ public:
 
     void    setTemplEmployee(TEmployeeType value);
     void    setOshsItemID(int value);
+    void    setProgress(int value);
     // Получить подэлемент по индексу
     EM_BasePlanItem* operator[](int index);
     EM_BasePlanItem* at(int index);

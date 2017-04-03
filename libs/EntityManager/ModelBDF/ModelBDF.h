@@ -388,6 +388,58 @@ public:
 
 } // Asset
 
+namespace Region{
+class EM_Regions;
+
+class ENTITYMANAGERSHARED_EXPORT EM_RegionItem: public BaseTreeItem<QString,int>{
+    friend class EM_Regions;
+private:
+    explicit EM_RegionItem();
+protected:
+    QString _type; // группирование
+    QString _name;
+    QString _url;
+protected:
+    EM_RegionItem(const QString id, const QString& type, const QString& name, const QString& url);
+    EM_RegionItem(const QString id);
+    const QString& getType() const;
+    const QString& getName() const;
+    const QString& getURL() const;
+public:
+    ~EM_RegionItem();
+};
+/*!
+ * \brief Иерархическая структура региона
+ */
+class ENTITYMANAGERSHARED_EXPORT EM_Regions: public BaseTree<QString,int>{
+private:
+    QMap<QString,QList<EM_RegionItem*> > _mapType;  // хэш по типам регионов
+    QList<QString> _types; // список типов;
+public:
+    explicit EM_Regions();
+    ~EM_Regions();
+    /*!
+     * \brief разбор исходных данных (строим дерево схем)
+     * \param data - исходные данные в формате GSON
+     */
+    void parse(const QByteArray& data)throw (JSONFormatException::FormatException);
+    /*!
+     * \brief получение по типу
+     * \param type - тип
+     * \return список регионов
+     */
+    QList<EM_RegionItem*>& byType(const QString& type) throw (CommonException::ObjNotFoundException);
+    /*!
+     * \brief список типов регионов
+     * \return список типов
+     */
+    QList<QString> types();
+
+    QByteArray serialize()const{return QByteArray();}
+    int deserialize(const QByteArray& data){if(data.isEmpty()){;}return -1;}
+};
+} // Region
+
 
 } // ModelBDF
 

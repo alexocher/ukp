@@ -13,7 +13,9 @@ class ENTITYMANAGERSHARED_EXPORT SimpleLogger:public QObject{
     Q_OBJECT
     // уровни
     enum SEVERITY {
-        INFO, WARNING, ERROR
+        _INFO = 1000,
+        _WARNING,
+        _ERROR
     };
 
 private:
