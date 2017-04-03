@@ -391,6 +391,7 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
         planItem->setOshsItemID(rl.unitId() ? rl.unitId() : unitId());
         foreach (TStatus st,statuses()) planItem->addStatus(st);
         planItem->setDescr(descr());
+        planItem->setProgress(carryOutPercent());
         yearPlan->add(currentProject ? currentProject : root,planItem);
         foreach (TCarryProcedure *pr,fPlProcedures)
         {
@@ -418,6 +419,7 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
             foreach (TStatus st,pr->statuses()) prItem->addStatus(st);
             prItem->setDescr(pr->descr());
             prItem->setExtProcNum(pr->externProcedureNum());
+            prItem->setProgress(pr->carryOutPercent());
             yearPlan->add(planItem,prItem);
             foreach (TCarryWork *wrk,pr->works())
             {
@@ -447,6 +449,7 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
                 wrkItem->setOptional(wrk->isOptional());
                 wrkItem->setPresent(wrk->isPresent());
                 wrkItem->setExtModuleType(wrk->externalModule());
+                wrkItem->setProgress(wrk->carryOutPercent());
                 yearPlan->add(prItem,wrkItem);
             }
         }

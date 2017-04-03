@@ -383,6 +383,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                         newCarryTask->setStatuses(curPlan->getStatus());
                         newCarryTask->setDescr(curPlan->getDescr());
                         newCarryTask->setPriority(curPlan->getPriority());
+                        newCarryTask->setCarryOutPercent(curPlan->getProgress());
                         newCarryTask->setSaved(true);
                         for(EM_BasePlanItem::iterator planIter=curPlan->begin(); planIter!=curPlan->end(); ++planIter)
                         {
@@ -414,6 +415,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                 if (dt.isValid()) newCarryPlan->setDtRealEnd(dt);
                                 newCarryPlan->setStatuses(curPlan->getStatus());
                                 newCarryPlan->setDescr(curPlan->getDescr());
+                                newCarryPlan->setCarryOutPercent(curPlan->getProgress());
                                 newCarryPlan->setSaved(true);
                                 for(EM_BasePlanItem::iterator prIter=curPlan->begin(); prIter!=curPlan->end(); ++prIter)
                                 {
@@ -444,6 +446,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                         newCarryProcedure->setStatuses(curPr->getStatus());
                                         newCarryProcedure->setDescr(curPr->getDescr());
                                         newCarryProcedure->setExternProcedureNum(curPr->getExtProcNum());
+                                        newCarryProcedure->setCarryOutPercent(curPr->getProgress());
                                         newCarryProcedure->setSaved(true);
                                         for(EM_BasePlanItem::iterator wrkIter=curPr->begin(); wrkIter!=curPr->end(); ++wrkIter)
                                         {
@@ -477,6 +480,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                                 newCarryWork->setExternalModule(curWrk->getExtModuleType());
                                                 newCarryWork->setOptional(curWrk->isOptional());
                                                 newCarryWork->setPresent(curWrk->isPresent());
+                                                newCarryWork->setCarryOutPercent(curWrk->getProgress());
                                                 newCarryWork->setSaved(true);
                                                 newCarryProcedure->insertWork(newCarryWork);
                                             }
