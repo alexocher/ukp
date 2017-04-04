@@ -4,8 +4,6 @@
 #include <TCarryPlan>
 #include <defUkpPlan>
 
-class UKPPLANSHARED_EXPORT TCarryPlan;
-
 // Проект (задача) управления (выпуска продукции)
 class UKPPLANSHARED_EXPORT TCarryTask : public TAbstractPlanElement
 {
