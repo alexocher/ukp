@@ -6,6 +6,7 @@
 #include <common>
 #include <enums>
 #include <TfrmMainUkpCarryPlan>
+#include <TModulePlans>
 #include <TMdiSubwindow>
 #include <WCompanyCalendar>
 #include <WEmployeeCalendar>
@@ -135,8 +136,6 @@ void TfrmMainUkpCarryPlan::clickAction()
 }
 //-----------------------------------------------------------------------------
 
-#include <TModulePlans> // ??? for testPlanData()
-
 void TfrmMainUkpCarryPlan::clickAction(const QAction &act)
 {
     if (&act==actPlan)
@@ -255,8 +254,6 @@ void TfrmMainUkpCarryPlan::clickAction(const QAction &act)
     }
     else if (&act==actTileVertical)
     {
-      MODULE(Plans);
-        modPlans->testPlanData();
     }
     else if (&act==actCascade)
     {
