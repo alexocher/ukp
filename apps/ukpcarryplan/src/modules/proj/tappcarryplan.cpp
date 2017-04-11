@@ -1,6 +1,6 @@
 #include <TAppCarryPlan>
 
-TAppCarryPlan::TAppCarryPlan(QStringList &params, int n, QString nm) : TAppPlan(params,n,nm)
+TAppCarryPlan::TAppCarryPlan(QStringList &params, QTime workdaybegin, int n, QString nm) : TAppPlan(params, n, nm), fWorkDayBegin(workdaybegin)
 {
 
 }
@@ -12,10 +12,15 @@ TAppCarryPlan::~TAppCarryPlan()
 }
 //-----------------------------------------------------------------------------
 
-TAppCarryPlan *TAppCarryPlan::instance(QStringList &params, int n, QString nm)
+TAppCarryPlan *TAppCarryPlan::instance(QStringList &params, QTime workdaybegin, int n, QString nm)
 {
-    if (!TAbstractApp::project) TAbstractApp::project = new TAppCarryPlan(params,n,nm);
+    if (!TAbstractApp::project) TAbstractApp::project = new TAppCarryPlan(params, workdaybegin, n, nm);
     return (TAppCarryPlan*)TAbstractApp::project;
+}
+
+const QTime &TAppCarryPlan::workDayBegin() const
+{
+    return fWorkDayBegin;
 }
 //-----------------------------------------------------------------------------
 

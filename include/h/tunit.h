@@ -24,7 +24,7 @@ private:
     TUnitList           fSubUnits;     // Список подчиненных подразделений
 
 public:
-    TUnit(int id, QString nm, QString shrtnm, TUnit *chfun=NULL, int n=0, TAbstractObject *parent=NULL);
+    TUnit(int id, QString nm, QString shrtnm, TUnit *chfun = NULL, int n = 0, TAbstractObject *parent = NULL);
     TUnit(const TUnit &obj);
     ~TUnit();
 
@@ -40,6 +40,7 @@ public:
     TEmployeeList *findEmployees(const TEmployeeRoleList &rls); // ... поиск с подходящими ролями
     int shtatEmployeeCount() const;    // Штатное количество персонала
     void setShtatEmployeeCount(int cnt);
+    bool isInternalEmployee(int id);   // Проверка, входит ли ДЛ в текущее подразделение или в какое-либо подчиненное
     TUnit *chiefUnit() const;          // Подразделение, которому подчинено данное
     void setChiefUnit(TUnit *un);
     TUnitList &subUnits() const;       // Список подчиненных подразделений
@@ -47,17 +48,17 @@ public:
     void removeSubUnit(TUnit *un);
     void clearSubUnits();
     TUnit *findSubUnit(int id);
-    TUnit *findSubUnit(QString nm, bool onscrnm=false);
+    TUnit *findSubUnit(QString nm, bool onscrnm = false);
 
     TUnit &operator=(const TUnit &obj);
 
     bool isTopUnit(TUnit *un);         // Признак подчиненности подразделению un
-    void reflectSubUnitsToTree(QTreeWidgetItem &twiself, bool withempl=false); // Отобразить на дереве
+    void reflectSubUnitsToTree(QTreeWidgetItem &twiself, bool withempl = false); // Отобразить на дереве
 
 public: // TAbstractObject interface
     void reset(bool thisonly);
     QString toStr();
-    QString toHtml(bool fullinfo=true);
+    QString toHtml(bool fullinfo = true);
     bool toDB(QString param);
     bool fromDB(QString param);
 

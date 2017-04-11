@@ -22,7 +22,7 @@ protected:
     TEmployee          *fEmployee;     // ДЛ, закрепленное за элементом
     int                 fTemplatePeriod, // Продолжительность выполнения операции (час): типовая
                         fPlanPeriod;   //                                                планируемая
-                                       //                                                фактическая (вычисляется)
+    //                                                фактическая (вычисляется)
     QDateTime          *fDtPlanBegin,  // Моменты времени: начала по плану
                        *fDtPlanEnd,    //                  окончания по плану
                        *fDtRealBegin,  //                  начала фактического
@@ -35,7 +35,7 @@ protected:
     int                 fCarryOutPercent; // Процент выполненной работы
 
 public:
-    explicit TAbstractPlanElement(int id=0, int n=0, QString nm="", TAbstractObject *parent=NULL);
+    explicit TAbstractPlanElement(int id = 0, int n = 0, QString nm = "", TAbstractObject *parent = NULL);
     TAbstractPlanElement(const TAbstractPlanElement &att);
     ~TAbstractPlanElement();
 
@@ -105,7 +105,7 @@ public:
 public: // TAbstractObject interface
     void reset(bool thisonly);
     QString toStr();
-    QString toHtml(bool fullinfo=true);
+    QString toHtml(bool fullinfo = true);
     bool toDB(QString param);
     bool fromDB(QString param);
 };

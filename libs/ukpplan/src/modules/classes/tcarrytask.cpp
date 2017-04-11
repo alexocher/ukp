@@ -3,7 +3,7 @@
 #include <TCarryTask>
 #include <EM_Plan>
 
-TCarryTask::TCarryTask(int year, TProductionType prtp, int id, int n, QString nm, TAbstractObject *parent) : TAbstractPlanElement(id,n,nm,parent), fYear(year), fPriority(0), fProductionType(prtp), fOrdPlan(NULL), fCarryPlan(NULL)
+TCarryTask::TCarryTask(int year, TProductionType prtp, int id, int n, QString nm, TAbstractObject *parent) : TAbstractPlanElement(id, n, nm, parent), fYear(year), fPriority(0), fProductionType(prtp), fOrdPlan(NULL), fCarryPlan(NULL), fDtMinBegin(NULL), fDtMaxEnd(NULL)
 {
 }
 //-----------------------------------------------------------------------------
@@ -12,6 +12,8 @@ TCarryTask::~TCarryTask()
 {
     DELETE(fOrdPlan);
     DELETE(fCarryPlan);
+    DELETE(fDtMinBegin);
+    DELETE(fDtMaxEnd);
 }
 //-----------------------------------------------------------------------------
 
@@ -88,6 +90,38 @@ void TCarryTask::setCarryPlan(TCarryPlan *pl)
 }
 //-----------------------------------------------------------------------------
 
+QDateTime *TCarryTask::dtMinBegin() const
+{
+    return fDtMinBegin;
+}
+//-----------------------------------------------------------------------------
+
+void TCarryTask::setDtMinBegin(const QDateTime &dt)
+{
+    if (dt.isValid())
+    {
+        DELETE(fDtMinBegin);
+        fDtMinBegin = new QDateTime(dt);
+    }
+}
+//-----------------------------------------------------------------------------
+
+QDateTime *TCarryTask::dtMaxEnd() const
+{
+    return fDtMaxEnd;
+}
+//-----------------------------------------------------------------------------
+
+void TCarryTask::setDtMaxEnd(const QDateTime &dt)
+{
+    if (dt.isValid())
+    {
+        DELETE(fDtMaxEnd);
+        fDtMaxEnd = new QDateTime(dt);
+    }
+}
+//-----------------------------------------------------------------------------
+
 QString TCarryTask::toStr()
 {
     return "";
@@ -96,29 +130,29 @@ QString TCarryTask::toStr()
 
 QString TCarryTask::toHtml(bool) // fullinfo
 {
-  QString sHtml("");
+    QString sHtml("");
     sHtml += QString("Год: <b>%1</b>").arg(fYear);
     sHtml += QString("<br>Продукция: <b>%1</b>").arg(convertEnums::enumToStr(fProductionType));
-    sHtml += QString("<br>ОРД: <b>%1</b>").arg(fOrdPlan ? (fOrdPlan->procedures().count() ? "заполнен" : "не заполнен"): "нет");
-    sHtml += QString("<br>План: <b>%1</b>").arg(fCarryPlan ? (fCarryPlan->procedures().count() ? "заполнен" : "не заполнен"): "нет");
+    sHtml += QString("<br>ОРД: <b>%1</b>").arg(fOrdPlan ? (fOrdPlan->procedures().count() ? "заполнен" : "не заполнен") : "нет");
+    sHtml += QString("<br>План: <b>%1</b>").arg(fCarryPlan ? (fCarryPlan->procedures().count() ? "заполнен" : "не заполнен") : "нет");
 
     sHtml += QString("<br>Приоритет: <b>%1</b>").arg(fPriority);
     sHtml += QString("<br>Сосотояние: <b>%1</b>").arg(convertEnums::enumToStr(fCondition));
-    if (fProblem!=copNone) sHtml += QString("<br>Проблемы: <b>%1</b>").arg(convertEnums::enumToStr(fProblem));
+    if (fProblem != copNone) sHtml += QString("<br>Проблемы: <b>%1</b>").arg(convertEnums::enumToStr(fProblem));
     sHtml += QString("<br>Исх. данные: <b>%1</b>").arg(fSourcesTitle.isEmpty() ? "---" : fSourcesTitle);
     //TAbstractAttachmentList fSources;  // Список исходных данных
     sHtml += QString("<br>Результаты: <b>%1</b>").arg(fResultsTitle.isEmpty() ? "" : fResultsTitle);
     //TAbstractAttachmentList fResults;  // Список результатов
-  TEmployeeRole erl = firstTemplateRole();
-    if (erl.type()!=eltNone)
+    TEmployeeRole erl = firstTemplateRole();
+    if (erl.type() != eltNone)
     {
         sHtml += QString("<br>Типовое ДЛ: <b>%1</b>").arg(convertEnums::enumToStr(erl.type()));
-      MODULE(Units);
+        MODULE(Units);
         if (TUnit *un = modUnits->findUnit(erl.unitId())) sHtml += QString("<br>Внешнее подразд.: <b>%1</b>").arg(un->scrName());
     }
     sHtml += QString("<br>Возможные ДЛ: <b>%1</b>").arg(fPossibleEmployees.count());
-  int n(0);
-    foreach (TEmployee *empl,fPossibleEmployees)
+    int n(0);
+    foreach (TEmployee *empl, fPossibleEmployees)
         sHtml += QString("<br><b>%1. %2</b>").arg(++n).arg(empl->scrName());
     sHtml += QString("<br>Закрепленное ДЛ: <b>%1</b>").arg(fEmployee ? fEmployee->scrName() : "---");
     sHtml += QString("<br>Продолж. тип.: <b>%1</b>").arg(fTemplatePeriod);
@@ -129,10 +163,13 @@ QString TCarryTask::toHtml(bool) // fullinfo
     sHtml += QString("<br>Tк (факт): <b>%1</b>").arg(fDtRealEnd ? fDtRealEnd->toString("dd.MM.yy (hh:mm)") : "---");
     sHtml += QString("<br>Статусы: <b>%1</b>").arg(fStatuses.count());
     n = 0;
-    foreach (TStatus st,fStatuses)
+    foreach (TStatus st, fStatuses)
         sHtml += QString("<br><b>%1. %2</b>").arg(++n).arg(convertEnums::enumToStr(st));
     sHtml += QString("<br>Сохранено: <b>%1</b>").arg(fIsSaved ? "Да" : "Нет");
     sHtml += QString("<br>Можно изменять: <b>%1</b>").arg(fIsVolatile ? "Да" : "Нет");
+
+    sHtml += QString("<br>Планировать с: <b>%1</b>").arg(fDtMinBegin ? fDtMinBegin->toString("dd.MM.yy") : "---");
+    sHtml += QString("<br>Выполнить к: <b>%1</b>").arg(fDtMaxEnd ? fDtMaxEnd->toString("dd.MM.yy") : "---");
 
     return sHtml;
 }
@@ -140,53 +177,57 @@ QString TCarryTask::toHtml(bool) // fullinfo
 
 bool TCarryTask::toDB(QString)
 {
-  EM_AddressBook *addrBook(NULL);
+    EM_AddressBook *addrBook(NULL);
     try
     {
-      EM_AddressBook &raddrBook = EM_AddressBook::Instance();
+        EM_AddressBook &raddrBook = EM_AddressBook::Instance();
         addrBook = &raddrBook;
     }
     catch(CommonException::OpenDBException &e)
     {
-        INSERT_ERROR(QString("EM_AddressBook::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+        INSERT_ERROR(QString("EM_AddressBook::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+        return false;
     }
     catch(CommonException::SQLException &e)
     {
-        INSERT_ERROR(QString("EM_AddressBook::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+        INSERT_ERROR(QString("EM_AddressBook::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+        return false;
     }
-  EM_ProductionDic *prodDic(NULL);
+    EM_ProductionDic *prodDic(NULL);
     try
     {
-      EM_ProductionDic &rprodDic = EM_ProductionDic::Instance();
+        EM_ProductionDic &rprodDic = EM_ProductionDic::Instance();
         prodDic = &rprodDic;
     }
     catch(CommonException::OpenDBException &e)
     {
-        INSERT_ERROR(QString("EM_ProductionDic::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+        INSERT_ERROR(QString("EM_ProductionDic::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+        return false;
     }
     catch(CommonException::SQLException &e)
     {
-        INSERT_ERROR(QString("EM_ProductionDic::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+        INSERT_ERROR(QString("EM_ProductionDic::Instance(): %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+        return false;
     }
     try
     {
-      EM_YearPlanDic &planDic = EM_YearPlanDic::Instance();
-      QSharedPointer<EM_YearPlan> shpYearPlan = planDic.by(fYear);
-      EM_YearPlan *yearPlan = shpYearPlan.data();
+        EM_YearPlanDic &planDic = EM_YearPlanDic::Instance();
+        QSharedPointer<EM_YearPlan> shpYearPlan = planDic.by(fYear);
+        EM_YearPlan *yearPlan = shpYearPlan.data();
         if (!yearPlan)
         {
             yearPlan = new EM_YearPlan(fYear);
             yearPlan->setTitle(QString("Годовой план %1 года").arg(fYear));
             shpYearPlan.reset(yearPlan);
         }
-      EM_BasePlanItem *root(NULL);
+        EM_BasePlanItem *root(NULL);
         try // удалить старый проект, если он был в базе
         {
             yearPlan->fromDB(); // чтение годового плана
             root = yearPlan->getRoot();
-            for (EM_BasePlanItem::iterator projIter=root->begin(); projIter!=root->end(); ++projIter)
+            for (EM_BasePlanItem::iterator projIter = root->begin(); projIter != root->end(); ++projIter)
                 if (EM_ProjectPlanItem *emProj = dynamic_cast<EM_ProjectPlanItem*>(*projIter)) // проект
-                    if (emProj->getID()==id())
+                    if (emProj->getID() == id())
                     {
                         try
                         {
@@ -194,29 +235,34 @@ bool TCarryTask::toDB(QString)
                         }
                         catch (CommonException::OpenDBException &e)
                         {
-                            INSERT_ERROR(QString("yearPlan->rem(emProj). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+                            INSERT_ERROR(QString("yearPlan->rem(emProj). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+                            return false;
                         }
                         catch (CommonException::SQLException &e)
                         {
-                            INSERT_ERROR(QString("yearPlan->rem(emProj). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+                            INSERT_ERROR(QString("yearPlan->rem(emProj). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+                            return false;
                         }
                         catch (CommonException::NullParamException &e)
                         {
-                            INSERT_ERROR(QString("yearPlan->rem(emProj). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+                            INSERT_ERROR(QString("yearPlan->rem(emProj). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+                            return false;
                         }
                         break;
                     }
         }
         catch (CommonException::OpenDBException &e)
         {
-            INSERT_ERROR(QString("yearPlan->fromDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+            INSERT_ERROR(QString("yearPlan->fromDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+            return false;
         }
         catch (CommonException::SQLException &e)
         {
-            INSERT_ERROR(QString("yearPlan->fromDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+            INSERT_ERROR(QString("yearPlan->fromDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+            return false;
         }
         // добавить новый
-      EM_BasePlanItem *emProj = yearPlan->Instance(PROJECT);
+        EM_BasePlanItem *emProj = yearPlan->Instance(PROJECT);
         if (EM_ProjectPlanItem *projItem = dynamic_cast<EM_ProjectPlanItem*>(emProj))
         {
             projItem->setNum(num());
@@ -237,26 +283,28 @@ bool TCarryTask::toDB(QString)
             projItem->setDuration(planPeriod());
             projItem->setSrcTitle(sourcesTitle());
             projItem->setResTitle(resultsTitle());
-            foreach (TStatus st,statuses()) projItem->addStatus(st);
-          TEmployeeRole rl = firstTemplateRole();
+            foreach (TStatus st, statuses()) projItem->addStatus(st);
+            TEmployeeRole rl = firstTemplateRole();
             projItem->setTemplEmployee(rl.type());
             projItem->setOshsItemID(rl.unitId() ? rl.unitId() : unitId());
             projItem->setPriority(priority());
             if (EM_Production *prod = prodDic->by(productionType())) projItem->setProduction(prod);
-            yearPlan->add(root,emProj);
+            yearPlan->add(root, emProj);
             try
             {
                 yearPlan->toDB();
             }
             catch (CommonException::OpenDBException &e)
             {
-                INSERT_ERROR(QString("emPlan->toDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+                INSERT_ERROR(QString("emPlan->toDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+                return false;
             }
             catch (CommonException::SQLException &e)
             {
-                INSERT_ERROR(QString("emPlan->toDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+                INSERT_ERROR(QString("emPlan->toDB(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+                return false;
             }
-        PR1(4,"emProj->getID(): %1",emProj->getID());
+            PR1(4, "emProj->getID(): %1", emProj->getID());
             setId(emProj->getID());
             if (fOrdPlan) fOrdPlan->toDB("plan");
             if (fCarryPlan) fCarryPlan->toDB("plan");
@@ -264,11 +312,13 @@ bool TCarryTask::toDB(QString)
     }
     catch (CommonException::OpenDBException &e)
     {
-        INSERT_ERROR(QString("EM_YearPlanDic::Instance(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+        INSERT_ERROR(QString("EM_YearPlanDic::Instance(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+        return false;
     }
     catch (CommonException::SQLException &e)
     {
-        INSERT_ERROR(QString("EM_YearPlanDic::Instance(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()),false); return false;
+        INSERT_ERROR(QString("EM_YearPlanDic::Instance(). %1 (code: %2)").arg(e.getMessage()).arg((int)e.getCode()), false);
+        return false;
     }
     return true;
 }
@@ -282,7 +332,7 @@ bool TCarryTask::fromDB(QString)
 
 //*****************************************************************************
 
-TCarryTaskPackage::TCarryTaskPackage(int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id,n,nm,parent)
+TCarryTaskPackage::TCarryTaskPackage(int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id, n, nm, parent)
 {
     fPlTasks.setAutoDelete(false);
 }
@@ -308,7 +358,7 @@ TCarryTaskList &TCarryTaskPackage::tasks() const
 
 void TCarryTaskPackage::insertTask(TCarryTask *tsk)
 {
-    if (tsk && fPlTasks.indexOf(tsk)==-1) fPlTasks.append(tsk);
+    if (tsk && fPlTasks.indexOf(tsk) == -1) fPlTasks.append(tsk);
 }
 //-----------------------------------------------------------------------------
 
@@ -326,24 +376,24 @@ void TCarryTaskPackage::clearTasks()
 
 TCarryTask *TCarryTaskPackage::findTask(int id, bool onnum)
 {
-    foreach (TCarryTask *tsk,fPlTasks)
+    foreach (TCarryTask *tsk, fPlTasks)
         if (onnum)
         {
-            if (tsk->num()==id) return tsk;
+            if (tsk->num() == id) return tsk;
         }
-        else if (tsk->id()==id) return tsk;
+        else if (tsk->id() == id) return tsk;
     return NULL;
 }
 //-----------------------------------------------------------------------------
 
 TCarryTask *TCarryTaskPackage::findTask(QString nm, bool onscrnm)
 {
-    foreach (TCarryTask *tsk,fPlTasks)
+    foreach (TCarryTask *tsk, fPlTasks)
         if (onscrnm)
         {
-            if (tsk->scrName()==nm) return tsk;
+            if (tsk->scrName() == nm) return tsk;
         }
-        else if (tsk->name()==nm) return tsk;
+        else if (tsk->name() == nm) return tsk;
     return NULL;
 }
 //-----------------------------------------------------------------------------

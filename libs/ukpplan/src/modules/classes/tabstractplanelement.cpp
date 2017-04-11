@@ -3,7 +3,7 @@
 #include <TIdent>
 #include <TAbstractPlanElement>
 
-TAbstractPlanElement::TAbstractPlanElement(int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id,n,nm,parent), fCondition(cocNone), fProblem(copNone), fSourcesTitle(""), fResultsTitle(""), fEmployee(NULL), fTemplatePeriod(0), fPlanPeriod(0), fDtPlanBegin(NULL), fDtPlanEnd(NULL), fDtRealBegin(NULL), fDtRealEnd(NULL), fIsSaved(false), fIsVolatile(false), fDescr(""), fUnitId(0), fCarryOutPercent(0)
+TAbstractPlanElement::TAbstractPlanElement(int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id, n, nm, parent), fCondition(cocNone), fProblem(copNone), fSourcesTitle(""), fResultsTitle(""), fEmployee(NULL), fTemplatePeriod(0), fPlanPeriod(0), fDtPlanBegin(NULL), fDtPlanEnd(NULL), fDtRealBegin(NULL), fDtRealEnd(NULL), fIsSaved(false), fIsVolatile(true), fDescr(""), fUnitId(0), fCarryOutPercent(0)
 {
     fSources.setAutoDelete(true);
     fResults.setAutoDelete(true);
@@ -14,25 +14,37 @@ TAbstractPlanElement::TAbstractPlanElement(int id, int n, QString nm, TAbstractO
 TAbstractPlanElement::TAbstractPlanElement(const TAbstractPlanElement &ape) : TAbstractObject(ape), fCondition(ape.fCondition), fProblem(ape.fProblem), fSourcesTitle(ape.fSourcesTitle), fResultsTitle(ape.fResultsTitle), fTemplateRoles(ape.fTemplateRoles), fEmployee(ape.fEmployee), fTemplatePeriod(ape.fTemplatePeriod), fPlanPeriod(ape.fPlanPeriod), fDtPlanBegin(ape.fDtPlanBegin ? new QDateTime(*ape.fDtPlanBegin) : NULL), fDtPlanEnd(ape.fDtPlanEnd ? new QDateTime(*ape.fDtPlanEnd) : NULL), fDtRealBegin(ape.fDtRealBegin ? new QDateTime(*ape.fDtRealBegin) : NULL), fDtRealEnd(ape.fDtRealEnd ? new QDateTime(*ape.fDtRealEnd) : NULL), fStatuses(ape.fStatuses), fIsSaved(ape.fIsSaved), fIsVolatile(ape.fIsVolatile), fDescr(ape.fDescr), fUnitId(ape.fUnitId), fCarryOutPercent(ape.fCarryOutPercent)
 {
     fSources.setAutoDelete(true);
-    foreach (TAbstractAttachment *el,ape.fSources)
+    foreach (TAbstractAttachment *el, ape.fSources)
         switch (el->type())
         {
-            case attDocument:  if (TDocument *doc = dynamic_cast<TDocument*>(el)) fSources.append(new TDocument(*doc)); break;
-            case attBdfData:   if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fSources.append(new TBdfData(*bdt)); break;
-            case attOobgdData: if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fSources.append(new TOobgdData(*odt)); break;
+            case attDocument:
+                if (TDocument *doc = dynamic_cast<TDocument*>(el)) fSources.append(new TDocument(*doc));
+                break;
+            case attBdfData:
+                if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fSources.append(new TBdfData(*bdt));
+                break;
+            case attOobgdData:
+                if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fSources.append(new TOobgdData(*odt));
+                break;
             default: ; // attNone
         }
     fResults.setAutoDelete(true);
-    foreach (TAbstractAttachment *el,ape.fResults)
+    foreach (TAbstractAttachment *el, ape.fResults)
         switch (el->type())
         {
-            case attDocument:  if (TDocument *doc = dynamic_cast<TDocument*>(el)) fResults.append(new TDocument(*doc)); break;
-            case attBdfData:   if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fResults.append(new TBdfData(*bdt)); break;
-            case attOobgdData: if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fResults.append(new TOobgdData(*odt)); break;
+            case attDocument:
+                if (TDocument *doc = dynamic_cast<TDocument*>(el)) fResults.append(new TDocument(*doc));
+                break;
+            case attBdfData:
+                if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fResults.append(new TBdfData(*bdt));
+                break;
+            case attOobgdData:
+                if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fResults.append(new TOobgdData(*odt));
+                break;
             default: ; // attNone
         }
     fPossibleEmployees.setAutoDelete(false);
-    foreach (TEmployee *empl,ape.fPossibleEmployees) fPossibleEmployees.append(empl);
+    foreach (TEmployee * empl, ape.fPossibleEmployees) fPossibleEmployees.append(empl);
 }
 //-----------------------------------------------------------------------------
 
@@ -47,32 +59,44 @@ TAbstractPlanElement::~TAbstractPlanElement()
 
 TAbstractPlanElement &TAbstractPlanElement::operator=(const TAbstractPlanElement &ape)
 {
-    if (&ape==this) return *this;
+    if (&ape == this) return *this;
     fCondition = ape.fCondition;
     fProblem = ape.fProblem;
     fSourcesTitle = ape.fSourcesTitle;
     fSources.clear();
-    foreach (TAbstractAttachment *el,ape.fSources)
+    foreach (TAbstractAttachment *el, ape.fSources)
         switch (el->type())
         {
-            case attDocument:  if (TDocument *doc = dynamic_cast<TDocument*>(el)) fSources.append(new TDocument(*doc)); break;
-            case attBdfData:   if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fSources.append(new TBdfData(*bdt)); break;
-            case attOobgdData: if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fSources.append(new TOobgdData(*odt)); break;
+            case attDocument:
+                if (TDocument *doc = dynamic_cast<TDocument*>(el)) fSources.append(new TDocument(*doc));
+                break;
+            case attBdfData:
+                if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fSources.append(new TBdfData(*bdt));
+                break;
+            case attOobgdData:
+                if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fSources.append(new TOobgdData(*odt));
+                break;
             default: ; // attNone
         }
     fResultsTitle = ape.fResultsTitle;
     fResults.clear();
-    foreach (TAbstractAttachment *el,ape.fResults)
+    foreach (TAbstractAttachment *el, ape.fResults)
         switch (el->type())
         {
-            case attDocument:  if (TDocument *doc = dynamic_cast<TDocument*>(el)) fResults.append(new TDocument(*doc)); break;
-            case attBdfData:   if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fResults.append(new TBdfData(*bdt)); break;
-            case attOobgdData: if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fResults.append(new TOobgdData(*odt)); break;
+            case attDocument:
+                if (TDocument *doc = dynamic_cast<TDocument*>(el)) fResults.append(new TDocument(*doc));
+                break;
+            case attBdfData:
+                if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) fResults.append(new TBdfData(*bdt));
+                break;
+            case attOobgdData:
+                if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) fResults.append(new TOobgdData(*odt));
+                break;
             default: ; // attNone
         }
     fTemplateRoles = ape.fTemplateRoles;
     fPossibleEmployees.clear();
-    foreach (TEmployee *empl,ape.fPossibleEmployees) fPossibleEmployees.append(empl);
+    foreach (TEmployee * empl, ape.fPossibleEmployees) fPossibleEmployees.append(empl);
     fEmployee = ape.fEmployee;
     fTemplatePeriod = ape.fTemplatePeriod;
     fPlanPeriod = ape.fPlanPeriod;
@@ -114,7 +138,7 @@ void TAbstractPlanElement::reset(bool thisonly)
     DELETE(fDtRealEnd);
     fStatuses.clear();
     fIsSaved = false;
-    fIsVolatile = false;
+    fIsVolatile = true;
     fDescr = "";
     fUnitId = 0;
     fCarryOutPercent = 0;
@@ -165,7 +189,7 @@ TAbstractAttachmentList &TAbstractPlanElement::sources() const
 
 void TAbstractPlanElement::insertSource(TAbstractAttachment *att)
 {
-    if (att && fSources.indexOf(att)==-1) fSources.append(att);
+    if (att && fSources.indexOf(att) == -1) fSources.append(att);
 }
 //-----------------------------------------------------------------------------
 
@@ -183,10 +207,10 @@ void TAbstractPlanElement::clearSources()
 
 TDocumentList *TAbstractPlanElement::sourceDocs() const
 {
-  TDocumentList *res(new TDocumentList());
+    TDocumentList *res(new TDocumentList());
     res->setAutoDelete(false);
-    foreach (TAbstractAttachment *el,fSources)
-        if (el->type()==attDocument)
+    foreach (TAbstractAttachment *el, fSources)
+        if (el->type() == attDocument)
             if (TDocument *doc = dynamic_cast<TDocument*>(el)) res->append(doc);
     if (!res->count()) DELETE(res);
     return res;
@@ -195,10 +219,10 @@ TDocumentList *TAbstractPlanElement::sourceDocs() const
 
 TBdfDataList *TAbstractPlanElement::sourceBdfs() const
 {
-  TBdfDataList *res(new TBdfDataList());
+    TBdfDataList *res(new TBdfDataList());
     res->setAutoDelete(false);
-    foreach (TAbstractAttachment *el,fSources)
-        if (el->type()==attBdfData)
+    foreach (TAbstractAttachment *el, fSources)
+        if (el->type() == attBdfData)
             if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) res->append(bdt);
     if (!res->count()) DELETE(res);
     return res;
@@ -207,10 +231,10 @@ TBdfDataList *TAbstractPlanElement::sourceBdfs() const
 
 TOobgdDataList *TAbstractPlanElement::sourceOobgds() const
 {
-  TOobgdDataList *res(new TOobgdDataList());
+    TOobgdDataList *res(new TOobgdDataList());
     res->setAutoDelete(false);
-    foreach (TAbstractAttachment *el,fSources)
-        if (el->type()==attOobgdData)
+    foreach (TAbstractAttachment *el, fSources)
+        if (el->type() == attOobgdData)
             if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) res->append(odt);
     if (!res->count()) DELETE(res);
     return res;
@@ -237,7 +261,7 @@ TAbstractAttachmentList &TAbstractPlanElement::results() const
 
 void TAbstractPlanElement::insertResult(TAbstractAttachment *att)
 {
-    if (att && fResults.indexOf(att)==-1) fResults.append(att);
+    if (att && fResults.indexOf(att) == -1) fResults.append(att);
 }
 //-----------------------------------------------------------------------------
 
@@ -255,10 +279,10 @@ void TAbstractPlanElement::clearResults()
 
 TDocumentList *TAbstractPlanElement::resultDocs() const
 {
-  TDocumentList *res(new TDocumentList());
+    TDocumentList *res(new TDocumentList());
     res->setAutoDelete(false);
-    foreach (TAbstractAttachment *el,fResults)
-        if (el->type()==attDocument)
+    foreach (TAbstractAttachment *el, fResults)
+        if (el->type() == attDocument)
             if (TDocument *doc = dynamic_cast<TDocument*>(el)) res->append(doc);
     if (!res->count()) DELETE(res);
     return res;
@@ -267,10 +291,10 @@ TDocumentList *TAbstractPlanElement::resultDocs() const
 
 TBdfDataList *TAbstractPlanElement::resultBdfs() const
 {
-  TBdfDataList *res(new TBdfDataList());
+    TBdfDataList *res(new TBdfDataList());
     res->setAutoDelete(false);
-    foreach (TAbstractAttachment *el,fResults)
-        if (el->type()==attBdfData)
+    foreach (TAbstractAttachment *el, fResults)
+        if (el->type() == attBdfData)
             if (TBdfData *bdt = dynamic_cast<TBdfData*>(el)) res->append(bdt);
     if (!res->count()) DELETE(res);
     return res;
@@ -279,10 +303,10 @@ TBdfDataList *TAbstractPlanElement::resultBdfs() const
 
 TOobgdDataList *TAbstractPlanElement::resultOobgds() const
 {
-  TOobgdDataList *res(new TOobgdDataList());
+    TOobgdDataList *res(new TOobgdDataList());
     res->setAutoDelete(false);
-    foreach (TAbstractAttachment *el,fResults)
-        if (el->type()==attOobgdData)
+    foreach (TAbstractAttachment *el, fResults)
+        if (el->type() == attOobgdData)
             if (TOobgdData *odt = dynamic_cast<TOobgdData*>(el)) res->append(odt);
     if (!res->count()) DELETE(res);
     return res;
@@ -316,7 +340,7 @@ TEmployeeList &TAbstractPlanElement::possibleEmployees() const
 
 void TAbstractPlanElement::insertPossibleEmployee(TEmployee *empl)
 {
-    if (empl && fPossibleEmployees.indexOf(empl)==-1) fPossibleEmployees.append(empl);
+    if (empl && fPossibleEmployees.indexOf(empl) == -1) fPossibleEmployees.append(empl);
 }
 //-----------------------------------------------------------------------------
 
@@ -371,8 +395,8 @@ void TAbstractPlanElement::setPlanPeriod(int t)
 int TAbstractPlanElement::realPeriod() const
 {
     if (!fDtRealBegin || !fDtRealEnd) return 0;
-  int diff(gen::round(fDtRealBegin->secsTo(*fDtRealEnd)/3600.)); // чвс
-    return diff>0 ? diff : 0;
+    int diff(gen::round(fDtRealBegin->secsTo(*fDtRealEnd) / 3600.)); // чвс
+    return diff > 0 ? diff : 0;
 }
 //-----------------------------------------------------------------------------
 
@@ -422,7 +446,7 @@ void TAbstractPlanElement::setDtRealEnd(const QDateTime &dt)
 
 QDateTime *TAbstractPlanElement::dtRealEndPrognos() const
 {
-    if (fDtRealBegin && !fDtRealEnd) return new QDateTime(fDtRealBegin->addSecs(fPlanPeriod*3600));
+    if (fDtRealBegin && !fDtRealEnd) return new QDateTime(fDtRealBegin->addSecs(fPlanPeriod * 3600));
     return NULL;
 }
 //-----------------------------------------------------------------------------
@@ -511,9 +535,9 @@ void TAbstractPlanElement::reflectAttachmentsToLw(const TAbstractAttachmentList 
     lw.clear();
     foreach (TAbstractAttachment *atchmt, atchmts)
     {
-      QListWidgetItem *newItem(new QListWidgetItem);
+        QListWidgetItem *newItem(new QListWidgetItem);
         newItem->setText(atchmt->scrName());
-        newItem->setData(Qt::UserRole,qVariantFromValue(TIdent(atchmt->id(),atchmt->num(),atchmt->name(),(int)atchmt->type())));
+        newItem->setData(Qt::UserRole, qVariantFromValue(TIdent(atchmt->id(), atchmt->num(), atchmt->name(), (int)atchmt->type())));
         newItem->setFlags(newItem->flags() | Qt::ItemIsTristate);
         newItem->setCheckState(Qt::Unchecked);
         lw.addItem(newItem);

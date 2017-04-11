@@ -13,12 +13,14 @@ private:
     TProductionType     fProductionType; // Тип продукции
     TCarryPlan         *fOrdPlan,      // План разработки ОРД
                        *fCarryPlan;    // План проекта
+    QDateTime          *fDtMinBegin,   // Минимальное время начала (для планирования)
+                       *fDtMaxEnd;     // Максимальное время окончания (для планирования)
 
     TCarryTask(const TCarryTask &crt);
     TCarryTask &operator=(const TCarryTask &crt);
 
 public:
-    TCarryTask(int year, TProductionType prtp, int id=0, int n=0, QString nm="", TAbstractObject *parent=NULL);
+    TCarryTask(int year, TProductionType prtp, int id = 0, int n = 0, QString nm = "", TAbstractObject *parent = NULL);
     ~TCarryTask();
 
     int year() const;                  // Год годового плана
@@ -31,11 +33,15 @@ public:
     void setOrdPlan(TCarryPlan *pl);
     TCarryPlan *carryPlan() const;     // План проекта
     void setCarryPlan(TCarryPlan *pl);
+    QDateTime *dtMinBegin() const;     // Минимальное время начала (для планирования)
+    void setDtMinBegin(const QDateTime &dt);
+    QDateTime *dtMaxEnd() const;       // Максимальное время окончания (для планирования)
+    void setDtMaxEnd(const QDateTime &dt);
 
 public: // TAbstractObject interface
     void reset(bool thisonly);
     QString toStr();
-    QString toHtml(bool fullinfo=true);
+    QString toHtml(bool fullinfo = true);
     bool toDB(QString param);
     bool fromDB(QString param);
 };
@@ -52,20 +58,20 @@ private:
     TCarryTaskPackage &operator=(const TCarryTaskPackage &cwp);
 
 public:
-    explicit TCarryTaskPackage(int id=0, int n=0, QString nm="", TAbstractObject *parent=NULL);
+    explicit TCarryTaskPackage(int id = 0, int n = 0, QString nm = "", TAbstractObject *parent = NULL);
     ~TCarryTaskPackage();
 
     TCarryTaskList &tasks() const;     // Список проектов
     void insertTask(TCarryTask *tsk);  // ... добавить
     void removeTask(TCarryTask *tsk);  // ... удалить
     void clearTasks();                 // ... очистить
-    TCarryTask *findTask(int id, bool onnum=false); // ... поиск по id (по умолчанию) или по номеру
-    TCarryTask *findTask(QString nm, bool onscrnm=false); // ... поиск по наименованию (по умолчанию) или по отображаемому наименованию
+    TCarryTask *findTask(int id, bool onnum = false); // ... поиск по id (по умолчанию) или по номеру
+    TCarryTask *findTask(QString nm, bool onscrnm = false); // ... поиск по наименованию (по умолчанию) или по отображаемому наименованию
 
 public: // TAbstractObject interface
     void reset(bool thisonly);
     QString toStr();
-    QString toHtml(bool fullinfo=true);
+    QString toHtml(bool fullinfo = true);
     bool toDB(QString param);
     bool fromDB(QString param);
 };

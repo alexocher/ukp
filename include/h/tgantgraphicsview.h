@@ -3,6 +3,7 @@
 
 #include <QGraphicsView>
 #include <QMap>
+#include <QTime>
 #include <QDateTime>
 #include <defUkpCommon>
 
@@ -27,11 +28,11 @@ private:
     TGantItem &operator=(const TGantItem &git);
 
 public:
-    enum TGantItemType { gitProject=0, gitPlan=1, gitProcedure=2, gitWork=3 };
-    enum TGantItemView { givRoundRect=0, gitRect=1 };
+    enum TGantItemType { gitProject = 0, gitPlan = 1, gitProcedure = 2, gitWork = 3 };
+    enum TGantItemView { givRoundRect = 0, gitRect = 1 };
 
 public:
-    TGantItem(TGantItemType tp, QString nm, TGantItem *prnt=NULL, int id=0, int n=0);
+    TGantItem(TGantItemType tp, QString nm, TGantItem *prnt = NULL, int id = 0, int n = 0);
     ~TGantItem();
 
     int id() const;                    // идентификатор
@@ -64,7 +65,7 @@ public:
     void insertChild(TGantItem *ch);   // ... добавление
     void removeChild(TGantItem *ch);   // ... удаление
     void clearChilds();                // ... очистка
-    TGantItem *findChild(int n, bool onid=false); // ... поиск по id или по номеру
+    TGantItem *findChild(int n, bool onid = false); // ... поиск по id или по номеру
     TGantItem *findChild(const QString &nm); // ... поиск по name
     int carryOutPercent() const;       // Процент выполненной работы
     void setCarryOutPercent(int cop);
@@ -100,16 +101,16 @@ class UKPCOMMONSHARED_EXPORT TGantGraphicsView : public QGraphicsView
 {
     Q_OBJECT
 //private:
-    public:
+public:
     TGantGraphicsView(const TGantGraphicsView &git);
     TGantGraphicsView &operator=(const TGantGraphicsView &git);
 
 public:
-    enum ContentDraw { cdPlan=0, cdReal=1, cdAll=2 };
-    enum ScaleView { svHour=0, svDay=1, svWeek=2, svMonth=3 };
+    enum ContentDraw { cdPlan = 0, cdReal = 1, cdAll = 2 };
+    enum ScaleView { svHour = 0, svDay = 1, svWeek = 2, svMonth = 3 };
 
 public:
-    explicit TGantGraphicsView( int year=0,  int curday=-1, QWidget *prnt=NULL); // year: если 0, то текущий год; curday: если < 0, то не отображать
+    explicit TGantGraphicsView(int year = 0,  int curday = -1, QTime workdaybegin = QTime(9, 0, 0), QWidget *prnt = NULL); // year: если 0, то текущий год; curday: если < 0, то не отображать
     ~TGantGraphicsView();
 
     int year() const;                  // год графика
@@ -129,7 +130,7 @@ public:
     void insertTopItem(TGantItem *ch); // ... добавление
     void removeTopItem(TGantItem *ch); // ... удаление
     void clearTopItems();              // ... очистка
-    TGantItem *findTopItem(int n, bool onid=false); // ... поиск по id или по номеру
+    TGantItem *findTopItem(int n, bool onid = false); // ... поиск по id или по номеру
     TGantItem *findTopItem(const QString &nm); // ... поиск по name
     QPen &gridPen() const;             // перо сетки
     void setGridPen(const QPen &p);
@@ -151,19 +152,19 @@ public:
     void show();
 
 public slots:
-     void ScrollVert(int value);    // получение сигнала вертикальной прокрутки ( QAbstractSlider::sliderMoved(int value) ) от синхронизируемого элемента
-     void ScrollHoriz(int value);
-     void ScrollHoriz_T(int value);
-     void ScrollHoriz_P(int value);
-     void ScrollVert_P(int value);
-     void set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_);
-     void set_scrollbarHoriz(QScrollBar *qscrollbarHorizPlan_);
-     void redraw();         // переотрисовка диаграмму
-     void newWindow();
+    void ScrollVert(int value);    // получение сигнала вертикальной прокрутки ( QAbstractSlider::sliderMoved(int value) ) от синхронизируемого элемента
+    void ScrollHoriz(int value);
+    void ScrollHoriz_T(int value);
+    void ScrollHoriz_P(int value);
+    void ScrollVert_P(int value);
+    void set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_);
+    void set_scrollbarHoriz(QScrollBar *qscrollbarHorizPlan_);
+    void redraw();         // переотрисовка диаграмму
+    void newWindow();
 
 protected:
-      void resizeEvent(QResizeEvent *event);//
-      //void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent *event);//
+    //void paintEvent(QPaintEvent *event);
 private:
 
     QTimer *timer;
@@ -174,6 +175,7 @@ private:
     // параметры календаря
     int                 m_year,
                         m_currentDay;  // текущий день календаря
+    QTime               m_workDayBegin; // Начало рабочего дня
     bool                m_weekends[ GANT_KOL_DAY ];
     // размеры ячеек и заголовка
     int                 m_headerHeight,
@@ -182,7 +184,7 @@ private:
     // элементы диаграммы верхнего уровня (m_parent==0)
     TGantItemList       m_topItems;
     // для удаления Item
-   // TGantItemList       m_items_for_del ; // ???
+    // TGantItemList       m_items_for_del ; // ???
     // параметры отрисовки сетки
     QPen                m_gridPen,
                         m_weekendPen;
@@ -209,8 +211,8 @@ private:
     int  get_kol_items(TGantItem *topItems);
     void get_kol_curr(TGantItem *topItems);
     void set_open(TGantItem  *items, bool op);
-    QGraphicsRectItem *draw_rec(qreal x, qreal y, qreal w, qreal h,  QPen &pen , QBrush &brush);
-    QGraphicsRectItem *draw_rec_tbl(qreal x, qreal y, qreal w, qreal h,  QPen &pen , QBrush &brush);
+    QGraphicsRectItem *draw_rec(qreal x, qreal y, qreal w, qreal h,  QPen &pen, QBrush &brush);
+    QGraphicsRectItem *draw_rec_tbl(qreal x, qreal y, qreal w, qreal h,  QPen &pen, QBrush &brush);
     void  draw_curr_items(TGantItem *topItems);
     void  draw_curr_items_n(TGantItem *topItems);
     void  draw_txt(qreal x, qreal y, qreal w, QString txt);
@@ -241,15 +243,15 @@ private:
 
     //bool first_resizeEvent;
     // календарь
-    QMap<int,QString>  months;
-    QMap<int,int>  days;
+    QMap<int, QString>  months;
+    QMap<int, int>  days;
 
     QPoint p;
 
 //public:
 //    QGraphicsView  *gv;
 
- signals:
+signals:
 
     void start_newPlan();
 

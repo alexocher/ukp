@@ -19,8 +19,8 @@ extern WGantDiagramm *wGantDiagramm;   // from wgantdiagramm.cpp
 namespace
 {
 
-    const int TW_COL_COUNT(8), TW_COL_WIDTHS[] = { 800,60,120,120,120,200,60,120 };
-    const QString TW_COL_NAMES[] = { "Наименование","Изм.","Продолжит.","Начало","Окончание","Должн. лицо","Сохр.","..." };
+    const int TW_COL_COUNT(8), TW_COL_WIDTHS[] = { 800, 60, 120, 150, 150, 200, 60, 120 };
+    const QString TW_COL_NAMES[] = { "Наименование", "Изм.", "Продолжит.", "Начало", "Окончание", "Должн. лицо", "Сохр.", "..." };
 
 }
 
@@ -29,40 +29,40 @@ WPlan::WPlan(QWidget *parent) : QFrame(parent)
     setupUi(this);
 
     if (QTreeWidgetItem *hdrIt = twProjects->headerItem())
-        for (int i=0; i<TW_COL_COUNT; i++)
+        for (int i = 0; i < TW_COL_COUNT; i++)
         {
-            hdrIt->setText(i,TW_COL_NAMES[i]);
-            hdrIt->setTextAlignment(i,Qt::AlignCenter);
+            hdrIt->setText(i, TW_COL_NAMES[i]);
+            hdrIt->setTextAlignment(i, Qt::AlignCenter);
         }
-    twProjects->setIconSize(QSize(36,36));
+    twProjects->setIconSize(QSize(36, 36));
     twProjects->setUniformRowHeights(true);
     twProjects->setSortingEnabled(true);
-    connect(twProjects,SIGNAL(currentItemChanged(QTreeWidgetItem*,QTreeWidgetItem*)),this,SLOT(selectPlanElement(QTreeWidgetItem*,QTreeWidgetItem*)));
-    connect(twProjects,SIGNAL(itemChanged(QTreeWidgetItem*,int)),this,SLOT(onItemChanged(QTreeWidgetItem*,int)));
+    connect(twProjects, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(selectPlanElement(QTreeWidgetItem*, QTreeWidgetItem*)));
+    connect(twProjects, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(onItemChanged(QTreeWidgetItem*, int)));
 
     dtBegin->setDate(QDate::currentDate());
 
-    connect(pbPriorityOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbCurrentDate,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbDtBeginOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbTemplatesOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbPeriodQuery,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbPeriodOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbEmployeesOk,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbEmployeesCalendar,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbEmployeesReset,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbEmployeesAdd,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbChangeYes,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbChangeNo,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbChangeReset,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbCheckAll,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbUncheckAll,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbExpand,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbCollapse,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbDiagr,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbPlan,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbCancel,SIGNAL(clicked()),this,SLOT(resetPlan()));
-    connect(pbApply,SIGNAL(clicked()),this,SLOT(resetPlan()));
+    connect(pbPriorityOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbCurrentDate, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbDtBeginOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbTemplatesOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbPeriodQuery, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbPeriodOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbEmployeesOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbEmployeesCalendar, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbEmployeesReset, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbEmployeesAdd, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbChangeYes, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbChangeNo, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbChangeReset, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbCheckAll, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbUncheckAll, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbExpand, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbCollapse, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbDiagr, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbPlan, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbCancel, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbApply, SIGNAL(clicked()), this, SLOT(resetPlan()));
 
     fillForm();
 
@@ -76,12 +76,12 @@ WPlan::~WPlan()
 
 void WPlan::fillForm()
 {
-  MODULE(Plans);
-    modPlans->reflectCarryTasksToTree(modPlans->carryTasks(),*twProjects);
-    twProjects->sortItems(0,Qt::AscendingOrder);
+    MODULE(Plans);
+    modPlans->reflectCarryTasksToTree(modPlans->carryTasks(), *twProjects);
+    twProjects->sortItems(0, Qt::AscendingOrder);
     qtools::expand(*twProjects);
-    modPlans->reflectTemplatesToCb(modPlans->planTemplates(),*cbTemplates);
-    for (int i=0; i<TW_COL_COUNT; i++) twProjects->setColumnWidth(i,TW_COL_WIDTHS[i]);
+    modPlans->reflectTemplatesToCb(modPlans->planTemplates(), *cbTemplates);
+    for (int i = 0; i < TW_COL_COUNT; i++) twProjects->setColumnWidth(i, TW_COL_WIDTHS[i]);
 }
 //-----------------------------------------------------------------------------
 
@@ -93,51 +93,52 @@ void WPlan::resetPlan()
 
 void WPlan::resetPlan(const QPushButton &btn)
 {
-    if (&btn==pbPriorityOk)
+    if (&btn == pbPriorityOk)
     {
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
                 if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(plEl)) tsk->setPriority(sbPriority->value());
         }
     }
-    else if (&btn==pbCurrentDate)
+    else if (&btn == pbCurrentDate)
     {
         dtBegin->setDate(QDate::currentDate());
     }
-    else if (&btn==pbDtBeginOk)
+    else if (&btn == pbDtBeginOk)
     {
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms)) plEl->setDtPlanBegin(QDateTime(dtBegin->date(),QTime(9,0,0)));
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
+                tsk->setDtMinBegin(QDateTime(dtBegin->date(), QTime(9, 0, 0)));
         }
     }
-    else if (&btn==pbTemplatesOk)
+    else if (&btn == pbTemplatesOk)
     {
-      QString sErr("");
+        QString sErr("");
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
             {
                 if (TCarryPlan *plan = dynamic_cast<TCarryPlan*>(plEl))
                 {
-                  QTreeWidgetItem *topIt(curIt->parent());
-                  QString tskTitle(topIt ? topIt->text(0) : "");
-                    plan->fillFromTemplate((TCarryPlan*)modPlans->findPlanTemplate(cbTemplates->currentText(),true));
+                    QTreeWidgetItem *topIt(curIt->parent());
+                    QString tskTitle(topIt ? topIt->text(0) : "");
+                    plan->fillFromTemplate((TCarryPlan*)modPlans->findPlanTemplate(cbTemplates->currentText(), true));
                     modPlans->setElementIdsForPlan();
-                    modPlans->reflectCarryTasksToTree(modPlans->carryTasks(),*twProjects);
-                    qtools::expand(*twProjects,0);
-                    for (int i=0; i<twProjects->topLevelItemCount(); i++)
+                    modPlans->reflectCarryTasksToTree(modPlans->carryTasks(), *twProjects);
+                    qtools::expand(*twProjects, 0);
+                    for (int i = 0; i < twProjects->topLevelItemCount(); i++)
                         if (QTreeWidgetItem *topIt = twProjects->topLevelItem(i))
-                            if (topIt->text(0)==tskTitle)
+                            if (topIt->text(0) == tskTitle)
                             {
-                                for (int j=0; j<topIt->childCount(); j++)
+                                for (int j = 0; j < topIt->childCount(); j++)
                                     if (QTreeWidgetItem *it = topIt->child(j)) it->setExpanded(true);
                                 topIt->setExpanded(true);
                                 break;
@@ -150,176 +151,176 @@ void WPlan::resetPlan(const QPushButton &btn)
         else sErr = "Не выбран узел дерева";
         if (!sErr.isEmpty())
         {
-          QMessageBox mb(QMessageBox::Question,tr("Ошибка"),sErr,QMessageBox::Ok,this);
-            mb.setButtonText(QMessageBox::Ok,tr("Принять"));
+            QMessageBox mb(QMessageBox::Question, tr("Ошибка"), sErr, QMessageBox::Ok, this);
+            mb.setButtonText(QMessageBox::Ok, tr("Принять"));
             mb.exec();
         }
     }
-    else if (&btn==pbPeriodQuery)
+    else if (&btn == pbPeriodQuery)
     {
 
     }
-    else if (&btn==pbPeriodOk)
+    else if (&btn == pbPeriodOk)
     {
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
             {
                 plEl->setPlanPeriod(sbPeriod->value());
-                curIt->setText(2,gen::intToStr(sbPeriod->value()));
+                curIt->setText(2, gen::intToStr(sbPeriod->value()));
             }
         }
     }
-    else if (&btn==pbEmployeesOk)
+    else if (&btn == pbEmployeesOk)
     {
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
             {
-              QStringList chkEmpls;
-                for (int i=0; i<lwEmployees->count(); i++)
+                QStringList chkEmpls;
+                for (int i = 0; i < lwEmployees->count(); i++)
                     if (QListWidgetItem *it = lwEmployees->item(i))
-                        if (it->checkState()==Qt::Checked) chkEmpls<<it->text();
+                        if (it->checkState() == Qt::Checked) chkEmpls << it->text();
                 plEl->clearPossibleEmployeess();
-              MODULE(Employees);
-                foreach (const QString &scrnm,chkEmpls)
-                    if (TEmployee *empl = modEmployees->findEmployee(scrnm,true)) plEl->insertPossibleEmployee(empl);
-                modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(),*lwEmployees);
+                MODULE(Employees);
+                foreach (const QString &scrnm, chkEmpls)
+                    if (TEmployee *empl = modEmployees->findEmployee(scrnm, true)) plEl->insertPossibleEmployee(empl);
+                modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(), *lwEmployees);
                 teParams->setText(plEl->toHtml(!cbIsShort->isChecked()));
             }
         }
     }
-    else if (&btn==pbEmployeesCalendar)
+    else if (&btn == pbEmployeesCalendar)
     {
 
     }
-    else if (&btn==pbEmployeesReset)
+    else if (&btn == pbEmployeesReset)
     {
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
             {
                 plEl->clearPossibleEmployeess();
-              MODULE(Employees);
-              TEmployeeRole frstRl = plEl->firstTemplateRole();
-                if (frstRl.type()!=eltNone)
+                MODULE(Employees);
+                TEmployeeRole frstRl = plEl->firstTemplateRole();
+                if (frstRl.type() != eltNone)
                 {
-                  TEmployeeRoleList rls;
-                    rls<<frstRl;
-                    if (TEmployeeList *posempl = modEmployees->findEmployees(frstRl.unitId(),rls))
-                        foreach (TEmployee *empl,*posempl) plEl->insertPossibleEmployee(empl);
+                    TEmployeeRoleList rls;
+                    rls << frstRl;
+                    if (TEmployeeList *posempl = modEmployees->findEmployees(frstRl.unitId(), rls))
+                        foreach (TEmployee * empl, *posempl) plEl->insertPossibleEmployee(empl);
                 }
-                modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(),*lwEmployees);
+                modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(), *lwEmployees);
                 teParams->setText(plEl->toHtml(!cbIsShort->isChecked()));
             }
         }
     }
-    else if (&btn==pbEmployeesAdd)
+    else if (&btn == pbEmployeesAdd)
     {
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
             {
-              MODULE(Employees);
+                MODULE(Employees);
                 if (TEmployee *empl = modEmployees->findEmployee(cbEmployees->currentData().toInt()))
                 {
                     plEl->insertPossibleEmployee(empl);
-                    modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(),*lwEmployees);
+                    modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(), *lwEmployees);
                 }
             }
         }
     }
-    else if (&btn==pbChangeYes || &btn==pbChangeNo)
+    else if (&btn == pbChangeYes || &btn == pbChangeNo)
     {
-      QList<QTreeWidgetItem*> checkedItems;
-        if (qtools::treeToList(*twProjects,checkedItems,Qt::Checked))
+        QList<QTreeWidgetItem*> checkedItems;
+        if (qtools::treeToList(*twProjects, checkedItems, Qt::Checked))
         {
-          MODULE(Plans);
-          bool setvol(&btn==pbChangeYes);
-            foreach (QTreeWidgetItem *it,checkedItems)
+            MODULE(Plans);
+            bool setvol(&btn == pbChangeYes);
+            foreach (QTreeWidgetItem *it, checkedItems)
             {
-              QStringList scrnms = qtools::hierarchyTexts(*it);
-                if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+                QStringList scrnms = qtools::hierarchyTexts(*it);
+                if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
                 {
                     plEl->setVolatile(setvol);
-                    it->setIcon(1,ICONPIX(plEl->isVolatile() ? PIX_CHANGE : ""));
+                    it->setIcon(1, ICONPIX(plEl->isVolatile() ? "" : PIX_CROSS));
                 }
             }
         }
     }
-    else if (&btn==pbChangeReset)
+    else if (&btn == pbChangeReset)
     {
-      QList<QTreeWidgetItem*> checkedItems;
-        if (qtools::treeToList(*twProjects,checkedItems))
+        QList<QTreeWidgetItem*> checkedItems;
+        if (qtools::treeToList(*twProjects, checkedItems))
         {
-          MODULE(Plans);
-            foreach (QTreeWidgetItem *it,checkedItems)
+            MODULE(Plans);
+            foreach (QTreeWidgetItem *it, checkedItems)
             {
-              QStringList scrnms = qtools::hierarchyTexts(*it);
-                if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+                QStringList scrnms = qtools::hierarchyTexts(*it);
+                if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
                 {
-                    plEl->setVolatile(false);
-                    it->setIcon(1,ICONPIX(""));
+                    plEl->setVolatile(true);
+                    it->setIcon(1, ICONPIX(""));
                 }
             }
         }
     }
-    else if (&btn==pbCheckAll || &btn==pbUncheckAll)
+    else if (&btn == pbCheckAll || &btn == pbUncheckAll)
     {
-        for (int i=0; i<twProjects->topLevelItemCount(); i++)
-            if (QTreeWidgetItem *it = twProjects->topLevelItem(i)) it->setCheckState(0,&btn==pbCheckAll ? Qt::Checked : Qt::Unchecked);
+        for (int i = 0; i < twProjects->topLevelItemCount(); i++)
+            if (QTreeWidgetItem *it = twProjects->topLevelItem(i)) it->setCheckState(0, &btn == pbCheckAll ? Qt::Checked : Qt::Unchecked);
     }
-    else if (&btn==pbExpand || &btn==pbCollapse)
+    else if (&btn == pbExpand || &btn == pbCollapse)
     {
-        qtools::expand(*twProjects,&btn==pbExpand ? -1 : 0);
+        qtools::expand(*twProjects, &btn == pbExpand ? -1 : 0);
     }
-    else if (&btn==pbDiagr)
+    else if (&btn == pbDiagr)
     {
         if (!wGantDiagramm) wGantDiagramm = new WGantDiagramm(this);
         wGantDiagramm->setGeometry(frmMainUkpCarryPlan->centralWidgetGlobalRect());
         //wGantDiagramm->setGeometry(frmMainUkpCarryPlan->formRect());
-      MODULE(Plans);
-        wGantDiagramm->prepare(modPlans->carryTasks(),TGantGraphicsView::cdPlan,TGantGraphicsView::svDay);
+        MODULE(Plans);
+        wGantDiagramm->prepare(modPlans->carryTasks(), TGantGraphicsView::cdPlan, TGantGraphicsView::svDay);
         wGantDiagramm->exec();
     }
-    else if (&btn==pbPlan)
+    else if (&btn == pbPlan)
     {
-      MODULE(Plans);
-      QString errs("");
-        if (!modPlans->createCarryPlans(modPlans->carryTasks(),errs))
+        MODULE(Plans);
+        QString errs("");
+        if (!modPlans->createCarryPlans(modPlans->carryTasks(), errs))
         {
-          QMessageBox mb(QMessageBox::Critical,tr("Ошибка планирования"),errs,QMessageBox::Ok,this);
-            mb.setButtonText(QMessageBox::Ok,tr("Принять"));
+            QMessageBox mb(QMessageBox::Critical, tr("Ошибка планирования"), errs, QMessageBox::Ok, this);
+            mb.setButtonText(QMessageBox::Ok, tr("Принять"));
             mb.exec();
         }
         else
         {
             fillForm();
-          QMessageBox mb(QMessageBox::Information,tr("Планирование"),"Выполнено успешно",QMessageBox::Ok,this);
-            mb.setButtonText(QMessageBox::Ok,tr("Принять"));
+            QMessageBox mb(QMessageBox::Information, tr("Планирование"), "Выполнено успешно", QMessageBox::Ok, this);
+            mb.setButtonText(QMessageBox::Ok, tr("Принять"));
             mb.exec();
         }
     }
-    else if (&btn==pbCancel)
+    else if (&btn == pbCancel)
     {
 
     }
-    else if (&btn==pbApply)
+    else if (&btn == pbApply)
     {
-      QString sErr("");
+        QString sErr("");
         if (QTreeWidgetItem *curIt = twProjects->currentItem())
         {
-          QStringList scrnms = qtools::hierarchyTexts(*curIt);
-          MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
             {
                 if (TCarryPlan *plan = dynamic_cast<TCarryPlan*>(plEl))
                 {
@@ -330,9 +331,9 @@ void WPlan::resetPlan(const QPushButton &btn)
             else sErr = "Не найден элемент";
         }
         else sErr = "Не выбран план";
-      bool wasErr(!sErr.isEmpty());
-      QMessageBox mb(wasErr ? QMessageBox::Warning : QMessageBox::Information,wasErr ? "Ошибка" : "Успешно",wasErr ? sErr : "План сохранен",QMessageBox::Ok,this);
-        mb.setButtonText(QMessageBox::Ok,tr("Принять"));
+        bool wasErr(!sErr.isEmpty());
+        QMessageBox mb(wasErr ? QMessageBox::Warning : QMessageBox::Information, wasErr ? "Ошибка" : "Успешно", wasErr ? sErr : "План сохранен", QMessageBox::Ok, this);
+        mb.setButtonText(QMessageBox::Ok, tr("Принять"));
         mb.exec();
     }
 }
@@ -340,26 +341,26 @@ void WPlan::resetPlan(const QPushButton &btn)
 
 void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
 {
-  QString params("");
+    QString params("");
     if (curIt)
     {
-      QStringList scrnms = qtools::hierarchyTexts(*curIt);
-      MODULE(Plans);
-        if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(),scrnms))
+        QStringList scrnms = qtools::hierarchyTexts(*curIt);
+        MODULE(Plans);
+        if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
         {
             params = plEl->toHtml(!cbIsShort->isChecked());
-          bool isTask(false), isPlan(false), isProcedure(false), isWork(false);
-          MODULE(Employees);
+            bool isTask(false), isPlan(false), isProcedure(false), isWork(false);
+            MODULE(Employees);
             if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(plEl))
             {
                 isTask = true;
                 sbPriority->setValue(tsk->priority());
-                dtBegin->setDate(tsk->dtPlanBegin() ? tsk->dtPlanBegin()->date() : QDate(QDate::currentDate().year(),1,1));
+                dtBegin->setDate(tsk->dtPlanBegin() ? tsk->dtPlanBegin()->date() : QDate(QDate::currentDate().year(), 1, 1));
             }
             else if (dynamic_cast<TCarryPlan*>(plEl)) isPlan = true; // TCarryPlan *plan =
             else if (TCarryProcedure *pr = dynamic_cast<TCarryProcedure*>(plEl))
             {
-                modEmployees->reflectEmployeesToLw(pr->possibleEmployees(),*lwEmployees);
+                modEmployees->reflectEmployeesToLw(pr->possibleEmployees(), *lwEmployees);
                 isProcedure = true;
             }
             else if (TCarryWork *wrk = dynamic_cast<TCarryWork*>(plEl))
@@ -383,8 +384,8 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
             pbEmployeesAdd->setEnabled(isProcedure);
             if (isProcedure)
             {
-              TEmployeeRole frstRl = plEl->firstTemplateRole();
-                modEmployees->reflectEmployeesToCb(frstRl.unitId(),*cbEmployees);
+                TEmployeeRole frstRl = plEl->firstTemplateRole();
+                modEmployees->reflectEmployeesToCb(frstRl.unitId(), *cbEmployees);
             }
             else cbEmployees->clear();
         }
@@ -396,14 +397,14 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
 void WPlan::onItemChanged(QTreeWidgetItem *it, int col)
 {
     if (!it || col) return;
-    if (qtools::level(*it)!=1) return;
+    if (qtools::level(*it) != 1) return;
     //PR(0,it->text(0));
-  QStringList scrnms = qtools::hierarchyTexts(*it);
-  MODULE(Plans);
-    if (TCarryPlan *plan = dynamic_cast<TCarryPlan*>(modPlans->findCarryElement(modPlans->carryTasks(),scrnms)))
+    QStringList scrnms = qtools::hierarchyTexts(*it);
+    MODULE(Plans);
+    if (TCarryPlan *plan = dynamic_cast<TCarryPlan*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
     {
-        plan->setChecked(it->checkState(0)==Qt::Checked);
-    //PR(4,plan->isChecked() ? "Да" : "Нет");
+        plan->setChecked(it->checkState(0) == Qt::Checked);
+        //PR(4,plan->isChecked() ? "Да" : "Нет");
     }
 }
 //-----------------------------------------------------------------------------
