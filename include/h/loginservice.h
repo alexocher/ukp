@@ -3,7 +3,7 @@
 
 #include <QtCore/qglobal.h>
 #include <QWidget>
-#if defined(LOGINSERVICE_LIBRARY) || defined(Q_OS_WIN32)
+#if defined(LOGINSERVICE_LIBRARY) && !defined(Q_OS_WIN32)
     #include "../EntityManager/Headers/EM_AddressBook.h"
 #else
     #include <EM_AddressBook>
