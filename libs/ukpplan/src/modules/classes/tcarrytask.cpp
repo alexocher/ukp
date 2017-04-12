@@ -3,7 +3,9 @@
 #include <TCarryTask>
 #include <EM_Plan>
 
-TCarryTask::TCarryTask(int year, TProductionType prtp, int id, int n, QString nm, TAbstractObject *parent) : TAbstractPlanElement(id, n, nm, parent), fYear(year), fPriority(0), fProductionType(prtp), fOrdPlan(NULL), fCarryPlan(NULL), fDtMinBegin(NULL), fDtMaxEnd(NULL)
+TCarryTask::TCarryTask(int year, TProductionType prtp, int id, int n, QString nm,
+                       TAbstractObject *parent) : TAbstractPlanElement(id, n, nm, parent), fYear(year), fPriority(0), fProductionType(prtp),
+    fOrdPlan(NULL), fCarryPlan(NULL), fDtMinBegin(NULL), fDtMaxEnd(NULL)
 {
 }
 //-----------------------------------------------------------------------------
@@ -133,8 +135,10 @@ QString TCarryTask::toHtml(bool) // fullinfo
     QString sHtml("");
     sHtml += QString("Год: <b>%1</b>").arg(fYear);
     sHtml += QString("<br>Продукция: <b>%1</b>").arg(convertEnums::enumToStr(fProductionType));
-    sHtml += QString("<br>ОРД: <b>%1</b>").arg(fOrdPlan ? (fOrdPlan->procedures().count() ? "заполнен" : "не заполнен") : "нет");
-    sHtml += QString("<br>План: <b>%1</b>").arg(fCarryPlan ? (fCarryPlan->procedures().count() ? "заполнен" : "не заполнен") : "нет");
+    sHtml += QString("<br>ОРД: <b>%1</b>").arg(fOrdPlan ? (fOrdPlan->procedures().count() ? "заполнен" :
+             "не заполнен") : "нет");
+    sHtml += QString("<br>План: <b>%1</b>").arg(fCarryPlan ? (fCarryPlan->procedures().count() ? "заполнен" :
+             "не заполнен") : "нет");
 
     sHtml += QString("<br>Приоритет: <b>%1</b>").arg(fPriority);
     sHtml += QString("<br>Сосотояние: <b>%1</b>").arg(convertEnums::enumToStr(fCondition));
@@ -148,7 +152,8 @@ QString TCarryTask::toHtml(bool) // fullinfo
     {
         sHtml += QString("<br>Типовое ДЛ: <b>%1</b>").arg(convertEnums::enumToStr(erl.type()));
         MODULE(Units);
-        if (TUnit *un = modUnits->findUnit(erl.unitId())) sHtml += QString("<br>Внешнее подразд.: <b>%1</b>").arg(un->scrName());
+        if (TUnit *un = modUnits->findUnit(erl.unitId())) sHtml += QString("<br>Внешнее подразд.: <b>%1</b>").arg(
+                        un->scrName());
     }
     sHtml += QString("<br>Возможные ДЛ: <b>%1</b>").arg(fPossibleEmployees.count());
     int n(0);
@@ -159,7 +164,8 @@ QString TCarryTask::toHtml(bool) // fullinfo
     sHtml += QString("<br>Продолж. план.: <b>%1</b>").arg(fPlanPeriod);
     sHtml += QString("<br>Tн (план): <b>%1</b>").arg(fDtPlanBegin ? fDtPlanBegin->toString("dd.MM.yy") : "---");
     sHtml += QString("<br>Tк (план): <b>%1</b>").arg(fDtPlanEnd ? fDtPlanEnd->toString("dd.MM.yy") : "---");
-    sHtml += QString("<br>Tн (факт): <b>%1</b>").arg(fDtRealBegin ? fDtRealBegin->toString("dd.MM.yy (hh:mm)") : "---");
+    sHtml += QString("<br>Tн (факт): <b>%1</b>").arg(fDtRealBegin ? fDtRealBegin->toString("dd.MM.yy (hh:mm)") :
+             "---");
     sHtml += QString("<br>Tк (факт): <b>%1</b>").arg(fDtRealEnd ? fDtRealEnd->toString("dd.MM.yy (hh:mm)") : "---");
     sHtml += QString("<br>Статусы: <b>%1</b>").arg(fStatuses.count());
     n = 0;
@@ -168,7 +174,8 @@ QString TCarryTask::toHtml(bool) // fullinfo
     sHtml += QString("<br>Сохранено: <b>%1</b>").arg(fIsSaved ? "Да" : "Нет");
     sHtml += QString("<br>Можно изменять: <b>%1</b>").arg(fIsVolatile ? "Да" : "Нет");
 
-    sHtml += QString("<br>Планировать с: <b>%1</b>").arg(fDtMinBegin ? fDtMinBegin->toString("dd.MM.yy") : "---");
+    sHtml += QString("<br>Планировать с: <b>%1</b>").arg(fDtMinBegin ? fDtMinBegin->toString("dd.MM.yy") :
+             "---");
     sHtml += QString("<br>Выполнить к: <b>%1</b>").arg(fDtMaxEnd ? fDtMaxEnd->toString("dd.MM.yy") : "---");
 
     return sHtml;
@@ -226,7 +233,7 @@ bool TCarryTask::toDB(QString)
             yearPlan->fromDB(); // чтение годового плана
             root = yearPlan->getRoot();
             for (EM_BasePlanItem::iterator projIter = root->begin(); projIter != root->end(); ++projIter)
-                if (EM_ProjectPlanItem *emProj = dynamic_cast<EM_ProjectPlanItem*>(*projIter)) // проект
+                if (EM_ProjectPlanItem *emProj = dynamic_cast<EM_ProjectPlanItem *>(*projIter)) // проект
                     if (emProj->getID() == id())
                     {
                         try
@@ -263,7 +270,7 @@ bool TCarryTask::toDB(QString)
         }
         // добавить новый
         EM_BasePlanItem *emProj = yearPlan->Instance(PROJECT);
-        if (EM_ProjectPlanItem *projItem = dynamic_cast<EM_ProjectPlanItem*>(emProj))
+        if (EM_ProjectPlanItem *projItem = dynamic_cast<EM_ProjectPlanItem *>(emProj))
         {
             projItem->setNum(num());
             projItem->setShortTitle(name());
@@ -332,7 +339,8 @@ bool TCarryTask::fromDB(QString)
 
 //*****************************************************************************
 
-TCarryTaskPackage::TCarryTaskPackage(int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id, n, nm, parent)
+TCarryTaskPackage::TCarryTaskPackage(int id, int n, QString nm, TAbstractObject *parent) :
+    TAbstractObject(id, n, nm, parent)
 {
     fPlTasks.setAutoDelete(false);
 }
@@ -352,7 +360,7 @@ void TCarryTaskPackage::reset(bool thisonly)
 
 TCarryTaskList &TCarryTaskPackage::tasks() const
 {
-    return const_cast<TCarryTaskList&>(fPlTasks);
+    return const_cast<TCarryTaskList &>(fPlTasks);
 }
 //-----------------------------------------------------------------------------
 
