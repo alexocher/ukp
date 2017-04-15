@@ -382,10 +382,9 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
         if (dtRealEnd()) planItem->realEnd(*dtRealEnd());
         planItem->setSrcTitle(sourcesTitle());
         planItem->setResTitle(resultsTitle());
-        if (employee())
-        {
-            if (EM_User *usr = addrBook->getUser(employee()->id())) planItem->setEmployee(usr); // external=false
-        }
+      MODULE(Employees);
+        if (!employee()) setEmployee(modEmployees->selfEmployee());
+        if (EM_User *usr = addrBook->getUser(employee()->id())) planItem->setEmployee(usr); // external=false
       TEmployeeRole rl = firstTemplateRole();
         planItem->setTemplEmployee(rl.type());
         planItem->setOshsItemID(rl.unitId() ? rl.unitId() : unitId());

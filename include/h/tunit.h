@@ -36,7 +36,7 @@ public:
     void insertEmployee(TEmployee *empl); // ... вставить
     void removeEmployee(TEmployee *empl); // ... удалить
     void clearEmployees();             // ... очистить
-    TEmployee *findEmployee(int id);   // ... поиск по id
+    TEmployee *findEmployee(int id, bool withsubunits=false); // ... поиск по id в текущем подразделени (withsubunits===false) или в текущем и во всех подчиненных (withsubunits===true)
     TEmployeeList *findEmployees(const TEmployeeRoleList &rls); // ... поиск с подходящими ролями
     int shtatEmployeeCount() const;    // Штатное количество персонала
     void setShtatEmployeeCount(int cnt);

@@ -146,7 +146,7 @@ bool TModuleEmployees::init()
                             // !!! TEmployeeCalendar *fCalendar - при создании общего календаря TModulePlans::fromDB("CompanyCalendar");
                             curUn.insertEmployee(curEmpl);
                             insertEmployee(curEmpl);
-                        PR1(4,"EMPL: %1",curEmpl->scrName());
+                        PR3(4,"EMPL: %1 (%2 *%3*)",curEmpl->scrName(),us->getLogin(),us->getPassword());
                         }
                     }
                 foreach (TUnit *subUn,curUn.subUnits()) unStack.push(subUn);

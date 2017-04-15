@@ -92,10 +92,14 @@ void TUnit::clearEmployees()
 }
 //-----------------------------------------------------------------------------
 
-TEmployee *TUnit::findEmployee(int id)
+// ... поиск по id в текущем подразделени  (insubunits===false) или в текущем и во всех подчиненных)
+TEmployee *TUnit::findEmployee(int id, bool withsubunits)
 {
     foreach (TEmployee *empl, fPlEmployees)
         if (empl->id() == id) return empl;
+    if (withsubunits)
+        foreach (TUnit *un,fSubUnits)
+            if (TEmployee *empl = un->findEmployee(id,true)) return empl;
     return NULL;
 }
 //-----------------------------------------------------------------------------
@@ -135,7 +139,12 @@ void TUnit::setShtatEmployeeCount(int cnt)
 // Проверка, входит ли ДЛ в текущее подразделение или в какое-либо подчиненное
 bool TUnit::isInternalEmployee(int id)
 {
-    return true; // ???
+  MODULE(Employees);
+    if (modEmployees->selfEmployee()->id()==id) return true;
+  TEmployeeRole &rl = modEmployees->selfEmployee()->role();
+    if (rl.type()==eltChief || rl.type()==eltSubstituent || rl.type()==eltMajorEngineer)
+        if (findEmployee(id,true)) return true;
+    return false;
 }
 //-----------------------------------------------------------------------------
 

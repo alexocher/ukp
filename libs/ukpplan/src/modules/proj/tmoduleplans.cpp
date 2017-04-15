@@ -396,10 +396,13 @@ void TModulePlans::fillTasks(QList<int> tskids)
                             PR(8, "for planIter");
                             EM_BasePlanItem *pl = *planIter;
                             PR3(12, "NODE_TYPE: %1, SUID: %2, (%3)", pl->getType(), pl->getID(), pl->getFullTitle());
-
-                            //MODULE(Units);
-                            // ??? if (!modUnits->selfUnit()->isInternalEmployee(EM_User*EM_BasePlanItem::_employee;)) continue;
-
+                            if (EM_User *user = pl->getEmployee())
+                            {
+                            PR1(16, "USER: %1", user->getDescr());
+                              MODULE(Units);
+                                if (!modUnits->selfUnit()->isInternalEmployee(user->SUID())) continue;
+                            }
+                            else PR(16, "USER: unknown");
                             if (EM_PlanItem *curPlan = dynamic_cast<EM_PlanItem*>(*planIter)) // план
                             {
                                 //PR(12,"if EM_PlanItem");
