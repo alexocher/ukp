@@ -1,6 +1,7 @@
 #include <EM_Calendar>
 #include <defMacro>
 #include <TWorkCalendar>
+#include <TAbstractApp>
 
 TCompanyCalendar::TCompanyCalendar(int year, int id, int n, QString nm, TAbstractObject *parent) : TAbstractObject(id,n,nm,parent), fYear(year)
 {
@@ -88,6 +89,7 @@ bool TCompanyCalendar::fromDB(QString param) // год
       EM_CalendarDic &dic = EM_CalendarDic::Instance();
         try
         {
+            PROJ->setWorkDayBegin(dic.getBeginWork());
           QList<QSharedPointer<EM_CalendarItem> > intervals = dic.get(QDateTime(QDate(fYear,1,1),QTime(0,0)),QDateTime(QDate(fYear+1,1,1),QTime(0,0)));
             foreach (QSharedPointer<EM_CalendarItem> shIt,intervals)
                 if (EM_CalendarItem *cdrIt = shIt.data())

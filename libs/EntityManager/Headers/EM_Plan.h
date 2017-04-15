@@ -81,6 +81,8 @@ private:
     int                      _oshs_item_id;         // идентификатор внешнего элемента ошс
 
     int                      _progress;             // прогресс
+
+    bool                     _is_tester;            // провверяющая задача
 protected:
     QList<TEmployeeType>     _template_employee;    // список возможных исполителей (роли)
     TEmployeeType            _templ_employee;       // возможный исполнитель
@@ -210,6 +212,7 @@ public:
     virtual TEmployeeType   getTemplEmployee() const;
     int                     getOshsItemID() const;
     int                     getProgress() const;
+    bool                    isTester() const;
 
     bool    isVisualHide() const; // признак видимости
 
@@ -246,6 +249,7 @@ public:
     void    setTemplEmployee(TEmployeeType value);
     void    setOshsItemID(int value);
     void    setProgress(int value);
+    void    setTester(bool value);
     // Получить подэлемент по индексу
     EM_BasePlanItem* operator[](int index);
     EM_BasePlanItem* at(int index);
@@ -269,6 +273,8 @@ protected:
 
     EM_Production* _production;
     int            _priority;
+    QDateTime      _tbegin;
+    QDateTime      _tend;
 public:
     ~EM_ProjectPlanItem(){;}
 
@@ -277,6 +283,10 @@ public:
     void setProduction(EM_Production* value);
     void setPriority(int value);
 
+    const QDateTime& getTimeBegin() const;
+    const QDateTime& getTimeEnd() const;
+    void setTimeBegin(const QDateTime& value);
+    void setTimeEnd(const QDateTime& value);
 };
 /**
  * @brief The EM_PlanItem class

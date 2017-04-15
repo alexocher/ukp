@@ -12,7 +12,8 @@ private:
     TCarryProcedure    *fCarryProcedure; // Указатель на процедуру
     TExternalModuleType fExternalModule; // Тип внещнего модуля
     bool                fIsOptional,   // Признак необязательности (для шаблона)
-                        fIsPresent;    // Признак присутствия в плане (для плана)
+                        fIsPresent,    // Признак присутствия в плане (для плана)
+                        fIsControl;    // Признак контроля работы
 
 public:
     explicit TCarryWork(TCarryProcedure *crypr, TExternalModuleType emt=emtNone, int id=0, int n=0, QString nm="", TAbstractObject *parent=NULL);
@@ -26,6 +27,8 @@ public:
     void setOptional(bool opt);
     bool isPresent() const;            // Признак присутствия в плане (для плана)
     void setPresent(bool pr);
+    bool isControl() const;            // Признак контроля работы
+    void setControl(bool ctrl);
 
     TCarryWork &operator=(const TCarryWork &wrk);
 

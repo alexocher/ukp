@@ -40,6 +40,9 @@
                                  " AND " \
                                  " (int_end>=to_timestamp(:int_begin)::timestamp AND int_end<=to_timestamp(:int_end)::timestamp) "
 
+#define query_DeleteBeginWork    "DELETE FROM stuff.param_dic WHERE id =:id"
+#define query_InsertBeginWork    "INSERT INTO stuff.param_dic (id,value,format,comment) VALUES (:id,:value,:format,:comment)  "
+#define query_SelectBeginWork    "SELECT value,format,comment FROM stuff.param_dic WHERE id=:id "
 // ------------------------------------------------------------------------------
 EM_CalendarUserItem::EM_CalendarUserItem(QDateTime begin, QDateTime end, QString title, QString   descr,TWorkPeriodType type):EM_CalendarItem(begin, end, title, descr){
     _type = type;
@@ -267,6 +270,91 @@ QList< QSharedPointer<EM_CalendarUserItem> > EM_CalendarDic::get(const QDateTime
 
     return ret;
 }
+
+
+
+
+
+#define CODE_BEGIN_WORK 10
+#define FORMAT_TIME 3
+#define CODE_DURATION_WORK 20
+// время начала рабочего дня
+const QTime EM_CalendarDic::getBeginWork(){
+    QString v = getParam(CODE_BEGIN_WORK);
+    QTime ret = QTime::fromString(v);
+    if(!ret.isValid()){
+        ret.setHMS(9,0,0);
+        setBeginWork(ret);
+    }
+    return ret;
+}
+void EM_CalendarDic::setBeginWork(const QTime& v){
+    if(v.isNull() || !v.isValid() ) return;
+    setParam(CODE_BEGIN_WORK,v.toString(), FORMAT_TIME, "Начало рабочего дня");
+}
+QString EM_CalendarDic::getParam(int id){
+    QSqlDatabase db = QSqlDatabase::database(_connect_name);
+    if(!db.open()) throw CommonException::OpenDBException(db.lastError().text());
+
+    QSqlQuery *q = new QSqlQuery(db);
+    q->prepare(query_SelectBeginWork);
+    q->bindValue(":id",id);
+    if(!q->exec()){
+        QString mes = q->lastError().text();
+        delete q;
+        db.close();
+        throw CommonException::SQLException(mes);
+    }
+
+    QSqlRecord rec = q->record();
+    const int ind_v = rec.indexOf("value");
+
+    QString ret;
+    while(q->next()){
+        ret = q->value(ind_v).toString();
+    }
+
+    delete q;
+    db.close();
+
+    return ret;
+}
+
+void EM_CalendarDic::setParam(int id,const QString& value, int format, const QString& comment){
+
+
+    QSqlDatabase db = QSqlDatabase::database(_connect_name);
+    if(!db.open()) throw CommonException::OpenDBException(db.lastError().text());
+
+    QSqlQuery *q = new QSqlQuery(db);
+    q->prepare(query_DeleteBeginWork);
+    q->bindValue(":id",id);
+    if(!q->exec()){
+        QString mes = q->lastError().text();
+        delete q;
+        db.close();
+        throw CommonException::SQLException(mes);
+    }
+
+
+    q->prepare(query_InsertBeginWork);
+    q->bindValue(":id",id);
+    q->bindValue(":value",value);
+    q->bindValue(":format",format);
+    q->bindValue(":comment",comment);
+    if(!q->exec()){
+        QString mes = q->lastError().text();
+        delete q;
+        db.close();
+        throw CommonException::SQLException(mes);
+    }
+
+
+
+    delete q;
+    db.close();
+}
+
 QList< QSharedPointer<EM_CalendarUserItem> > EM_CalendarDic::get(const QDateTime& begin, const QDateTime& end,int user_suid)throw(AddressBookException::UserNotFoundException,CommonException::OpenDBException,CommonException::SQLException){
     EM_AddressBook &addr = EM_AddressBook::Instance();
     EM_User *user = addr.getUser(user_suid);

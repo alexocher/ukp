@@ -2,7 +2,6 @@
 #define TAPPCARRYPLAN_H
 
 #include <TAppPlan>
-#include <QTime>
 
 class TAppCarryPlan : public TAppPlan
 {
@@ -10,16 +9,12 @@ private:
     TAppCarryPlan(const TAppCarryPlan &obj);
     TAppCarryPlan &operator=(const TAppCarryPlan &obj);
 
-    QTime               fWorkDayBegin; // Начало рабочего дня
-
 protected:
-    TAppCarryPlan(QStringList &params, QTime workdaybegin = QTime(9, 0, 0), int n = 0, QString nm = "");
+    TAppCarryPlan(QStringList &params, int n = 0, QString nm = "");
     ~TAppCarryPlan();
 
 public:
-    static TAppCarryPlan *instance(QStringList &params, QTime workdaybegin = QTime(9, 0, 0), int n = 0, QString nm = "");
-
-    const QTime &workDayBegin() const; // Начало рабочего дня
+    static TAppCarryPlan *instance(QStringList &params, int n = 0, QString nm = "");
 
 public: // TAbstractApp interface
     virtual void freeInstance();

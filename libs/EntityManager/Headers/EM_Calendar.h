@@ -54,6 +54,9 @@ private:
 
     static bool _instflag;
     static EM_CalendarDic* _instance;
+
+    void setParam(int id,const QString& value, int format, const QString& comment);
+    QString getParam(int id);
 protected:
     void rem(int suid,const QString& mes)throw(CommonException::OpenDBException,CommonException::SQLException);
 public:
@@ -81,6 +84,13 @@ public:
     QList< QSharedPointer<EM_CalendarItem> > get(const QDateTime& begin, const QDateTime& end)throw(CommonException::OpenDBException,CommonException::SQLException);
     QList< QSharedPointer<EM_CalendarUserItem> > get(const QDateTime& begin, const QDateTime& end,const EM_User* user)throw(CommonException::NullParamException,CommonException::OpenDBException,CommonException::SQLException);
     QList< QSharedPointer<EM_CalendarUserItem> > get(const QDateTime& begin, const QDateTime& end,int user_suid)throw(AddressBookException::UserNotFoundException,CommonException::OpenDBException,CommonException::SQLException);
+
+    // время начала рабочего дня
+    const QTime getBeginWork();
+    void setBeginWork(const QTime& v);
+    // продолжительность рабочего дня
+    //const QTime getDurationWork() const;
+    //void setDurationWork(const QTime& v) const;
 };
 
 #endif // EM_CALENDAR

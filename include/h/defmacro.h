@@ -55,6 +55,7 @@
 // Приложения ...
 #define PROJ         TAbstractApp::project
 #define PROJUKP      ((TAppUkp*)TAbstractApp::project)
+#define PROJPLAN     ((TAppPlan*)TAbstractApp::project)
 #define PROJCARRYPLAN ((TAppCarryPlan*)TAbstractApp::project)
 
 // Склейка ...

@@ -287,6 +287,19 @@ bool TAbstractApp::presentCriticalErrors()
 }
 //-----------------------------------------------------------------------------
 
+// Начало рабочего дня
+const QTime &TAbstractApp::workDayBegin() const
+{
+    return const_cast<QTime&>(fWorkDayBegin);
+}
+//-----------------------------------------------------------------------------
+
+void TAbstractApp::setWorkDayBegin(const QTime &t)
+{
+    fWorkDayBegin = t;
+}
+//-----------------------------------------------------------------------------
+
 // Данные интерфейса
 TUiData &TAbstractApp::uiData() const
 {

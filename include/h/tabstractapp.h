@@ -1,6 +1,7 @@
 #ifndef TABSTRACTAPP_H
 #define TABSTRACTAPP_H
 
+#include <QTime>
 #include <QIntValidator>
 #include <QDoubleValidator>
 #include <QSize>
@@ -98,6 +99,7 @@ protected:
     bool                fIsRunning;    // Флаг запущенного проекта
     TUiData             fUiData;       // Данные интерфейса
     TPaletteColors      fCurrentPalette; // Текущая палитра
+    QTime               fWorkDayBegin; // Начало рабочего дня
 
     TAbstractApp(QStringList &params, int n=0, QString nm="");
     ~TAbstractApp();
@@ -118,6 +120,8 @@ public:
     void insertError(QString nm, bool iscrit, QString fnc, QString ln); // Добавить ошибку приложения в список
     void printErrors();                // Вывод ошибок проекта
     bool presentCriticalErrors();      // Поиск критических ошибок проекта
+    const QTime &workDayBegin() const; // Начало рабочего дня
+    void setWorkDayBegin(const QTime &t);
 
     TUiData &uiData() const;           // Данные интерфейса
     TPaletteColors &currentPalette() const; // Текущая палитра

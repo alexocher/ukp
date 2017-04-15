@@ -4,13 +4,13 @@
 #include <TCarryProcedure>
 #include <TCarryWork>
 
-TCarryWork::TCarryWork(TCarryProcedure *crypr, TExternalModuleType emt, int id, int n, QString nm, TAbstractObject *parent) : TAbstractPlanElement(id,n,nm,parent), fCarryProcedure(crypr), fExternalModule(emt), fIsOptional(false), fIsPresent(false)
+TCarryWork::TCarryWork(TCarryProcedure *crypr, TExternalModuleType emt, int id, int n, QString nm, TAbstractObject *parent) : TAbstractPlanElement(id,n,nm,parent), fCarryProcedure(crypr), fExternalModule(emt), fIsOptional(false), fIsPresent(false), fIsControl(false)
 {
     setScrName(QString("%1. %2").arg(fNum,2,10,QChar(' ')).arg(fName));
 }
 //-----------------------------------------------------------------------------
 
-TCarryWork::TCarryWork(const TCarryWork &wrk) : TAbstractPlanElement(wrk), fCarryProcedure(wrk.fCarryProcedure), fExternalModule(wrk.fExternalModule), fIsOptional(wrk.fIsOptional), fIsPresent(wrk.fIsPresent)
+TCarryWork::TCarryWork(const TCarryWork &wrk) : TAbstractPlanElement(wrk), fCarryProcedure(wrk.fCarryProcedure), fExternalModule(wrk.fExternalModule), fIsOptional(wrk.fIsOptional), fIsPresent(wrk.fIsPresent), fIsControl(wrk.fIsControl)
 {
     setScrName(QString("%1. %2").arg(fNum,2,10,QChar(' ')).arg(fName));
 }
@@ -36,6 +36,7 @@ TCarryWork &TCarryWork::operator=(const TCarryWork &wrk)
     fExternalModule = wrk.fExternalModule;
     fIsOptional = wrk.fIsOptional;
     fIsPresent = wrk.fIsPresent;
+    fIsControl = wrk.fIsControl;
     return *this;
 }
 //-----------------------------------------------------------------------------
@@ -47,6 +48,7 @@ void TCarryWork::reset(bool thisonly)
     fExternalModule = emtNone;
     fIsOptional = false;
     fIsPresent = false;
+    fIsControl = false;
 }
 //-----------------------------------------------------------------------------
 
@@ -86,6 +88,18 @@ void TCarryWork::setPresent(bool pr)
 }
 //-----------------------------------------------------------------------------
 
+bool TCarryWork::isControl() const
+{
+    return fIsControl;
+}
+//-----------------------------------------------------------------------------
+
+void TCarryWork::setControl(bool ctrl)
+{
+    fIsControl = ctrl;
+}
+//-----------------------------------------------------------------------------
+
 QString TCarryWork::toStr()
 {
     return "";
@@ -101,6 +115,8 @@ QString TCarryWork::toHtml(bool fullinfo)
     sHtml += QString("<br>Обязательность: <b>%1</b>").arg(fIsOptional ? "Нет" : "Да");
 
     //fIsPresent;    // Признак присутствия в плане (для плана)
+
+    sHtml += QString("<br>Признак контроля: <b>%1</b>").arg(fIsControl ? "Да" : "Нет");
 
     sHtml += QString("<br>Сосотояние: <b>%1</b>").arg(convertEnums::enumToStr(fCondition));
     if (fProblem!=copNone) sHtml += QString("<br>Проблемы: <b>%1</b>").arg(convertEnums::enumToStr(fProblem));

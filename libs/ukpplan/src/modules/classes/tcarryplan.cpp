@@ -392,6 +392,11 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
         foreach (TStatus st,statuses()) planItem->addStatus(st);
         planItem->setDescr(descr());
         planItem->setProgress(carryOutPercent());
+        if (currentProject) // не шаблон
+        {
+            if (fCarryTask->dtMinBegin()) currentProject->setTimeBegin(*fCarryTask->dtMinBegin());
+            if (fCarryTask->dtMaxEnd()) currentProject->setTimeEnd(*fCarryTask->dtMaxEnd());
+        }
         yearPlan->add(currentProject ? currentProject : root,planItem);
         foreach (TCarryProcedure *pr,fPlProcedures)
         {
@@ -448,6 +453,7 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
                 wrkItem->setDescr(wrk->descr());
                 wrkItem->setOptional(wrk->isOptional());
                 wrkItem->setPresent(wrk->isPresent());
+                wrkItem->setTester(wrk->isControl());
                 wrkItem->setExtModuleType(wrk->externalModule());
                 wrkItem->setProgress(wrk->carryOutPercent());
                 yearPlan->add(prItem,wrkItem);

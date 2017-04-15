@@ -388,6 +388,8 @@ void TModulePlans::fillTasks(QList<int> tskids)
                         newCarryTask->setDescr(curPlan->getDescr());
                         newCarryTask->setPriority(curPlan->getPriority());
                         newCarryTask->setCarryOutPercent(curPlan->getProgress());
+                        if (curPlan->getTimeBegin().isValid()) newCarryTask->setDtMinBegin(curPlan->getTimeBegin());
+                        if (curPlan->getTimeEnd().isValid()) newCarryTask->setDtMaxEnd(curPlan->getTimeEnd());
                         newCarryTask->setSaved(true);
                         for(EM_BasePlanItem::iterator planIter = curPlan->begin(); planIter != curPlan->end(); ++planIter)
                         {
@@ -488,6 +490,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                                 newCarryWork->setExternalModule(curWrk->getExtModuleType());
                                                 newCarryWork->setOptional(curWrk->isOptional());
                                                 newCarryWork->setPresent(curWrk->isPresent());
+                                                newCarryWork->setControl(curWrk->isTester());
                                                 newCarryWork->setCarryOutPercent(curWrk->getProgress());
                                                 newCarryWork->setSaved(true);
                                                 newCarryProcedure->insertWork(newCarryWork);
@@ -889,6 +892,7 @@ bool TModulePlans::fromDB(QString param)
                                         newCarryWork->setExternalModule(curWrk->getExtModuleType());
                                         newCarryWork->setOptional(curWrk->isOptional());
                                         newCarryWork->setPresent(curWrk->isPresent());
+                                        newCarryWork->setControl(curWrk->isTester());
                                         newCarryWork->setSaved(true);
                                         newCarryProcedure->insertWork(newCarryWork);
                                     }

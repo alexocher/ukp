@@ -1,5 +1,5 @@
 #include "../Headers/EM_Policy.h"
-#include <QtSql>
+#include <QSql>
 #include "../DBConnect/dbconnect.h"
 
 #define field_title "_title"

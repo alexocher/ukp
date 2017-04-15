@@ -100,7 +100,10 @@ void WPlan::resetPlan(const QPushButton &btn)
             QStringList scrnms = qtools::hierarchyTexts(*curIt);
             MODULE(Plans);
             if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
+            {
                 if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(plEl)) tsk->setPriority(sbPriority->value());
+                teParams->setText(plEl->toHtml(!cbIsShort->isChecked()));
+            }
         }
     }
     else if (&btn == pbCurrentDate)
@@ -114,7 +117,10 @@ void WPlan::resetPlan(const QPushButton &btn)
             QStringList scrnms = qtools::hierarchyTexts(*curIt);
             MODULE(Plans);
             if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
+            {
                 tsk->setDtMinBegin(QDateTime(dtBegin->date(), QTime(9, 0, 0)));
+                teParams->setText(tsk->toHtml(!cbIsShort->isChecked()));
+            }
         }
     }
     else if (&btn == pbTemplatesOk)
@@ -170,6 +176,7 @@ void WPlan::resetPlan(const QPushButton &btn)
             {
                 plEl->setPlanPeriod(sbPeriod->value());
                 curIt->setText(2, gen::intToStr(sbPeriod->value()));
+                teParams->setText(plEl->toHtml(!cbIsShort->isChecked()));
             }
         }
     }
@@ -235,6 +242,7 @@ void WPlan::resetPlan(const QPushButton &btn)
                     plEl->insertPossibleEmployee(empl);
                     modEmployees->reflectEmployeesToLw(plEl->possibleEmployees(), *lwEmployees);
                 }
+                teParams->setText(plEl->toHtml(!cbIsShort->isChecked()));
             }
         }
     }
@@ -316,23 +324,18 @@ void WPlan::resetPlan(const QPushButton &btn)
     else if (&btn == pbApply)
     {
         QString sErr("");
-        if (QTreeWidgetItem *curIt = twProjects->currentItem())
+        MODULE(Plans);
+        int n(0);
+        foreach (TCarryTask *tsk, modPlans->carryTasks())
         {
-            QStringList scrnms = qtools::hierarchyTexts(*curIt);
-            MODULE(Plans);
-            if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
-            {
-                if (TCarryPlan *plan = dynamic_cast<TCarryPlan*>(plEl))
-                {
-                    if (!plan->toDB("plan"))  sErr = "План не сохранен";
-                }
-                else sErr = "Не выбран план";
-            }
-            else sErr = "Не найден элемент";
+            TCarryPlan *plans[2] = { tsk->ordPlan(), tsk->carryPlan() };
+            for (int i=0; i<2; i++)
+                if (TCarryPlan *plan = plans[i])
+                    // if (!plan->isSaved()) ??? пока сохраняется все
+                        if (!plan->toDB("plan"))  sErr += QString("%1. План не сохранен (%2)\n").arg(++n).arg(plan->scrName());
         }
-        else sErr = "Не выбран план";
         bool wasErr(!sErr.isEmpty());
-        QMessageBox mb(wasErr ? QMessageBox::Warning : QMessageBox::Information, wasErr ? "Ошибка" : "Успешно", wasErr ? sErr : "План сохранен", QMessageBox::Ok, this);
+        QMessageBox mb(wasErr ? QMessageBox::Warning : QMessageBox::Information, wasErr ? "Ошибка" : "Успешно", wasErr ? sErr : "Сохранено", QMessageBox::Ok, this);
         mb.setButtonText(QMessageBox::Ok, tr("Принять"));
         mb.exec();
     }

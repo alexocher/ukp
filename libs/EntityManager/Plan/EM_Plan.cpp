@@ -28,6 +28,9 @@
                                     " i.template_employee, "\
                                     " i.oshs_item_id, "\
                                     " i.progress, " \
+                                    " i.tbegin, " \
+                                    " i.tend, "  \
+                                    " i.is_tester, " \
                                     " s.main_state, "\
                                     " s.state, " \
                                     " s.problem " \
@@ -61,14 +64,18 @@
                                     " parent_suid, ftitle, stitle, "\
                                     " itemtype, yearplan_suid, production_id, typal_duration, priority, "\
                                     " is_optional, is_present, ext_module_type, descr, src_title, res_title, "\
-                                    " ext_proc, custom_number, template_employee, oshs_item_id, duration, progress " \
+                                    " ext_proc, custom_number, template_employee, oshs_item_id, duration, progress, " \
+                                    " tbegin, tend," \
+                                    " is_tester " \
                                     " ) "\
                                     " VALUES "\
                                     " ("\
                                     " :parent_suid, :ftitle, :stitle, "\
                                     " :itemtype, :yearplan_suid, :production_id, :typal_duration, :priority, "\
                                     " :is_optional, :is_present, :ext_module_type, :descr, :src_title, :res_title, "\
-                                    " :ext_proc, :custom_number, :template_employee, :oshs_item_id, :duration, :progress " \
+                                    " :ext_proc, :custom_number, :template_employee, :oshs_item_id, :duration, :progress," \
+                                    " to_timestamp(:tbegin)::timestamp, to_timestamp(:tend)::timestamp, " \
+                                    " :is_tester " \
                                     " ) "\
                                     " RETURNING suid"
 
@@ -80,7 +87,8 @@
                                     " is_optional = :is_optional, is_present=:is_present, "\
                                     " ext_module_type=:ext_module_type, descr=:descr, src_title=:src_title, res_title=:res_title, "\
                                     " ext_proc=:ext_proc, custom_number=:custom_number, template_employee=:template_employee, oshs_item_id=:oshs_item_id, " \
-                                    " duration=:duration, progress=:progress " \
+                                    " duration=:duration, progress=:progress, tbegin=to_timestamp(:tbegin)::timestamp, tend = to_timestamp(:tend)::timestamp, " \
+                                    " is_tester = :is_tester " \
                                     " WHERE suid = :suid "
 // Добавление/Обновление статусов узла
 #define query_InsertPlanItemState   "INSERT INTO plan.planitem_state "\
@@ -347,6 +355,13 @@ int EM_BasePlanItem::getOshsItemID() const{
 int EM_BasePlanItem::getProgress() const{
     return _progress;
 }
+bool EM_BasePlanItem::isTester() const{
+    return _is_tester;
+}
+void EM_BasePlanItem::setTester(bool value){
+    _is_tester = value;
+    setModify();
+}
 TCarryOutProblem EM_BasePlanItem::getProblem() const{
     return _problem;
 }
@@ -556,7 +571,20 @@ void EM_ProjectPlanItem::setPriority(int value){
     _priority = value;
     setModify();
 }
-
+const QDateTime& EM_ProjectPlanItem::getTimeBegin() const{
+    return _tbegin;
+}
+const QDateTime& EM_ProjectPlanItem::getTimeEnd() const   {
+    return _tend;
+}
+void EM_ProjectPlanItem::setTimeBegin(const QDateTime& value){
+    _tbegin = value;
+    setModify();
+}
+void EM_ProjectPlanItem::setTimeEnd(const QDateTime& value){
+    _tend = value;
+    setModify();
+}
 //----------------------------------------------------
 EM_PlanItem::EM_PlanItem(int suid):EM_BasePlanItem(CARRY_PLAN, suid){
     ;
@@ -1145,6 +1173,9 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
     TEmployeeType l_templ_employee;
     int l_oshs_item_id;
     int l_progress;
+    QDateTime l_tbegin;
+    QDateTime l_tend;
+    bool l_tester;
 
     // индексы столбцов
     rec = q->record();
@@ -1171,6 +1202,10 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
     const int ind_templ_employee = rec.indexOf("template_employee");
     const int ind_oshs_item_id = rec.indexOf("oshs_item_id");
     const int ind_progress = rec.indexOf("progress");
+    const int ind_tbegin = rec.indexOf("tbegin");
+    const int ind_tend = rec.indexOf("tend");
+    const int ind_tester = rec.indexOf("is_tester");
+
     QMap<int,EM_BasePlanItem*> mTree;
     EM_BasePlanItem *root = 0;
 
@@ -1205,6 +1240,9 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
         l_templ_employee = (TEmployeeType)q->value(ind_templ_employee).toInt();
         l_oshs_item_id = q->value(ind_oshs_item_id).toInt();
         l_progress = q->value(ind_progress).toInt();
+        l_tbegin = q->value(ind_tbegin).toDateTime();
+        l_tend = q->value(ind_tend).toDateTime();
+        l_tester = q->value(ind_tester).toBool();
 
         int pkey = l_parent_suid;
         int key = l_suid;
@@ -1266,10 +1304,13 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
             newItem->setTemplEmployee(l_templ_employee);
             newItem->setOshsItemID(l_oshs_item_id);
             newItem->setProgress(l_progress);
+            newItem->setTester(l_tester);
             if(newItem->getType()==PROJECT){
                 EM_Production* prud = produc_dic.by(l_production_type);
                 ((EM_ProjectPlanItem*)newItem)->setProduction(prud);
                 ((EM_ProjectPlanItem*)newItem)->setPriority(l_priority);
+                ((EM_ProjectPlanItem*)newItem)->setTimeBegin(l_tbegin);
+                ((EM_ProjectPlanItem*)newItem)->setTimeEnd(l_tend);
             }
             if(newItem->getType()==TASK){
                 ((EM_TaskPlanItem*)newItem)->setOptional(l_optional);
@@ -1540,6 +1581,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
             pq->bindValue(":template_employee",cur->getTemplEmployee());
             pq->bindValue(":oshs_item_id",cur->getOshsItemID());
             pq->bindValue(":progress",cur->getProgress());
+            pq->bindValue(":is_tester",cur->isTester());
             if(isNewItem){
                 pq->bindValue(":yearplan_suid", suid());
             }else{
@@ -1547,15 +1589,21 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
             }
             TProductionType production_type = prtNone;
             int priority = 0;
+            QVariant tbegin = 0;
+            QVariant tend = 0;
             if(cur->getType()==PROJECT){
                 EM_Production* prod = ((EM_ProjectPlanItem*)cur)->getProduction();
                 if(prod!=0){
                     production_type = prod->getProductionType();
                 }
                 priority = ((EM_ProjectPlanItem*)cur)->getPriority();
+                tbegin = ((EM_ProjectPlanItem*)cur)->getTimeBegin().toTime_t();
+                tend = ((EM_ProjectPlanItem*)cur)->getTimeEnd().toTime_t();
             }
             pq->bindValue(":production_id",production_type);
             pq->bindValue(":priority",priority);
+            pq->bindValue(":tbegin",tbegin);
+            pq->bindValue(":tend",tend);
 
             bool present = false;
             bool optional = false;

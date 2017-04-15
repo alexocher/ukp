@@ -56,6 +56,7 @@ WTemplate::WTemplate(QWidget *parent) : QFrame(parent)
     connect(pbAddResults,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbClearResults,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbOptional,SIGNAL(clicked()),this,SLOT(resetTemplates()));
+    connect(pbControl,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbApplyCurrentItem,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbClearCurrentItem,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbDiagramma,SIGNAL(clicked()),this,SLOT(resetTemplates()));
@@ -308,6 +309,12 @@ void WTemplate::resetTemplates(const QPushButton &btn)
         pbOptional->setChecked(isChck);
         pbOptional->setIcon(ICONPIX(!isChck ? "" : PIX_CHECKED));
     }
+    else if (&btn==pbControl)
+    {
+      bool isChck(pbControl->isChecked());
+        pbControl->setChecked(isChck);
+        pbControl->setIcon(ICONPIX(!isChck ? "" : PIX_CHECKED));
+    }
     else if (&btn==pbApplyCurrentItem)
     {
       MODULE(Plans);
@@ -367,6 +374,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                                         //lwResults
                                         wrk->setTemplatePeriod(sbTime_hours->value());
                                         wrk->setOptional(pbOptional->isChecked());
+                                        wrk->setControl(pbControl->isChecked());
                                         wrk->setSaved(false);
                                         pr->setSaved(false);
                                     }
@@ -392,6 +400,8 @@ void WTemplate::resetTemplates(const QPushButton &btn)
         sbTime_hours->setValue(0); sbTime_days->setValue(0);
         pbOptional->setChecked(false);
         pbOptional->setIcon(ICONPIX(""));
+        pbControl->setChecked(false);
+        pbControl->setIcon(ICONPIX(""));
     }
     else if (&btn==pbDiagramma)
     {
@@ -461,7 +471,7 @@ void WTemplate::selectPattern(const QString &) //scrnm
 void WTemplate::setEnabledControls(bool isenbl)
 {
   QList<QWidget*> lstW;
-    lstW<<lblNum<<sbNum<<lblName<<edName<<lblExtProcedure<<cbExtProcedure<<lblSources<<edSources<<lwSources<<pbAddSources<<pbClearSources<<lblResults<<edResults<<lwResults<<pbAddResults<<pbClearResults<<lblEmployee<<cbEmployee<<lblExtUnit<<cbExtUnit<<lblTime<<sbTime_hours<<sbTime_days<<rbTime_hours<<rbTime_days<<lblOptional<<pbOptional<<pbApplyCurrentItem<<pbClearCurrentItem;
+    lstW<<lblNum<<sbNum<<lblName<<edName<<lblExtProcedure<<cbExtProcedure<<lblSources<<edSources<<lwSources<<pbAddSources<<pbClearSources<<lblResults<<edResults<<lwResults<<pbAddResults<<pbClearResults<<lblEmployee<<cbEmployee<<lblExtUnit<<cbExtUnit<<lblTime<<sbTime_hours<<sbTime_days<<rbTime_hours<<rbTime_days<<lblOptional<<pbOptional<<lblControl<<pbControl<<pbApplyCurrentItem<<pbClearCurrentItem;
     foreach (QWidget *w,lstW) w->setEnabled(isenbl);
 }
 //-----------------------------------------------------------------------------
@@ -492,6 +502,8 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
         rbTime_days->setEnabled(!isProcedure);
         lblOptional->setEnabled(!isProcedure);
         pbOptional->setEnabled(!isProcedure);
+        lblControl->setEnabled(!isProcedure);
+        pbControl->setEnabled(!isProcedure);
       TCarryProcedure *curProc(NULL);
       TCarryWork *curWork(NULL);
         if (isProcedure) curProc = curTemplate->findProcedure(idnt->num);
@@ -557,6 +569,8 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
             sbTime_days->setValue(curWork->templatePeriod());
             pbOptional->setChecked(curWork->isOptional());
             pbOptional->setIcon(ICONPIX(curWork->isOptional() ? PIX_CHECKED : ""));
+            pbControl->setChecked(curWork->isControl());
+            pbControl->setIcon(ICONPIX(curWork->isControl() ? PIX_CHECKED : ""));
         }
         else setEnabledControls(false);
     }
