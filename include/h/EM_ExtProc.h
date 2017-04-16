@@ -7,6 +7,7 @@
 #include "exceptions.h"
 
 
+#define NEW_VERSION 1
 class EM_ExtProcDic;
 
 

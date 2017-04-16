@@ -474,6 +474,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                                 newCarryWork->setProblem(curWrk->getProblem());
                                                 newCarryWork->setSourcesTitle(curWrk->getSrcTitle());
                                                 newCarryWork->setResultsTitle(curWrk->getResTitle());
+                                                newCarryWork->setExternProcedureNum(curWrk->getExtProcNum());
                                                 TEmployeeRole rl(curWrk->getTemplEmployee());
                                                 rl.setUnitId(curWrk->getOshsItemID());
                                                 newCarryWork->setSingleTemplateRole(rl);
@@ -875,6 +876,7 @@ bool TModulePlans::fromDB(QString param)
                                         newCarryWork->setProblem(curWrk->getProblem());
                                         newCarryWork->setSourcesTitle(curWrk->getSrcTitle());
                                         newCarryWork->setResultsTitle(curWrk->getResTitle());
+                                        newCarryWork->setExternProcedureNum(curWrk->getExtProcNum());
                                         TEmployeeRole rl(curWrk->getTemplEmployee());
                                         rl.setUnitId(curWrk->getOshsItemID());
                                         newCarryWork->setSingleTemplateRole(rl);

@@ -83,6 +83,7 @@ private:
     int                      _progress;             // прогресс
 
     bool                     _is_tester;            // провверяющая задача
+    int                      _ext_proc_num;  // код внешней процедуры
 protected:
     QList<TEmployeeType>     _template_employee;    // список возможных исполителей (роли)
     TEmployeeType            _templ_employee;       // возможный исполнитель
@@ -212,7 +213,8 @@ public:
     virtual TEmployeeType   getTemplEmployee() const;
     int                     getOshsItemID() const;
     int                     getProgress() const;
-    bool                    isTester() const;
+    bool                    isTester() const;    
+    int                     getExtProcNum() const;
 
     bool    isVisualHide() const; // признак видимости
 
@@ -250,6 +252,7 @@ public:
     void    setOshsItemID(int value);
     void    setProgress(int value);
     void    setTester(bool value);
+    void    setExtProcNum(int value);
     // Получить подэлемент по индексу
     EM_BasePlanItem* operator[](int index);
     EM_BasePlanItem* at(int index);
@@ -307,14 +310,13 @@ public:
  */
 class ENTITYMANAGERSHARED_EXPORT EM_StagePlanItem:public EM_BasePlanItem{
     friend class EM_YearPlan;
-private:
-    int _ext_proc_num;  // код внешней процедуры
+/*private:
+    int _ext_proc_num;  // код внешней процедуры*/
 protected:
     EM_StagePlanItem(int suid);
 public:
     ~EM_StagePlanItem(){;}
-    void setExtProcNum(int value);
-    int getExtProcNum() const;
+
 };
 /**
  * @brief The EM_TaskUtil class

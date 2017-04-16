@@ -197,6 +197,8 @@ EM_BasePlanItem::EM_BasePlanItem(NODE_TYPE type, int suid):BaseTreeItem(suid,typ
 
     _templ_employee = eltNone;
     _oshs_item_id = -1;
+    _progress = 0;
+    _ext_proc_num = -1;
 }
 void EM_BasePlanItem::setInternalState(INTERNAL_STATE state, bool child){
     EM_InternalState::setInternalState(state);
@@ -551,6 +553,13 @@ void EM_BasePlanItem::setVisualHide(bool value){
     }
     _visual_hide = value;
 }
+void EM_BasePlanItem::setExtProcNum(int value){
+    _ext_proc_num = value;
+    setModify();
+}
+int EM_BasePlanItem::getExtProcNum() const{
+    return _ext_proc_num;
+}
 //----------------------------------------------------
 EM_ProjectPlanItem::EM_ProjectPlanItem(int suid):EM_BasePlanItem(PROJECT, suid){
     _production = 0;
@@ -592,13 +601,6 @@ EM_PlanItem::EM_PlanItem(int suid):EM_BasePlanItem(CARRY_PLAN, suid){
 //----------------------------------------------------
 EM_StagePlanItem::EM_StagePlanItem(int suid):EM_BasePlanItem(STAGE, suid){
     ;
-}
-void EM_StagePlanItem::setExtProcNum(int value){
-    _ext_proc_num = value;
-    setModify();
-}
-int EM_StagePlanItem::getExtProcNum() const{
-    return _ext_proc_num;
 }
 //----------------------------------------------------
 EM_TaskPlanItem::EM_TaskPlanItem(int suid):EM_BasePlanItem(TASK, suid){
@@ -1317,9 +1319,10 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
                 ((EM_TaskPlanItem*)newItem)->setPresent(l_present);
                 ((EM_TaskPlanItem*)newItem)->setExtModuleType(l_ext_module_type);
             }
-            if(newItem->getType()==STAGE){
-                ((EM_StagePlanItem*)newItem)->setExtProcNum(l_ext_proc);
-            }
+//            if(newItem->getType()==STAGE){
+//                ((EM_StagePlanItem*)newItem)->setExtProcNum(l_ext_proc);
+//            }
+            newItem->setExtProcNum(l_ext_proc);
             newItem->setInternalState(EM_InternalState::INTERNAL_STATE_COMMIT_ITEM);
 
             add(par,newItem);
@@ -1618,10 +1621,10 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
             pq->bindValue(":ext_module_type",ext_module_type);
 
 
-            int ext_proc = 0;
-            if(cur->getType()==STAGE){
+            int ext_proc = cur->getExtProcNum();
+            /*if(cur->getType()==STAGE){
                 ext_proc = ((EM_StagePlanItem*)cur)->getExtProcNum();
-            }
+            }*/
             pq->bindValue(":ext_proc",ext_proc);
 
 

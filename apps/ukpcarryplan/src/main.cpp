@@ -7,7 +7,7 @@
 #include <TfrmMainUkpCarryPlan>
 
 #if defined(Q_OS_WIN32)
-#include "../LoginService/loginservice.h"
+#include <LoginService>
 #else
 #include <LoginService>
 #endif

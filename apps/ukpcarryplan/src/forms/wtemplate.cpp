@@ -377,6 +377,16 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                                         wrk->setControl(pbControl->isChecked());
                                         wrk->setSaved(false);
                                         pr->setSaved(false);
+
+                                        // BUTCHER
+                                        QString extNm("");
+                                        if (TExternProcedureTemplate *ep = modPlans->findExternProcedureTemplate(cbExtProcedure->currentText())){
+                                            wrk->setExternProcedureNum(ep->num());
+                                            extNm = ep->scrName();
+                                        }else{
+                                            wrk->setExternProcedureNum(0);
+                                        }
+                                        curIt->setText(3,extNm);
                                     }
                     }
                     curTemplate->setSaved(false);
@@ -490,7 +500,8 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
         setEnabledControls(true);
       bool isProcedure((TPlanElementType)idnt->tag==petProcedure);
         lblExtProcedure->setEnabled(isProcedure);
-        cbExtProcedure->setEnabled(isProcedure);
+        //cbExtProcedure->setEnabled(isProcedure);
+        cbExtProcedure->setEnabled(true); //BUTCHER!!!
         lblEmployee->setEnabled(isProcedure);
         cbEmployee->setEnabled(isProcedure);
         lblExtUnit->setEnabled(isProcedure);
@@ -546,7 +557,14 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
         {
             sbNum->setValue(curWork->num());
             edName->setText(curWork->name());
-            cbExtProcedure->setCurrentIndex(0);
+            //cbExtProcedure->setCurrentIndex(0);
+            //BUTCHER
+            if (curWork->isExtern())
+            {
+                if (TExternProcedureTemplate *extProc = modPlans->findExternProcedureTemplate(curWork->externProcedureNum()))
+                    cbExtProcedure->setCurrentIndex(cbExtProcedure->findText(extProc->scrName()));
+            }
+            else cbExtProcedure->setCurrentIndex(0);
             edSources->setText(curWork->sourcesTitle());
             curWork->reflectAttachmentsToLw(curWork->sources(),*lwSources);
             edResults->setText(curWork->resultsTitle());

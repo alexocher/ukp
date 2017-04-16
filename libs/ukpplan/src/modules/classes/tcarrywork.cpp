@@ -10,7 +10,7 @@ TCarryWork::TCarryWork(TCarryProcedure *crypr, TExternalModuleType emt, int id, 
 }
 //-----------------------------------------------------------------------------
 
-TCarryWork::TCarryWork(const TCarryWork &wrk) : TAbstractPlanElement(wrk), fCarryProcedure(wrk.fCarryProcedure), fExternalModule(wrk.fExternalModule), fIsOptional(wrk.fIsOptional), fIsPresent(wrk.fIsPresent), fIsControl(wrk.fIsControl)
+TCarryWork::TCarryWork(const TCarryWork &wrk) : TAbstractPlanElement(wrk), fCarryProcedure(wrk.fCarryProcedure), fExternalModule(wrk.fExternalModule), fIsOptional(wrk.fIsOptional), fIsPresent(wrk.fIsPresent), fIsControl(wrk.fIsControl), fExternProcedureNum(wrk.fExternProcedureNum)
 {
     setScrName(QString("%1. %2").arg(fNum,2,10,QChar(' ')).arg(fName));
 }
@@ -28,12 +28,25 @@ TCarryProcedure *TCarryWork::carryProcedure() const
 }
 //-----------------------------------------------------------------------------
 
+int TCarryWork::externProcedureNum() const
+{
+    return fExternProcedureNum;
+}
+//-----------------------------------------------------------------------------
+
+void TCarryWork::setExternProcedureNum(int n)
+{
+    fExternProcedureNum = n;
+}
+//-----------------------------------------------------------------------------
+
 TCarryWork &TCarryWork::operator=(const TCarryWork &wrk)
 {
     if (&wrk==this) return *this;
     TAbstractPlanElement::operator=(wrk);
     fCarryProcedure = wrk.fCarryProcedure;
     fExternalModule = wrk.fExternalModule;
+    fExternProcedureNum = wrk.fExternProcedureNum;
     fIsOptional = wrk.fIsOptional;
     fIsPresent = wrk.fIsPresent;
     fIsControl = wrk.fIsControl;
@@ -46,6 +59,7 @@ void TCarryWork::reset(bool thisonly)
     if (!thisonly) TAbstractPlanElement::reset(true);
     fCarryProcedure = NULL;
     fExternalModule = emtNone;
+    fExternProcedureNum = 0;
     fIsOptional = false;
     fIsPresent = false;
     fIsControl = false;
@@ -93,7 +107,11 @@ bool TCarryWork::isControl() const
     return fIsControl;
 }
 //-----------------------------------------------------------------------------
-
+bool TCarryWork::isExtern() const
+{
+    return fExternProcedureNum;
+}
+// ------------------------------------------------------------------------------
 void TCarryWork::setControl(bool ctrl)
 {
     fIsControl = ctrl;

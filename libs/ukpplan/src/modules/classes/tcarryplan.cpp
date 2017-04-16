@@ -189,7 +189,11 @@ void TCarryPlan::reflectToTree(QTreeWidget &tw, bool astemplate)
                 twiWrk->setIcon(0,ICONPIX(PIX_LEVEL5));
                 twiWrk->setText(1,"");
                 twiWrk->setText(2,"");
-                twiWrk->setText(3,"");
+                //BUTCHER
+                QString extNm("");
+                  if (wrk->isExtern())
+                      if (TExternProcedureTemplate *extProc = modPlans->findExternProcedureTemplate(wrk->externProcedureNum())) extNm = extProc->scrName();
+                  twiPr->setText(3,extNm);
                 twiWrk->setData(0,Qt::UserRole,qVariantFromValue(TIdent(wrk->id(),wrk->num(),wrk->name(),(int)petWork)));
                 twiWrk->setFlags(twiWrk->flags() | Qt::ItemIsUserCheckable);
                 twiWrk->setCheckState(0,Qt::Unchecked);
@@ -435,6 +439,7 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
                 wrkItem->setFullTitle(wrk->scrName());
                 wrkItem->setTypalDuration(wrk->templatePeriod());
                 wrkItem->setDuration(wrk->planPeriod());
+
                 if (wrk->dtPlanBegin()) wrkItem->planBegin(*wrk->dtPlanBegin());
                 if (wrk->dtPlanEnd()) wrkItem->planEnd(*wrk->dtPlanEnd());
                 if (wrk->dtRealBegin()) wrkItem->realBegin(*wrk->dtRealBegin());
@@ -455,6 +460,7 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
                 wrkItem->setTester(wrk->isControl());
                 wrkItem->setExtModuleType(wrk->externalModule());
                 wrkItem->setProgress(wrk->carryOutPercent());
+                wrkItem->setExtProcNum(wrk->externProcedureNum());
                 yearPlan->add(prItem,wrkItem);
             }
         }
