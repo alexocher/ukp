@@ -365,6 +365,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                         //PR(4,"if EM_ProjectPlanItem");
                         TCarryTask *newCarryTask(new TCarryTask(curYear, curPlan->getProduction()->getProductionType(), curPlan->getID(), curPlan->getNum(), curPlan->getShortTitle())); // curPlan->SUID()
                         newCarryTask->setScrName(QString("%1. %2").arg((int)newCarryTask->productionType()).arg(newCarryTask->name()));
+                        newCarryTask->setISort(newCarryTask->num());
                         newCarryTask->setCondition(curPlan->getState());
                         newCarryTask->setProblem(curPlan->getProblem());
                         newCarryTask->setSourcesTitle(curPlan->getSrcTitle());
@@ -408,6 +409,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                 //PR(12,"if EM_PlanItem");
                                 TCarryPlan *newCarryPlan(new TCarryPlan(newCarryTask, curPlan->getID(), curPlan->getNum(), curPlan->getShortTitle())); // curPlan->SUID()
                                 newCarryPlan->setScrName(QString("%1.%2. %3").arg(newCarryPlan->num() / 10).arg(newCarryPlan->num() % 10).arg(newCarryPlan->name()));
+                                newCarryPlan->setISort(newCarryPlan->num());
                                 newCarryPlan->setCondition(curPlan->getState());
                                 newCarryPlan->setProblem(curPlan->getProblem());
                                 newCarryPlan->setSourcesTitle(curPlan->getSrcTitle());
@@ -512,6 +514,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                         if (newCarryTask->ordPlan() || newCarryTask->carryPlan()) fPlCarryTasks.append(newCarryTask);
                         else DELETE(newCarryTask);
                     }
+                    qStableSort(fPlCarryTasks.begin(), fPlCarryTasks.end(), obj::FSortMinToMaxInt<TCarryTask*>());
                 }
                 delete yearPlan;
             }
