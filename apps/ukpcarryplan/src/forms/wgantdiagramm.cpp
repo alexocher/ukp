@@ -202,7 +202,20 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
     {
         foreach (TCarryTask *tsk, tasks)
         {
-            TCarryPlan *plans[2] = { tsk->ordPlan(), tsk->carryPlan() };
+            TCarryPlan *plans[2] = { NULL };
+            if (tsk->ordPlan() && tsk->carryPlan())
+            {
+                if (tsk->ordPlan()->scrName()<tsk->carryPlan()->scrName())
+                {
+                    plans[0] = tsk->ordPlan(); plans[1] = tsk->carryPlan();
+                }
+                else
+                {
+                    plans[1] = tsk->ordPlan(); plans[0] = tsk->carryPlan();
+                }
+            }
+            else if (tsk->ordPlan()) plans[0] = tsk->ordPlan();
+            else if (tsk->carryPlan()) plans[0] = tsk->carryPlan();
             TGantItem *tskGit(new TGantItem(TGantItem::gitProject, tsk->scrName()));
             tskGit->setLabel(GANT_IND_PLAN, gen::intToStr(tsk->num()));
             tskGit->setPen(GANT_IND_PLAN, planItemsTaskPen);
@@ -277,7 +290,20 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
     {
         foreach (TCarryTask *tsk, tasks)
         {
-            TCarryPlan *plans[2] = { tsk->ordPlan(), tsk->carryPlan() };
+            TCarryPlan *plans[2] = { NULL };
+            if (tsk->ordPlan() && tsk->carryPlan())
+            {
+                if (tsk->ordPlan()->scrName()<tsk->carryPlan()->scrName())
+                {
+                    plans[0] = tsk->ordPlan(); plans[1] = tsk->carryPlan();
+                }
+                else
+                {
+                    plans[1] = tsk->ordPlan(); plans[0] = tsk->carryPlan();
+                }
+            }
+            else if (tsk->ordPlan()) plans[0] = tsk->ordPlan();
+            else if (tsk->carryPlan()) plans[0] = tsk->carryPlan();
             TGantItem *tskGit(new TGantItem(TGantItem::gitProject, tsk->scrName()));
             tskGit->setPen(GANT_IND_REAL, realItemsTaskPen);
             tskGit->setBrush(GANT_IND_REAL, realItemsTaskBrash);
