@@ -355,9 +355,6 @@ void TGantGraphicsView::newPlan(){
 
     std::cerr << " ! ==============newPlan()=============== ! " << std::endl;
 
-   // int kolDays(GANT_KOL_DAY);
-   //   if (m_dates[GANT_KOL_DAY-1]==0) kolDays = GANT_KOL_DAY-1;
-
     int headerHeight(m_headerHeight);
     int rowcount(0);
       kol_curr = 0;
@@ -1180,8 +1177,6 @@ void  TGantGraphicsView::set_open(TGantItem *items, bool op)
         set_open(curr,op);
     }
 }
-
-
 //----------------------------------------------------------------------
 
 QGraphicsRectItem *TGantGraphicsView::draw_rec_tbl(qreal x, qreal y, qreal w, qreal h, QPen &pen, QBrush &brush)
@@ -1418,25 +1413,59 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     TGantItemList & m_items = m_topItems;
     //if (m_items.isEmpty()) return;
 
-    /*
+
 #ifdef DEBUG_INFO
     std::cerr << " ==============kol_curr=============== " << kol_curr << std::endl;
 #endif
-    TGantItemList::iterator it2_;
-    for (it2_ = m_items.begin(); it2_ != m_items.end(); ++it2_)
-    //for (it2_ = m_topItems.begin(); it2_ != m_topItems.end(); ++it2_)
+    /*
+    for (int i=m_items.size()-1; i>=0;--i)
     {
-         TGantItem *curr = *it2_;
+        TGantItem *curr =m_items.at(i);
+        if (curr==NULL) continue;
+    //TGantItemList::iterator it2_;
+    //for (it2_ = m_items.begin(); it2_ != m_items.end(); ++it2_)
+    //{
+    //     TGantItem *curr = *it2_;
 #ifdef DEBUG_INFO
     std::cerr << " ==============kol_curr bef =============== " << kol_curr << std::endl;
 #endif
-         draw_curr_items(curr);
+         draw_curr_items_new(curr,false);
 #ifdef DEBUG_INFO
     std::cerr << " ==============kol_curr after =============== " << kol_curr << std::endl;
 #endif
     }
-*/
+    */
+    foreach (TGantItem *topIt, m_items)
+    {
+        draw_curr_items_new(topIt,false);
+        foreach (TGantItem *planIt, topIt->childs())
+        {
+        //std::cerr << " ==============topIt =============== " << topIt->name().toStdString().c_str() << std::endl;
+        //for (int i=topIt->childs().size()-1; i>=0;--i)
+        //{
+        //   TGantItem *planIt =topIt->childs().at(i);
+            draw_curr_items_new(planIt,false);
+            //std::cerr << " ==============planIt =============== " << planIt->name().toStdString().c_str() << std::endl;
+            foreach (TGantItem *procIt, planIt->childs())
+            {
+            //for (int i=planIt->childs().size()-1; i>=0;--i)
+            //{
+            //  TGantItem *procIt =planIt->childs().at(i);
+                draw_curr_items_new(procIt,false);
+                //std::cerr << " ==============procIt =============== " << procIt->name().toStdString().c_str() << std::endl;
+                 foreach (TGantItem *workIt, procIt->childs())
+                 {
+                  //for (int i=procIt->childs().size()-1; i>=0;--i)
+                  //{
+                  // TGantItem *workIt =procIt->childs().at(i);
+                  draw_curr_items_new(workIt,false);
+                  //  std::cerr << " ==============workIt =============== " << workIt->name().toStdString().c_str() << std::endl;
+                }
+            }
+        }
+    }
 
+    /*
       QStack<TGantItem*> stack;
       foreach (TGantItem *topIt,m_items)
       {
@@ -1452,12 +1481,11 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 #ifdef DEBUG_INFO
     std::cerr << " ============== текущая kol_curr  =============== " << kol_curr <<  "  name "<<curIt->name().toStdString().c_str()<< std::endl;
 #endif
-              /*
-              foreach (TGantItem *it,curIt->childs())
-              {
-                 stack.push(it);
-              }
-               */
+
+              //foreach (TGantItem *it,curIt->childs())
+              //{
+              //   stack.push(it);
+              //}
 
               for (int i=curIt->childs().size()-1; i>=0;--i)
               {
@@ -1465,8 +1493,11 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
                   if (it==NULL) continue;
                   stack.push(it);
               }
+
           }
       }
+
+    */
 
      int height (this->height());
 
@@ -1528,7 +1559,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
              qscrollbarVertgvPlan->setMaximum(m_rowHeight*rowcount + dob  - page_vp );
              int max_ = qscrollbarVertgvPlan->maximum();
 
-//#ifdef DEBUG_INFO
+#ifdef DEBUG_INFO
              std::cerr << " !!! qscrollbarVertgvPlan max = " << max_ << std::endl;
              std::cerr << " !!! qscrollbarVertgvPlan min = " << min_ << std::endl;
              std::cerr << " !!! qscrollbarVertgvPlan pageStep = " << page_vp  << std::endl;
@@ -1540,11 +1571,11 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
              std::cerr << " !!! dob = " << dob << std::endl;
              std::cerr << " !!! this->width()  = " << this->width() << std::endl;
              std::cerr << " !!! this->height() = " << this->height() << std::endl;
-//#endif
+#endif
 
-//#ifdef DEBUG_INFO
+#ifdef DEBUG_INFO
              std::cerr << "  !!! qscrollbarVert DETERMINANT  !!! " << std::endl;
-//#endif
+#endif
             }
 
         }
@@ -1575,7 +1606,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             //qscrollbarHoriz->setTracking(true);
             //qscrollbarHoriz->setSliderDown(false);
 
-//#ifdef DEBUG_INFO
+#ifdef DEBUG_INFO
             std::cerr << " !!!! qscrollbarHoriz DETERMINANT !!!! "  << std::endl;
             int min = this->minimumWidth(); int max = this->maximumWidth();//
             int pagestep = qscrollbarHoriz->pageStep();//->PageStep
@@ -1586,7 +1617,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             std::cerr << " !!!! qscrollbarHoriz->maximum() = !!!! "  <<  qscrollbarHoriz->maximum() <<std::endl;
             std::cerr << " !!!! qscrollbarHoriz->minimum() = !!!! "  <<  qscrollbarHoriz->minimum() <<std::endl;
             std::cerr << " !!!! qscrollbarHoriz->value() = !!!! "  <<  qscrollbarHoriz->value() <<std::endl;
-//#endif
+#endif
 
         }      
     }
@@ -1611,7 +1642,6 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     if (m_scaleView == svWeek || m_scaleView == svMonth)
     {
         m_currentViewDay =0;
-
     }
 
     //if (m_currentDay>=0)
@@ -1644,11 +1674,11 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             int max_  = qscrollbarHoriz->maximum();//->minimax();
             int min   = qscrollbarHorgvPlan->minimum();
             int max   = qscrollbarHorgvPlan->maximum();
-            std::cerr << " qscrollbarHoriz min = " <<min_ << std::endl;
-            std::cerr << " qscrollbarHoriz max = " <<max_ << std::endl;
-            std::cerr << " qscrollbarHorizPlan min = " << min << std::endl;
-            std::cerr << " qscrollbarHorizPlan max = " << max << std::endl;
-             std::cerr << " m_currentViewDay = " << m_currentViewDay << std::endl;
+            //std::cerr << " qscrollbarHoriz min = " <<min_ << std::endl;
+            //std::cerr << " qscrollbarHoriz max = " <<max_ << std::endl;
+            //std::cerr << " qscrollbarHorizPlan min = " << min << std::endl;
+            //std::cerr << " qscrollbarHorizPlan max = " << max << std::endl;
+            //std::cerr << " m_currentViewDay = " << m_currentViewDay << std::endl;
             float k =0;
             if (max-min>0 && max_ - min_ >0){
                k= ((float)(max-min)/(max_-min_));
@@ -1657,21 +1687,21 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
                 int value =(int) ((float)(colDaysWidth*m_currentViewDay - min)/k + min_);
                 if (value>=0)
                    qscrollbarHoriz->setSliderPosition(value);
-                 std::cerr << " qscrollbarHoriz value new = " <<value << std::endl;
+                // std::cerr << " qscrollbarHoriz value new = " <<value << std::endl;
             }
         }
         //qscrollbarHorgvPlan->setSliderPosition(colDaysWidth*m_currentViewDay);
         qscrollbarHorgvPlan->setSliderPosition(colDaysWidth*m_currentViewDay);
     }
 
-//#ifdef DEBUG_INFO
+#ifdef DEBUG_INFO
     std::cerr << " !!!! gv->width()   AFTER  =  " << gv->width() <<std::endl;
     std::cerr << " !!!! gv->height()  AFTER  =  " << gv->height() <<std::endl;
     //std::cerr << " !!!! gv->minimumWidth() AFTER =  " << gv->minimumWidth() <<std::endl;
     //std::cerr << " !!!! gv->maximumWidth() AFTER =  " << gv->maximumWidth() <<std::endl;
     //std::cerr << " !!!! gv->minimumHeight() AFTER =  " << gv->minimumHeight() <<std::endl;
     //std::cerr << " !!!! gv->maximumHeight() AFTER =  " << gv->maximumHeight() <<std::endl;
-//#endif
+#endif
 
     gv->show();
 
@@ -1725,10 +1755,24 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
       float t(0.);
       //int year_b(0);
-      int month_b(0),day_b(0);
+      //int month_b(0);
+      int day_b(0);
       //int year_e(0);
-      int month_e(0),day_e(0);
+      //int month_e(0);
+      int day_e(0);
       //int hour (0);
+      int begin_time(9);
+
+      int kolDays(GANT_KOL_DAY);
+        if (m_dates[GANT_KOL_DAY-1]==0) kolDays = GANT_KOL_DAY-1;
+
+      int columnWidth (0);
+
+      columnWidth= this->width()/kolDays;
+      if ((float)this->width()/kolDays - columnWidth> 0.5) columnWidth = columnWidth+1;
+
+      //std::cerr << " this->width()  " << this->width()<< std::endl;
+      //std::cerr << " columnWidth  " <<columnWidth<< std::endl;
 
       switch (m_scaleView)
       {
@@ -1742,13 +1786,15 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
                      *begin = m_begin_date.dayOfYear() - 1;
                      *end = m_end_date.dayOfYear() - 1;
 
-                     if (m_begin_time.hour() - 9 >=0)
-                         t =(((float)m_begin_time.hour() - 9)/9);
+                     if (m_workDayBegin.isValid()) begin_time = m_workDayBegin.hour();
+
+                     if (m_begin_time.hour() - begin_time >=0)
+                         t =(((float)m_begin_time.hour() - begin_time)/8);
                      else t=0;
                      *begin = (*begin)*m_columnWidth + t*m_columnWidth;
 
-                     if (m_end_time.hour() - 9 >=0)
-                        t =(((float)m_end_time.hour()- 9)/9);
+                     if (m_end_time.hour() - begin_time >=0)
+                        t =(((float)m_end_time.hour()- begin_time)/8);
                      else t =0;
                      *end = (*end)*m_columnWidth + t*m_columnWidth;
 
@@ -1773,31 +1819,18 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
                      break;
            case svWeek:
+
                      m_begin_date = m_begin.date();
                      m_end_date = m_end.date();
 
-                     //year_b = m_begin_date.year();
-                     month_b = m_begin_date.month();
-                     day_b = m_begin_date.day();
+                     //day_b  = m_begin_date.dayOfYear() -1;
+                     //day_e  = m_end_date.dayOfYear()-1;
 
-                     //year_e = m_end_date.year();
-                     month_e = m_end_date.month();
-                     day_e =  m_end_date.day();
+                     *begin = m_begin_date.dayOfYear() - 1;
+                     *end = m_end_date.dayOfYear() - 1;
 
-                     *begin = month_b - 1;
-                     *end = month_e - 1;
-
-                     t =(((float)day_b/7));
-                     if (t>4) t=4;
-                     *begin =(*begin)*4*m_columnWidth + t*m_columnWidth;
-                     if (t<4)
-                     *begin = (*begin) + (int)((float) m_begin_date.dayOfWeek()*m_columnWidth/7);
-
-                     t =(((float)day_e/7));
-                     if (t>4) t=4;
-                     *end =(*end)*4*m_columnWidth + t*m_columnWidth;
-                     if (t<4)
-                     *end = (*end) + (int)((float) m_end_date.dayOfWeek()*m_columnWidth/7);
+                     *begin =(*begin)*columnWidth ;
+                     *end =(*end)*columnWidth ;
 
                      break;
            case svMonth:
@@ -1805,22 +1838,11 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
                      m_begin_date = m_begin.date();
                      m_end_date = m_end.date();
 
-                     //year_b = m_begin_date.year();
-                     month_b = m_begin_date.month();
-                     day_b = m_begin_date.day();
+                     day_b  = m_begin_date.dayOfYear() -1;
+                     day_e  = m_end_date.dayOfYear()-1;
 
-                     //year_e = m_end_date.year();
-                     month_e = m_end_date.month();
-                     day_e =  m_end_date.day();
-
-                     *begin = month_b - 1;
-                     *end = month_e - 1;
-
-                     t =(((float)day_b/m_begin_date.daysInMonth()));
-                     *begin =(*begin)*m_columnWidth + t*m_columnWidth;
-
-                     t =(((float)day_e/m_end_date.daysInMonth()));
-                     *end =(*end)*m_columnWidth + t*m_columnWidth;
+                     *begin =day_b*columnWidth ;
+                     *end =day_e*columnWidth ;
 
                      break;
           default: return;
@@ -1837,18 +1859,18 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
        int headerHeight(m_headerHeight);
        int rowcount(0);
-         kol_curr = 0;
+       kol_curr = 0;
        TGantItemList &items = m_topItems;
        TGantItemList::iterator it2;
-         for (it2=items.begin(); it2!=items.end(); ++it2)
+       for (it2=items.begin(); it2!=items.end(); ++it2)
          {
            TGantItem *curr = *it2;
              rowcount = rowcount+get_kol_items(curr);
              get_kol_curr(curr);
          }
 
-         rowcount =kol_curr;
-         rowcount_all =kol_curr;
+       rowcount =kol_curr;
+       rowcount_all =kol_curr;
 
      #ifdef DEBUG_INFO
          std::cerr << " ==============rowcount=============== " << rowcount<< std::endl;
@@ -1891,6 +1913,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
      qreal x(0.);
      int w(0), h(headerHeight/2);
 
+     QBrush m_viewdayBrush = QBrush(Qt::red);
      QGraphicsLineItem *line(NULL);
 
      switch (m_scaleView)
@@ -1918,9 +1941,13 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
              else line->setPen(m_gridPen);
              sceneGant->addItem(line);
 
+             if (m_currentViewDay>=0 && i==m_currentViewDay){
+                 sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
+             }
+
              // для прорисовки часов
-             for(int j=1; j<=9; j++){
-                 line = new QGraphicsLineItem(i*colDaysWidth + j*colDaysWidth/9,0,i*colDaysWidth + j*colDaysWidth/9,m_rowHeight*rowcount);
+             for(int j=1; j<=8; j++){
+                 line = new QGraphicsLineItem(i*colDaysWidth + j*colDaysWidth/8,0,i*colDaysWidth + j*colDaysWidth/8,m_rowHeight*rowcount);
                  line->setPen(QPen(Qt::black));
                  sceneGant->addItem(line);
              }
@@ -1931,6 +1958,8 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
              else line->setPen(m_gridPen);
              sceneTable->addItem(line);
          }
+
+
          // Горизонтальная
          #ifdef DEBUG_INFO
              std::cerr << " Горизонталь " << std::endl;
@@ -2014,6 +2043,11 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
              }
              //QGraphicsLineItem *line(NULL);
              //line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount+slayder);
+
+             if (m_currentViewDay>=0 && i==m_currentViewDay){
+                 sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
+             }
+
              line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount);
              line->setPen(QPen(Qt::black));
              if (m_weekends[i]) line->setPen(m_weekendPen);
@@ -2092,8 +2126,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
              sceneTable->addItem(textDate);
          }
 
-
-              break;
+         break;
 //---------------------------------------------------------------------------------------------------------------
          case svWeek:
 
@@ -2204,7 +2237,16 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
           sceneGant->addItem(line);
        }
 
-           break;
+       colDaysWidth =this->width()/ kolDays;
+       if ((float)this->width()/ kolDays - colDaysWidth > 0.5 ) colDaysWidth=colDaysWidth+1;
+
+       if (m_currentViewDay>=0 ){
+           sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
+       }
+
+       //std::cerr << " this->width()  " << this->width()<< std::endl;
+       //std::cerr << " colDaysWidth  " <<colDaysWidth<< std::endl;
+       break;
 //------------------------------------------------------------------------------------------------------------------
        case svMonth:
 
@@ -2309,8 +2351,16 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
           sceneGant->addItem(line);
        }
 
+       colDaysWidth =this->width()/ kolDays;
+       if ((float)this->width()/ kolDays - colDaysWidth > 0.5 ) colDaysWidth=colDaysWidth+1;
 
-              break;
+       if (m_currentViewDay>=0 ){
+           sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
+       }
+
+       break;
+
+
        default: return;
      }
 
@@ -2368,7 +2418,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
          }
      #ifdef DEBUG_INFO
           std::cerr << " !!!!!!!    dob new = " << dob << std::endl;
-      #endif
+     #endif
 
      //int slayder(m_rowHeight/2);
      int slayder(dob);
@@ -2379,7 +2429,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
      switch (m_scaleView)
      {
             case svHour:
-                     m_columnWidth = m_columnWidth*2;
+                     m_columnWidth = m_columnWidth*8;
                      slayder_gor=m_columnWidth;
                      //!!!!
                      sceneGant->setSceneRect (QRectF(0,0,colDaysWidth*kolDays+slayder_gor,m_rowHeight*rowcount + slayder));//
@@ -2448,6 +2498,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
     int begin(0), end(0);
 
+    QBrush  q_white =QBrush(Qt::white);
       switch (m_contentDraw)
       {
           case cdPlan:
@@ -2487,6 +2538,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
               if (items->carryOutPercent()==0) break;
 
+              draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_white);
 
               break;
 
@@ -2600,299 +2652,210 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
           default: return;
       }
 
+      /*
+          if (!items->isOpen()) return;
+          TGantItemList &m_items = items->childs();
+          if (m_items.isEmpty()) return;
+
+          TGantItemList::iterator it2;
+          for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+          {
+            TGantItem *curr = *it2;
+              draw_curr_items(curr);
+          }
+          */
+
   }
 
+  //-----------------------------------------------------------------------------------
+   void  TGantGraphicsView::draw_curr_items_new(TGantItem *items , bool g)
+   {
 
+     if (items==NULL) return;
+     kol_curr ++;
+   #ifdef DEBUG_INFO
+       std::cerr <<"============== kol_curr in=============== "<<  kol_curr<< std::endl;
+   #endif
+     //   std::cerr << " ! ============== DRAW  =============== ! " << items->name().toStdString().c_str() << std::endl;
+     qreal x(0.), y(0.), w(0.), h(0.);
+     QPen pen;
+     QBrush brush;
+     QString txt;
+     QDateTime m_begin, m_end;
 
+     int begin(0), end(0);
+
+     QBrush  q_white =QBrush(Qt::white);
+       switch (m_contentDraw)
+       {
+           case cdPlan:
+
+               // временные параметры
+               m_begin = items->begin(GANT_IND_PLAN);//
+               m_end = items->end(GANT_IND_PLAN);
+
+               if (!m_begin.isValid() || !m_end.isValid()) break;
+
+               draw_items_beg_end( m_begin, m_end, &begin, &end);
+
+               // параметры отрисовки элементов
+               pen = items->pen(GANT_IND_PLAN);
+               brush = items->brush(GANT_IND_PLAN);
+
+               // надписи на элементах
+               txt = items->label(GANT_IND_PLAN);
+
+               x = begin;
+               y = (kol_curr-1)*m_rowHeight;
+               h = m_rowHeight;
+
+               if (end-begin>0)
+                   w = end-begin ;
+               else
+                   w = begin-end ;
+
+               if (g){
+                   draw_rec_g(x,y,w,h,pen,brush);
+                   draw_txt(x,y+m_rowHeight*0.1,w,txt);
+               }
+               else{
+                   draw_rec(x,y,w,h,pen,brush);
+                   draw_txt(x,y+m_rowHeight*0.2,w,txt);
+               }
+
+               if (items->carryOutPercent()==0) break;
+
+               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_white);
+
+               break;
+
+           case  cdReal:
+
+               // временные параметры
+               m_begin = items->begin(GANT_IND_REAL);//
+               m_end = items->end(GANT_IND_REAL);
+
+               if (!m_begin.isValid() || !m_end.isValid()) break;
+
+               draw_items_beg_end( m_begin, m_end, &begin, &end);
+
+               // параметры отрисовки элементов
+               pen = items->pen(GANT_IND_REAL);
+               brush = items->brush(GANT_IND_REAL);
+
+               // надписи на элементах
+               txt = items->label(GANT_IND_REAL);
+
+               x = begin;
+               y = (kol_curr-1)*m_rowHeight;
+               h = m_rowHeight;
+
+               if (end-begin>0)
+                   w = end-begin;
+               else
+                   w = begin-end;
+
+               if (g){
+                   draw_rec_g(x,y,w,h,pen,brush);
+                   draw_txt(x,y+m_rowHeight*0.1,w,txt);
+               }
+               else{
+                   draw_rec(x,y,w,h,pen,brush);
+                   draw_txt(x,y+m_rowHeight*0.2,w,txt);
+               }
+
+               break;
+
+           case cdAll:
+
+               // временные параметры
+               m_begin = items->begin(GANT_IND_PLAN);//
+               m_end = items->end(GANT_IND_PLAN);
+
+               if (!m_begin.isValid() || !m_end.isValid()) break;
+
+               draw_items_beg_end( m_begin, m_end, &begin, &end);
+
+               // параметры отрисовки элементов
+               pen = items->pen(GANT_IND_PLAN);
+               brush = items->brush(GANT_IND_PLAN);
+
+               // надписи на элементах
+               txt = items->label(GANT_IND_PLAN);
+
+               x = begin;
+               y = (kol_curr-1)*m_rowHeight;
+               h = m_rowHeight*0.5;
+
+               if (end-begin>0)
+                   w = end-begin ;
+               else
+                   w = begin-end ;
+
+               if (g){
+                   draw_rec_g(x,y,w,h,pen,brush);
+                   draw_txt(x,y - m_rowHeight*0.1,w,txt);
+               }
+               else{
+                   draw_rec(x,y,w,h,pen,brush);
+                   draw_txt(x,y,w,txt);
+               }
+
+               // временные параметры
+               m_begin = items->begin(GANT_IND_REAL);
+               m_end = items->end(GANT_IND_REAL);
+
+               if (!m_begin.isValid() || !m_end.isValid()) break;
+
+               draw_items_beg_end( m_begin, m_end, &begin, &end);
+
+               // параметры отрисовки элементов
+               pen = items->pen(GANT_IND_REAL);
+               brush = items->brush(GANT_IND_REAL);
+
+               // надписи на элементах
+               txt = items->label(GANT_IND_REAL);
+
+               x = begin;
+               y = (kol_curr-1)*m_rowHeight + m_rowHeight*0.5;
+               h = m_rowHeight*0.5;
+
+               if (end-begin>0)
+                   w = end-begin ;
+               else
+                   w = begin-end ;
+
+               if (g){
+                   draw_rec_g(x,y,w,h,pen,brush);
+                   draw_txt(x,y-m_rowHeight*0.1,w,txt);
+               }
+               else{
+                   draw_rec(x,y,w,h,pen,brush);
+                   draw_txt(x,y,w,txt);
+               }
+
+               break;
+
+           default: return;
+       }
+
+       /*
+       if (!items->isOpen()) return;
+       TGantItemList &m_items = items->childs();
+       if (m_items.isEmpty()) return;
+
+       TGantItemList::iterator it2;
+       for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+           {
+               TGantItem *curr = *it2;
+               draw_curr_items_new(curr,g);
+           }
+        */
+   }
 
 //----------------------------------------------------------------------------------------------
 
-  void  TGantGraphicsView::draw_curr_items(TGantItem *items)
-  {
-  /*
-    if (items==NULL) return;
-    kol_curr ++;
-  #ifdef DEBUG_INFO
-      std::cerr <<"============== kol_curr in=============== "<<  kol_curr<< std::endl;
-  #endif
-    qreal x(0.), y(0.), w(0.), h(0.);
-    QPen pen;
-    QBrush brush;
-    QString txt;
-    QDateTime m_begin, m_end;
 
-      switch (m_contentDraw)
-      {
-          case cdPlan:
 
-              // временные параметры
-              m_begin = items->begin(GANT_IND_PLAN);//
-              m_end = items->end(GANT_IND_PLAN);
 
-              if (!m_begin.isValid() || !m_end.isValid()) break;
-
-              // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_PLAN);
-              brush = items->brush(GANT_IND_PLAN);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_PLAN);
-
-              x = m_begin*m_columnWidth;
-              y = (kol_curr-1)*m_rowHeight;
-              h = m_rowHeight;
-
-              if (m_end-m_begin>0)
-                  w = (m_columnWidth)*(m_end-m_begin+1);
-              else
-                  w = (m_columnWidth)*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y+m_rowHeight*0.2,w,txt);
-
-              break;
-
-          case  cdReal:
-
-              // временные параметры
-              m_begin = items->begin(GANT_IND_REAL);//
-              m_end = items->end(GANT_IND_REAL);
-
-              if (m_begin<0 || m_end<0) break;
-
-              // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_REAL);
-              brush = items->brush(GANT_IND_REAL);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_REAL);
-
-              x = m_begin*m_columnWidth;
-
-              y = (kol_curr-1)*m_rowHeight;
-              h = m_rowHeight;
-
-              if (m_end-m_begin>0) w = (m_columnWidth)*(m_end-m_begin+1);
-              else w = (m_columnWidth)*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y+m_rowHeight*0.2,w,txt);
-
-              break;
-
-          case cdAll:
-
-              // временные параметры
-              m_begin = items->begin(GANT_IND_PLAN);//
-              m_end = items->end(GANT_IND_PLAN);
-
-              if (m_begin<0 || m_end<0) break;
-
-              // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_PLAN);
-              brush = items->brush(GANT_IND_PLAN);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_PLAN);
-
-              x = m_begin*m_columnWidth;
-              y = (kol_curr-1)*m_rowHeight;
-              h = (m_rowHeight*0.5);
-
-              if (m_end-m_begin>0) w = m_columnWidth*(m_end-m_begin+1);
-              else w = m_columnWidth*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y,w,txt);
-
-              // временные параметры
-              m_begin = items->begin(GANT_IND_REAL);
-              m_end = items->end(GANT_IND_REAL);
-
-               if (m_begin<0 || m_end<0) break;
-
-               // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_REAL);
-              brush = items->brush(GANT_IND_REAL);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_REAL);
-
-              x = m_begin*m_columnWidth;
-
-              y = (kol_curr-1)*m_rowHeight+m_rowHeight*0.5;
-              h = m_rowHeight*0.5;
-
-              if (m_end-m_begin>0) w = m_columnWidth*(m_end-m_begin+1);
-              else w = m_columnWidth*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y,w,txt);
-
-              break;
-
-          default: return;
-      }
-
-      if (!items->isOpen()) return;
-      TGantItemList &m_items = items->childs();
-      if (m_items.isEmpty()) return;
-
-      TGantItemList::iterator it2;
-      for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
-      {
-        TGantItem *curr = *it2;
-          draw_curr_items(curr);
-      }
-  */
-  }
-
-  //------------------------------------------------------------------------------
-  void  TGantGraphicsView::draw_curr_items_n(TGantItem *items)
-  {
-  /*
-    if (items==NULL) return;
-    kol_curr ++;
-  #ifdef DEBUG_INFO
-      std::cerr <<"============== kol_curr in=============== "<<  kol_curr<< std::endl;
-  #endif
-    qreal x(0.), y(0.), w(0.), h(0.);
-    QPen pen;
-    QBrush brush;
-    QString txt;
-    int m_begin(0), m_end(0);
-
-      switch (m_contentDraw)
-      {
-          case cdPlan:
-
-              // временные параметры
-              m_begin = items->begin(GANT_IND_PLAN);//
-              m_end = items->end(GANT_IND_PLAN);
-
-              if (m_begin<0 || m_end<0) break;
-
-              // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_PLAN);
-              brush = items->brush(GANT_IND_PLAN);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_PLAN);
-
-              x = m_begin*m_columnWidth;
-              y = (kol_curr-1)*m_rowHeight;
-              h = m_rowHeight;
-
-              if (m_end-m_begin>0)
-                  w = (m_columnWidth)*(m_end-m_begin+1);
-              else
-                  w = (m_columnWidth)*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y+m_rowHeight*0.2,w,txt);
-
-              break;
-
-          case  cdReal:
-
-              // временные параметры
-              m_begin = items->begin(GANT_IND_REAL);//
-              m_end = items->end(GANT_IND_REAL);
-
-              if (m_begin<0 || m_end<0) break;
-
-              // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_REAL);
-              brush = items->brush(GANT_IND_REAL);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_REAL);
-
-              x = m_begin*m_columnWidth;
-
-              y = (kol_curr-1)*m_rowHeight;
-              h = m_rowHeight;
-
-              if (m_end-m_begin>0) w = (m_columnWidth)*(m_end-m_begin+1);
-              else w = (m_columnWidth)*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y+m_rowHeight*0.2,w,txt);
-
-              break;
-
-          case cdAll:
-
-              // временные параметры
-              m_begin = items->begin(GANT_IND_PLAN);//
-              m_end = items->end(GANT_IND_PLAN);
-
-              if (m_begin<0 || m_end<0) break;
-
-              // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_PLAN);
-              brush = items->brush(GANT_IND_PLAN);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_PLAN);
-
-              x = m_begin*m_columnWidth;
-              y = (kol_curr-1)*m_rowHeight;
-              h = (m_rowHeight*0.5);
-
-              if (m_end-m_begin>0) w = m_columnWidth*(m_end-m_begin+1);
-              else w = m_columnWidth*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y,w,txt);
-
-              // временные параметры
-              m_begin = items->begin(GANT_IND_REAL);
-              m_end = items->end(GANT_IND_REAL);
-
-               if (m_begin<0 || m_end<0) break;
-
-               // параметры отрисовки элементов
-              pen = items->pen(GANT_IND_REAL);
-              brush = items->brush(GANT_IND_REAL);
-
-              // надписи на элементах
-              txt = items->label(GANT_IND_REAL);
-
-              x = m_begin*m_columnWidth;
-
-              y = (kol_curr-1)*m_rowHeight+m_rowHeight*0.5;
-              h = m_rowHeight*0.5;
-
-              if (m_end-m_begin>0) w = m_columnWidth*(m_end-m_begin+1);
-              else w = m_columnWidth*(m_begin-m_end+1);
-
-              draw_rec(x,y,w,h,pen,brush);
-
-              draw_txt(x,y,w,txt);
-
-              break;
-
-          default: return;
-      }
-  /*
-      if (!items->isOpen()) return;
-      TGantItemList &m_items = items->childs();
-      if (m_items.isEmpty()) return;
-
-      TGantItemList::iterator it2;
-      for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
-      {
-        TGantItem *curr = *it2;
-          draw_curr_items(curr);
-      }
-      */
-  }
 
