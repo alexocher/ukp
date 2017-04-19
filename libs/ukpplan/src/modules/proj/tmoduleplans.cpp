@@ -346,6 +346,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
     if (!tskids.count()) // все проекты
     {
         int curYear(QDate::currentDate().year());
+        //??? find param -year=<number>
         try
         {
             EM_YearPlan *yearPlan = new EM_YearPlan(curYear);
