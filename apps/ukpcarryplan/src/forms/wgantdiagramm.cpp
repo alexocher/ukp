@@ -172,6 +172,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
     BTN_PLAN->setChecked(whatdraw == TGantGraphicsView::cdPlan);
     BTN_REAL->setChecked(whatdraw == TGantGraphicsView::cdReal);
 
+    CB_SCALE->setCurrentIndex((int)sc);
+
     MODULE(Plans);
     modPlans->reflectCarryTasksToTree(tasks, *TREE, false, ROW_H); // отобразить все
     TREE->sortItems(0, Qt::AscendingOrder);
