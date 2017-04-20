@@ -5,6 +5,7 @@
 #include <defMacro>
 #include <TAppCarryPlan>
 #include <TfrmMainUkpCarryPlan>
+#include <WGantDiagramm>
 
 #if defined(Q_OS_WIN32)
 #include <LoginService>
@@ -13,6 +14,7 @@
 #endif
 
 extern TfrmMainUkpCarryPlan *frmMainUkpCarryPlan; // from fmainukpdetale.cpp
+extern WGantDiagramm *wGantDiagramm;              // from wgantdiagramm.cpp
 
 int main(int argc, char *argv[])
 {
@@ -36,6 +38,15 @@ int main(int argc, char *argv[])
     frmMainUkpCarryPlan = new TfrmMainUkpCarryPlan();
     frmMainUkpCarryPlan->show();
     ukpApp->run();
+
+    if (ukpApp->findParam("-diagramma")!="NOTFOUND")
+    {
+        if (!wGantDiagramm) wGantDiagramm = new WGantDiagramm(frmMainUkpCarryPlan);
+      MODULE(Plans);
+        wGantDiagramm->prepare(modPlans->carryTasks(), TGantGraphicsView::cdAll, TGantGraphicsView::svHour);
+        wGantDiagramm->showMaximized();
+    }
+
     int res(a.exec());
     DELETE(frmMainUkpCarryPlan);
     ukpApp->freeInstance();

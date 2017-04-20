@@ -14,7 +14,7 @@ private:
     void printDiagrammTree();
 
 public:
-    explicit WGantDiagramm(QWidget *parent = 0);
+    explicit WGantDiagramm(QWidget *parent = 0, Qt::WindowFlags f = Qt::WindowFlags());
     ~WGantDiagramm();
 
     void prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDraw whatdraw, TGantGraphicsView::ScaleView sc);

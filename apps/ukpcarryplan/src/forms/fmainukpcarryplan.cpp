@@ -62,15 +62,6 @@ TfrmMainUkpCarryPlan::TfrmMainUkpCarryPlan(QWidget *parent) : QMainWindow(parent
 
     showMaximized(); // showFullScreen();
 
-/*
-    if (!wGantDiagramm) wGantDiagramm = new WGantDiagramm(this);
-    wGantDiagramm->setGeometry(frmMainUkpCarryPlan->centralWidgetGlobalRect());
-    //wGantDiagramm->setGeometry(frmMainUkpCarryPlan->formRect());
-    MODULE(Plans);
-    wGantDiagramm->prepare(modPlans->carryTasks(), TGantGraphicsView::cdPlan, TGantGraphicsView::svDay);
-    wGantDiagramm->exec();
-*/
-
 }
 //-----------------------------------------------------------------------------
 

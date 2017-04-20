@@ -115,6 +115,7 @@ public:
 
     QString &dataPath() const;         // Путь к директории данных data
     QStringList &params() const;       // Параметры запуска
+    QString findParam(const QString &paramkey) const; // Поиск параметра по ключу
     TAbstractModule *findModule(TProjModuleType mt); // Модуль проекта
     TProjectErrorList &errors() const; // Список ошибок приложения
     void insertError(QString nm, bool iscrit, QString fnc, QString ln); // Добавить ошибку приложения в список

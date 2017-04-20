@@ -36,7 +36,7 @@ namespace
 
 }
 
-WGantDiagramm::WGantDiagramm(QWidget *parent) : QDialog(parent)
+WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent,f)
 {
     ui->setupUi(this);
 

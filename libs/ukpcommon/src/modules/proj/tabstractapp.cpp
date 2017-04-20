@@ -225,6 +225,13 @@ QStringList &TAbstractApp::params() const
 {
     return const_cast<QStringList&>(fParams);
 }
+
+QString TAbstractApp::findParam(const QString &paramkey) const
+{
+    foreach (const QString &s,fParams)
+        if (s.indexOf(paramkey)>-1) return s.section("=",1,1);
+    return "NOTFOUND";
+}
 //-----------------------------------------------------------------------------
 
 void TAbstractApp::insertModule(TAbstractModule *m)
