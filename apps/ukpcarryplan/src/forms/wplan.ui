@@ -56,13 +56,13 @@
         <property name="minimumSize">
          <size>
           <width>400</width>
-          <height>180</height>
+          <height>130</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>400</width>
-          <height>180</height>
+          <height>130</height>
          </size>
         </property>
         <layout class="QGridLayout" name="gridLayout_6">
@@ -143,13 +143,13 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>150</height>
+             <height>100</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>150</height>
+             <height>100</height>
             </size>
            </property>
            <property name="verticalScrollBarPolicy">
@@ -184,13 +184,13 @@
         <property name="minimumSize">
          <size>
           <width>400</width>
-          <height>550</height>
+          <height>600</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
           <width>400</width>
-          <height>550</height>
+          <height>600</height>
          </size>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -239,13 +239,13 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>520</height>
+             <height>570</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>520</height>
+             <height>570</height>
             </size>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -363,7 +363,7 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <widget class="QLabel" name="lblDtEnd">
+               <widget class="QLabel" name="lblDtBegin">
                 <property name="minimumSize">
                  <size>
                   <width>150</width>
@@ -420,7 +420,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="pbCurrentDate">
+               <widget class="QPushButton" name="pbCurrentDateBegin">
                 <property name="minimumSize">
                  <size>
                   <width>40</width>
@@ -447,6 +447,122 @@
               </item>
               <item>
                <widget class="QPushButton" name="pbDtBeginOk">
+                <property name="minimumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/images/docsReady.png</normaloff>:/images/docsReady.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>36</width>
+                  <height>36</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <property name="spacing">
+               <number>10</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lblDtEnd">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>150</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Закончить до</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>17</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QDateEdit" name="dtEnd">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>100</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="displayFormat">
+                 <string>dd.MM.yy</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbCurrentDateEnd">
+                <property name="minimumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/images/history.png</normaloff>:/images/history.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>36</width>
+                  <height>36</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbDtEndOk">
                 <property name="minimumSize">
                  <size>
                   <width>40</width>
