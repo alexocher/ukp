@@ -1592,21 +1592,28 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
             }
             TProductionType production_type = prtNone;
             int priority = 0;
-            QVariant tbegin = 0;
-            QVariant tend = 0;
+            QVariant tbegin = QVariant(QVariant::DateTime);
+            QVariant tend = QVariant(QVariant::DateTime);
+
             if(cur->getType()==PROJECT){
                 EM_Production* prod = ((EM_ProjectPlanItem*)cur)->getProduction();
                 if(prod!=0){
                     production_type = prod->getProductionType();
                 }
                 priority = ((EM_ProjectPlanItem*)cur)->getPriority();
-                tbegin = ((EM_ProjectPlanItem*)cur)->getTimeBegin().toTime_t();
-                tend = ((EM_ProjectPlanItem*)cur)->getTimeEnd().toTime_t();
+                if(((EM_ProjectPlanItem*)cur)->getTimeBegin().isValid()){
+                    tbegin = ((EM_ProjectPlanItem*)cur)->getTimeBegin().toTime_t();
+                }
+                if(((EM_ProjectPlanItem*)cur)->getTimeEnd().isValid()){
+                    tend = ((EM_ProjectPlanItem*)cur)->getTimeEnd().toTime_t();
+                }
+
             }
             pq->bindValue(":production_id",production_type);
             pq->bindValue(":priority",priority);
             pq->bindValue(":tbegin",tbegin);
             pq->bindValue(":tend",tend);
+
 
             bool present = false;
             bool optional = false;
