@@ -7,7 +7,6 @@
 #include <convertEnums>
 #include <TModuleEmployees>
 #include <TModuleUnits>
-
 TModuleEmployees::TModuleEmployees(TProjModuleType t, int id, int n, QString nm, TAbstractObject *parent) : TAbstractModule(t,id,n,nm,parent), fSelfEmployee(NULL)
 {
     fPlEmployees.setAutoDelete(true);

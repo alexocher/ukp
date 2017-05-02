@@ -363,39 +363,39 @@ void TModulePlans::fillTasks(QList<int> tskids)
                     PR(0, "for projIter");
                     EM_BasePlanItem *proj = *projIter;
                     PR3(4, "NODE_TYPE: %1, SUID: %2, (%3)", proj->getType(), proj->getID(), proj->getFullTitle());
-                    if (EM_ProjectPlanItem *curPlan = dynamic_cast<EM_ProjectPlanItem*>(*projIter)) // проект
+                    if (EM_ProjectPlanItem *curProject = dynamic_cast<EM_ProjectPlanItem*>(*projIter)) // проект
                     {
                         //PR(4,"if EM_ProjectPlanItem");
-                        TCarryTask *newCarryTask(new TCarryTask(curYear, curPlan->getProduction()->getProductionType(), curPlan->getID(), curPlan->getNum(), curPlan->getShortTitle())); // curPlan->SUID()
+                        TCarryTask *newCarryTask(new TCarryTask(curYear, curProject->getProduction()->getProductionType(), curProject->getID(), curProject->getNum(), curProject->getShortTitle())); // curPlan->SUID()
                         newCarryTask->setScrName(QString("%1. %2").arg((int)newCarryTask->productionType()).arg(newCarryTask->name()));
                         newCarryTask->setISort(newCarryTask->num());
-                        newCarryTask->setCondition(curPlan->getState());
-                        newCarryTask->setProblem(curPlan->getProblem());
-                        newCarryTask->setSourcesTitle(curPlan->getSrcTitle());
-                        newCarryTask->setResultsTitle(curPlan->getResTitle());
-                        TEmployeeRole rl(curPlan->getTemplEmployee());
-                        rl.setUnitId(curPlan->getOshsItemID());
+                        newCarryTask->setCondition(curProject->getState());
+                        newCarryTask->setProblem(curProject->getProblem());
+                        newCarryTask->setSourcesTitle(curProject->getSrcTitle());
+                        newCarryTask->setResultsTitle(curProject->getResTitle());
+                        TEmployeeRole rl(curProject->getTemplEmployee());
+                        rl.setUnitId(curProject->getOshsItemID());
                         newCarryTask->setSingleTemplateRole(rl);
                         newCarryTask->setUnitId(rl.unitId()); // тролько для проекта
-                        if (EM_User *user = curPlan->getEmployee()) newCarryTask->setEmployee(modEmployees->findEmployee(user->SUID()));
-                        newCarryTask->setTemplatePeriod(curPlan->getTypalDuration());
-                        newCarryTask->setPlanPeriod(curPlan->getTypalDuration()); // ??? должно быть плановое
-                        dt = curPlan->planBegin();
+                        if (EM_User *user = curProject->getEmployee()) newCarryTask->setEmployee(modEmployees->findEmployee(user->SUID()));
+                        newCarryTask->setTemplatePeriod(curProject->getTypalDuration());
+                        newCarryTask->setPlanPeriod(curProject->getTypalDuration()); // ??? должно быть плановое
+                        dt = curProject->planBegin();
                         if (dt.isValid()) newCarryTask->setDtPlanBegin(dt);
-                        dt = curPlan->planEnd();
+                        dt = curProject->planEnd();
                         if (dt.isValid()) newCarryTask->setDtPlanEnd(dt);
-                        dt = curPlan->realBegin();
+                        dt = curProject->realBegin();
                         if (dt.isValid()) newCarryTask->setDtRealBegin(dt);
-                        dt = curPlan->realEnd();
+                        dt = curProject->realEnd();
                         if (dt.isValid()) newCarryTask->setDtRealEnd(dt);
-                        newCarryTask->setStatuses(curPlan->getStatus());
-                        newCarryTask->setDescr(curPlan->getDescr());
-                        newCarryTask->setPriority(curPlan->getPriority());
-                        newCarryTask->setCarryOutPercent(curPlan->getProgress());
-                        if (curPlan->getTimeBegin().isValid()) newCarryTask->setDtMinBegin(curPlan->getTimeBegin());
-                        if (curPlan->getTimeEnd().isValid()) newCarryTask->setDtMaxEnd(curPlan->getTimeEnd());
+                        newCarryTask->setStatuses(curProject->getStatus());
+                        newCarryTask->setDescr(curProject->getDescr());
+                        newCarryTask->setPriority(curProject->getPriority());
+                        newCarryTask->setCarryOutPercent(curProject->getProgress());
+                        if (curProject->getTimeBegin().isValid()) newCarryTask->setDtMinBegin(curProject->getTimeBegin());
+                        if (curProject->getTimeEnd().isValid()) newCarryTask->setDtMaxEnd(curProject->getTimeEnd());
                         newCarryTask->setSaved(true);
-                        for(EM_BasePlanItem::iterator planIter = curPlan->begin(); planIter != curPlan->end(); ++planIter)
+                        for(EM_BasePlanItem::iterator planIter = curProject->begin(); planIter != curProject->end(); ++planIter)
                         {
                             PR(8, "for planIter");
                             EM_BasePlanItem *pl = *planIter;
@@ -958,7 +958,11 @@ bool TModulePlans::fromDB(QString param)
                         QList<QSharedPointer<EM_CalendarUserItem> > shPeriods = dic.get(QDateTime(QDate(fCompanyCalendar->year(), 1, 1), QTime(0, 0)), QDateTime(QDate(fCompanyCalendar->year() + 1, 1, 1), QTime(0, 0)), empl->id());
                         foreach (QSharedPointer<EM_CalendarUserItem> shIt, shPeriods)
                             if (EM_CalendarUserItem *cdrIt = shIt.data())
-                                clndr->insertWorkPeriod(new TWorkPeriod(cdrIt->getType(), cdrIt->getBeginDate().date().dayOfYear() - 1, cdrIt->getEndDate().date().dayOfYear() - 1));
+                                if (cdrIt->getType()==wptAbsent) // ??? только отсутствие
+                                {
+PR2(8,"[begin]: %1, [end]: %2",cdrIt->getBeginDate().date().toString("dd.MM,yy"),cdrIt->getEndDate().date().toString("dd.MM,yy"));
+                                    clndr->insertWorkPeriod(new TWorkPeriod(cdrIt->getType(), cdrIt->getBeginDate().date().dayOfYear() - 1, cdrIt->getEndDate().date().dayOfYear() - 1));
+                                }
                     }
                     catch (AddressBookException::UserNotFoundException &e)
                     {

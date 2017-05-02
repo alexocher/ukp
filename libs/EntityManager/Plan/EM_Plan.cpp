@@ -175,7 +175,7 @@ TAttachmentType EM_AbstractParam::getAttachmentType() const{
 
 EM_BasePlanItem::~EM_BasePlanItem(){
     qDeleteAll(_inParam);
-    qDeleteAll(_outParam);    
+    qDeleteAll(_outParam);
 }
 
 EM_BasePlanItem::EM_BasePlanItem(NODE_TYPE type, int suid):BaseTreeItem(suid,type),AbstractEntity(suid),EM_InternalState(INTERNAL_STATE_NEW_ITEM){
@@ -268,7 +268,7 @@ EM_OPERATION_RETURNED_STATUS EM_BasePlanItem::saveStatus() const throw(CommonExc
     }else{
         db = getConnection(CONN_UPDATE_STATUS) ;
     }
-    if(!db.open()){        
+    if(!db.open()){
         throw CommonException::OpenDBException(db.lastError().text());
     }
     QSqlQuery *pqState = new QSqlQuery(db);
@@ -759,7 +759,7 @@ void EM_YearPlanDic::reinit(){
 EM_YearPlan::EM_YearPlan(int year):AbstractEntity(-1),BaseTree<int,NODE_TYPE>(new EM_BasePlanItem(ROOT, -1)),_connect_name(generateConnectionCustomName("YearPlan")){
     _year = year;
     _state = EMPTY;
-    _title = "UNDEF";    
+    _title = "UNDEF";
 
     getConnection(_connect_name);
 
@@ -867,7 +867,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::rem(EM_BasePlanItem *item) throw (Comm
             stack.push(*iter);
         }
 
-    }   
+    }
     QSqlDatabase db = QSqlDatabase::database(_connect_name);
     if(!db.open()){
         throw CommonException::OpenDBException(db.lastError().text());
@@ -1468,7 +1468,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
         }
     }
 
-    // сейвим сам план   
+    // сейвим сам план
     EM_YearPlan::STATE planState;
     if(_state==EM_YearPlan::EMPTY){
         q->prepare(query_InsertYearPlan);
