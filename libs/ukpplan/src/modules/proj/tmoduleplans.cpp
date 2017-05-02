@@ -960,9 +960,11 @@ bool TModulePlans::fromDB(QString param)
                             if (EM_CalendarUserItem *cdrIt = shIt.data())
                                 if (cdrIt->getType()==wptAbsent) // ??? только отсутствие
                                 {
-PR2(8,"[begin]: %1, [end]: %2",cdrIt->getBeginDate().date().toString("dd.MM,yy"),cdrIt->getEndDate().date().toString("dd.MM,yy"));
+//PR2(8,"[begin]: %1, [end]: %2",cdrIt->getBeginDate().date().toString("dd.MM,yy"),cdrIt->getEndDate().date().toString("dd.MM,yy"));
                                     clndr->insertWorkPeriod(new TWorkPeriod(cdrIt->getType(), cdrIt->getBeginDate().date().dayOfYear() - 1, cdrIt->getEndDate().date().dayOfYear() - 1));
                                 }
+//if (QList<int> *allDays = clndr->fullRestDates())
+//    foreach (int d,*allDays) PR1(8,": %1",d);
                     }
                     catch (AddressBookException::UserNotFoundException &e)
                     {

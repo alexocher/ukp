@@ -84,7 +84,7 @@ bool TCompanyCalendar::fromDB(QString param) // год
 {
     fYear = param.isEmpty() ? QDate::currentDate().year() : param.toInt();
     fWeekEnds.clear();
-PR(0,"COMPANY CALENDAR");
+//PR(0,"COMPANY CALENDAR");
     try
     {
       EM_CalendarDic &dic = EM_CalendarDic::Instance();
@@ -96,7 +96,7 @@ PR(0,"COMPANY CALENDAR");
                 if (EM_CalendarItem *cdrIt = shIt.data())
                 {
                   const QDateTime &beginDate = cdrIt->getBeginDate(), &endDate = cdrIt->getEndDate();
-PR2(4,"[begin]: %1, [end]: %2",beginDate.toString("dd.MM,yy"),endDate.toString("dd.MM,yy"));
+//PR2(4,"[begin]: %1, [end]: %2",beginDate.toString("dd.MM,yy"),endDate.toString("dd.MM,yy"));
                   int frstDay(beginDate.date().dayOfYear()), diffDays(beginDate.date().daysTo(endDate.date()));
                     fWeekEnds<<(frstDay-1);
                     for (int i=0; i<diffDays; i++) fWeekEnds<<(frstDay+i);

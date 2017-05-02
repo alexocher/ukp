@@ -86,7 +86,6 @@ public:
     void insertWorkPeriod(TWorkPeriod *rp); // ... добавление
     void removeWorkPeriod(TWorkPeriod *rp); // ... удаление
     void clearWorkPeriods();           // ... очистка
-    TWorkPeriodList *workPeriods();     // Промежутки рабочего времени
 
     TEmployeeCalendar &operator=(const TEmployeeCalendar &emc);
     QList<int> *fullRestDates();       // Полный список выходных дней
