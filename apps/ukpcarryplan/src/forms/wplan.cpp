@@ -41,6 +41,7 @@ WPlan::WPlan(QWidget *parent) : QFrame(parent)
     connect(twProjects, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(onItemChanged(QTreeWidgetItem*, int)));
 
     dtBegin->setDate(QDate::currentDate());
+    dtEnd->setDate(QDate::currentDate());
 
     connect(pbPriorityOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
     connect(pbCurrentDateBegin, SIGNAL(clicked()), this, SLOT(resetPlan()));
@@ -377,7 +378,8 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
             {
                 isTask = true;
                 sbPriority->setValue(tsk->priority());
-                dtBegin->setDate(tsk->dtPlanBegin() ? tsk->dtPlanBegin()->date() : QDate(QDate::currentDate().year(), 1, 1));
+                dtBegin->setDate(tsk->dtMinBegin() ? tsk->dtMinBegin()->date() : QDate(QDate::currentDate().year(), 1, 1));
+                dtEnd->setDate(tsk->dtMaxEnd() ? tsk->dtMaxEnd()->date() : QDate(QDate::currentDate().year(), 1, 1));
             }
             else if (dynamic_cast<TCarryPlan*>(plEl)) isPlan = true; // TCarryPlan *plan =
             else if (TCarryProcedure *pr = dynamic_cast<TCarryProcedure*>(plEl))
@@ -398,6 +400,7 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
             pbDtBeginOk->setEnabled(isTask);
             pbDtEndOk->setEnabled(isTask);
             dtBegin->setEnabled(isTask);
+            dtEnd->setEnabled(isTask);
             pbTemplatesOk->setEnabled(isPlan);
             pbPeriodQuery->setEnabled(isWork);
             pbPeriodOk->setEnabled(isWork);
