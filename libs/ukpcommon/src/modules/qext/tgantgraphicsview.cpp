@@ -11,6 +11,7 @@
 #include <QStack>
 #include <QTimer>
 //#include "windows.h"
+#include <TIdent>
 
 //#define DEBUG_INFO
 
@@ -114,6 +115,19 @@ bool TGantItem::isOpen() const
 void TGantItem::setOpen(bool op)
 {
     m_isOpen = op;
+}
+
+//-----------------------------------------------------------------------------
+
+bool TGantItem::isOpenBef() const
+{
+    return m_isOpenBef;
+}
+//-----------------------------------------------------------------------------
+
+void TGantItem::setOpenBef(bool op)
+{
+    m_isOpenBef = op;
 }
 //-----------------------------------------------------------------------------
 
@@ -323,6 +337,7 @@ TGantGraphicsView::TGantGraphicsView(int year, int curday, QTime workdaybegin, Q
 
     qscrollbarHoriz = NULL;
     qscrollbarVert = NULL;
+    TREE = NULL;
 
     sceneTable=NULL;
     gvTable=NULL;
@@ -331,13 +346,15 @@ TGantGraphicsView::TGantGraphicsView(int year, int curday, QTime workdaybegin, Q
     scene=NULL;
     gv=NULL;
 
+    kol_collapse =0;
+    kol_expand=0;
+
     timer = new QTimer();
     connect(timer,SIGNAL(timeout()),this, SLOT(redraw()));
     timer->start(100);
 
     counter =0;
     connect(this,SIGNAL(start_newPlan()),this, SLOT(newWindow()));
-
 
 }
 //-----------------------------------------------------------------------------
@@ -370,9 +387,9 @@ void TGantGraphicsView::newPlan(){
       rowcount =kol_curr;
       rowcount_all =kol_curr;
 
-  #ifdef DEBUG_INFO
+ // #ifdef DEBUG_INFO
       std::cerr << " ==============rowcount=============== " << rowcount<< std::endl;
-  #endif
+ // #endif
     if (rowcount==0) rowcount=1;
 
     //int colDaysWidth(m_columnWidth);
@@ -525,6 +542,16 @@ void TGantGraphicsView::newPlan(){
   //!!!!!!!! обязательно
   //qscrollbarHoriz = NULL;
   //qscrollbarVert = NULL;
+
+  /*
+  if (TREE){
+
+      connect(TREE, SIGNAL(itemCollapsed(QTreeWidgetItem * )),
+             this, SLOT(collapseitem(QTreeWidgetItem * )));
+      connect(TREE, SIGNAL(itemExpanded(QTreeWidgetItem * )),
+             this, SLOT(expanditem(QTreeWidgetItem * )));
+  }
+  */
 
   if (prnt_gv){
 
@@ -886,11 +913,239 @@ TGantItem *TGantGraphicsView::findItem(const QStringList &slitnms)
     return NULL;
 }
 //-----------------------------------------------------------------------------
-void TGantGraphicsView::setOpen(TGantItem *it, bool isop)
+TGantItem * TGantGraphicsView::findItem( int id,  int  num,  QString   name){
+
+    std::cerr << " ============== name =============== " << id << " "<< num <<" "<< name.toStdString().c_str() << std::endl;
+
+    foreach (TGantItem *topIt,  m_topItems)
+    {
+        //std::cerr << " ==============topIt =============== " << topIt->name().indexOf(name) << std::endl;
+        //std::cerr << " ==============topIt =============== " << topIt->id()<<" "<<topIt->num()<<" "<< topIt->name().toStdString().c_str() << std::endl;
+        if (topIt->id()==id && topIt->num()==num && topIt->name().indexOf(name)>=0 ) return topIt;
+        // if (topIt->id()==id &&  topIt->name().indexOf(name)>=0 ) return topIt;
+        // if (topIt->name().indexOf(name)>=0 ) return topIt;
+        //if (topIt->id()==id  ) return topIt;
+
+        foreach (TGantItem *planIt, topIt->childs())
+        {
+            //std::cerr << " ==============planIt =============== " << planIt->name().indexOf(name) << std::endl;
+            //std::cerr << " ==============planIt =============== " << planIt->id()<<" "<<planIt->num()<<" "<< planIt->name().toStdString().c_str() << std::endl;
+            if (planIt->id()==id && planIt->num()==num && planIt->name().indexOf(name)>=0 ) return planIt;
+            //if (planIt->id()==id && planIt->name().indexOf(name)>=0 ) return planIt;
+            //if ( planIt->name().indexOf(name)>=0 ) return planIt;
+            //if (planIt->id()==id  ) return planIt;
+
+            foreach (TGantItem *procIt, planIt->childs())
+            {
+                 //std::cerr << " ==============procIt =============== " << procIt->name().indexOf(name) << std::endl;
+                 //std::cerr << " ==============procIt =============== "<< procIt->id()<<" "<<procIt->num()<<" "<< procIt->name().toStdString().c_str() << std::endl;
+                 if (procIt->id()==id && procIt->num()==num && procIt->name().indexOf(name)>=0 ) return procIt;
+                 //if (procIt->id()==id && procIt->name().indexOf(name)>=0 ) return procIt;
+                 //if ( procIt->name().indexOf(name)>=0 ) return procIt;
+                 //if (procIt->id()==id ) return procIt;
+
+                 foreach (TGantItem *workIt, procIt->childs())
+                 {
+                     //std::cerr << " ==============workIt =============== " << workIt->name().indexOf(name) << std::endl;
+                     //std::cerr << " ==============workIt =============== " << workIt->id()<<" "<< workIt->num()<<" "<< workIt->name().toStdString().c_str() << std::endl;
+                     if (workIt->id()==id && workIt->num()==num && workIt->name().indexOf(name)>=0 ) return workIt;
+                     //if (workIt->id()==id  && workIt->name().indexOf(name)>=0 ) return workIt;
+                     //if ( workIt->name().indexOf(name)>=0 ) return workIt;
+                     // if (workIt->id()==id ) return workIt;
+
+                 }
+            }
+        }
+    }
+
+    return NULL;
+}
+
+//-----------------------------------------------------------------------------
+void TGantGraphicsView::setOpen(TGantItem *items, bool op)
 {
     // isop==false - it остается видимым, все вложенные элементы скрываются
     // isop==true  - it его m_childs остаются видимым, m_childs[i]->m_childs - в соответствии с m_childs[i]->m_isOpen, и так в глубину
-    if (it) set_open(it,isop);
+    //if (op==false)
+        items->setOpen(true);//
+    //else
+
+    TGantItemList &m_items = items->childs();
+    if (m_items.isEmpty()) return;
+
+    TGantItemList::iterator it2;
+
+    if (op==false){
+
+        for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+        {
+            TGantItem *curr = *it2;
+            setOpenBef(curr);
+        }
+
+        for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+        {
+            TGantItem *curr = *it2;
+            set_open(curr,false);
+        }
+     }
+     else {
+     //if (op==true){
+        //for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+        //{
+        //    TGantItem *curr = *it2;
+        //    curr->setOpen(true);
+        //}
+
+        for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+        {
+            TGantItem *curr = *it2;
+            getOpenBef(curr);
+        }
+
+
+     }
+
+}
+//-----------------------------------------------------------------------------
+void TGantGraphicsView::setOpenBef(TGantItem *items)
+{
+    // isop==false - it остается видимым, все вложенные элементы скрываются
+    // isop==true  - it его m_childs остаются видимым, m_childs[i]->m_childs - в соответствии с m_childs[i]->m_isOpen, и так в глубину
+
+        items->setOpenBef(items->isOpen());//
+
+        TGantItemList &m_items = items->childs();
+        if (m_items.isEmpty()) return;
+
+        TGantItemList::iterator it2;
+        for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+        {
+            TGantItem *curr = *it2;
+            setOpenBef(curr);
+        }
+
+}
+//-----------------------------------------------------------------------------
+void TGantGraphicsView::getOpenBef(TGantItem *items)
+{
+    // isop==false - it остается видимым, все вложенные элементы скрываются
+    // isop==true  - it его m_childs остаются видимым, m_childs[i]->m_childs - в соответствии с m_childs[i]->m_isOpen, и так в глубину
+
+        items->setOpen(items->isOpenBef());//
+
+        TGantItemList &m_items = items->childs();
+        if (m_items.isEmpty()) return;
+
+        TGantItemList::iterator it2;
+        for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
+        {
+            TGantItem *curr = *it2;
+            getOpenBef(curr);
+        }
+}
+
+//----------------------------------------------------------------------------
+void TGantGraphicsView::disconnect_tree()
+{
+  if (TREE){
+
+       disconnect(TREE, SIGNAL(itemCollapsed(QTreeWidgetItem * )),
+           this, SLOT(collapseitem(QTreeWidgetItem * )));
+       disconnect(TREE, SIGNAL(itemExpanded(QTreeWidgetItem * )),
+           this, SLOT(expanditem(QTreeWidgetItem * )));
+
+    }
+}
+//-----------------------------------------------------------------------------
+//                     СЛОТЫ
+//-----------------------------------------------------------------------------
+void TGantGraphicsView::collapseitem(QTreeWidgetItem *item){
+
+    kol_expand=0;
+
+    std::cerr << " ==============COLLAPSE=============== " <<  std::endl;
+    //if (kol_collapse==1 && item==item_curr){
+    //    kol_collapse =0;
+    //    std::cerr << " ==============COLLAPSE DUBLE=============== " <<  std::endl;
+    //    return;
+    // }
+    if (kol_collapse==1){
+        kol_collapse=0;
+        std::cerr << " ==============COLLAPSE DUBLE=============== " <<  std::endl;
+        return;
+     }
+
+    if (item==NULL) return;
+    if (item!=item_curr) kol_collapse =0;
+
+    item_curr =NULL;
+    //TIdent idn1;
+    QVariant var = item->data(0,Qt::UserRole);
+    //  var.setValue(idn1); // copy idn1 into the variant
+
+    TIdent idn = var.value<TIdent>(); // retrieve the value
+
+     std::cerr << " ============== name COLLAPSE =============== " << idn.id << " "<< idn.num <<" "<< idn.name.toStdString().c_str() << std::endl;
+
+    TGantItem * p =findItem( idn.id,  idn.num, idn.name);
+    if (p==NULL) return;
+
+    //if (kol_collapse==0)
+        setOpen(p, false);
+
+    int val = -1;
+    if (qscrollbarHoriz) val =qscrollbarHoriz->value();
+
+    int val_v = -1;
+    if (qscrollbarVert) val_v =qscrollbarVert->value();
+
+    m_columnWidth = m_columnWidth_s;
+    draw(m_contentDraw );
+
+    if (val>=0)  qscrollbarHoriz->setSliderPosition(val);
+    if (val_v>=0)  qscrollbarVert->setSliderPosition(val_v);
+
+      kol_collapse = kol_collapse + 1;
+      item_curr = item;
+
+}
+//-----------------------------------------------------------------------------
+void TGantGraphicsView:: expanditem(QTreeWidgetItem *item){
+
+    kol_collapse=0;
+    std::cerr << " ==============EXPAND=============== " <<  std::endl;
+    if (kol_expand==1){
+        kol_expand =0;
+        std::cerr << " ==============EXPAND DUBLE=============== " <<  std::endl;
+        return;
+     }
+    if (item==NULL) return;
+    //TIdent idn1;
+    QVariant var = item->data(0,Qt::UserRole);
+    //  var.setValue(idn1); // copy idn1 into the variant
+
+    TIdent idn = var.value<TIdent>(); // retrieve the value
+
+    TGantItem * p =findItem( idn.id,  idn.num, idn.name);
+    if (p==NULL) return;
+
+    setOpen(p, true);
+
+    int val = -1;
+    if (qscrollbarHoriz) val =qscrollbarHoriz->value();
+
+    int val_v = -1;
+    if (qscrollbarVert) val_v =qscrollbarVert->value();
+
+    m_columnWidth = m_columnWidth_s;
+    draw(m_contentDraw );
+
+    if (val>=0)  qscrollbarHoriz->setSliderPosition(val);
+    if (val_v>=0 && val_v!=qscrollbarVert->maximum())  qscrollbarVert->setSliderPosition(val_v);
+
+    kol_expand = kol_expand + 1;
+
 }
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::ScrollVert(int value)
@@ -1145,14 +1400,16 @@ int  TGantGraphicsView::get_kol_items(TGantItem *items)
 void  TGantGraphicsView::get_kol_curr(TGantItem *items)
 {
     if (items==NULL) return;
-    kol_curr++;
     if (!items->isOpen()) return;
-  TGantItemList &m_items = items->childs();
+
+    kol_curr++;
+
+    TGantItemList &m_items = items->childs();
     if (m_items.isEmpty()) return;
 #ifdef DEBUG_INFO
    // std::cerr <<"==============kol=============== "<< kol<< std::endl;
 #endif
-  TGantItemList::iterator it2;
+    TGantItemList::iterator it2;
     for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
     {
       TGantItem *curr = *it2;
@@ -1167,9 +1424,9 @@ void  TGantGraphicsView::set_open(TGantItem *items, bool op)
     items->setOpen(op);//
     TGantItemList &m_items = items->childs();
     if (m_items.isEmpty()) return;
-#ifdef DEBUG_INFO
+//#ifdef DEBUG_INFO
     //std::cerr <<"==============kol=============== "<< kol<< std::endl;
-#endif
+//#endif
     TGantItemList::iterator it2;
     for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
     {
@@ -1242,7 +1499,19 @@ void  TGantGraphicsView::set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_
 {
     qscrollbarHoriz = qscrollbarHorizPlan_;
 }
+ //-----------------------------------------------------------------------------
+  void TGantGraphicsView:: set_tree(QTreeWidget *TR)
+ {
+     TREE = TR;
 
+     if (TREE){
+
+         connect(TREE, SIGNAL(itemCollapsed(QTreeWidgetItem * )),
+                this, SLOT(collapseitem(QTreeWidgetItem * )));
+         connect(TREE, SIGNAL(itemExpanded(QTreeWidgetItem * )),
+                this, SLOT(expanditem(QTreeWidgetItem * )));
+     }
+ }
 
 // !!! толщина (высота) элемента зависит от TGantGraphicsView::ContentDraw:
 //     cdPlan или cdReal - полная
@@ -1254,9 +1523,13 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     //emit start_newPlan();
 
     m_contentDraw = cd;
+    m_columnWidth_s =m_columnWidth;
 
     Vert =false;
     Vert_P =false;
+
+    kol_collapse =0;
+    kol_expand=0;
 
     //-------------- вроде работает 30.03.2017-----
     if (sceneGant)
@@ -1289,9 +1562,9 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     }
 
     rowcount =kol_curr;
-#ifdef DEBUG_INFO
+//#ifdef DEBUG_INFO
     std::cerr << " ==============rowcount all=============== " << rowcount<< std::endl;
-#endif
+//#endif
   if (rowcount==0) rowcount=1;
 
   int colDaysWidth(m_columnWidth);
@@ -1312,102 +1585,10 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     //int slayder_gor(m_columnWidth);
 
     //------------------------------------------------------------------------------------
-    draw_scale(); // вместо нижестоящих комментариев
+    draw_scale(); //
     //------------------------------------------------------------------------------------
 
-//--------------------------------------------------------------------------------------------------------------
-    /*
-    // Сетка
-    // Вертикальная
-#ifdef DEBUG_INFO
-    std::cerr << " Вертикаль " << std::endl;
-#endif
-    for (int i=0; i<kolDays; i++)
-    {
-        if (m_weekends[i])
-        {
-            //sceneGant->addRect(i*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount+slayder,m_weekendPen,m_weekendBrush);
-            sceneGant->addRect(i*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_weekendBrush);
-            sceneTable->addRect(i*colDaysWidth,0,colDaysWidth,headerHeight,m_weekendPen,m_weekendBrush);
-        }
-        QGraphicsLineItem *line(NULL);
-        //line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount+slayder);
-        line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount);
-        line->setPen(QPen(Qt::black));
-        if (m_weekends[i]) line->setPen(m_weekendPen);
-        else line->setPen(m_gridPen);
-        sceneGant->addItem(line);
 
-        line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,headerHeight);
-        line->setPen(QPen(Qt::black));
-        if (m_weekends[i]) line->setPen(m_weekendPen);
-        else line->setPen(m_gridPen);
-
-        sceneTable->addItem(line);
-    }
-    // Горизонтальная
-#ifdef DEBUG_INFO
-    std::cerr << " Горизонталь " << std::endl;
-#endif
-
-    // первая горизонталь
-  QGraphicsLineItem *line(new QGraphicsLineItem(0,headerHeight/2,colDaysWidth*kolDays,headerHeight/2));
-    line->setPen(QPen(Qt::black));
-    sceneTable->addItem(line);
-
-    for (int i=0; i<rowcount; i++)
-    {
-      QGraphicsLineItem *line(new QGraphicsLineItem(0,i*m_rowHeight,colDaysWidth*kolDays,i*m_rowHeight));
-        line->setPen(QPen(Qt::black));
-        sceneGant->addItem(line);
-    }
-
-    // месяцы
-  QMap<int,QString>::const_iterator it;
-  qreal x(0.);
-  int w(0), h(headerHeight/2);
-    for (it=months.begin(); it!=months.end(); ++it)
-    {
-      int kod(it.key());
-      QString value(it.value());
-      int kolDays(days.take(kod));
-
-        x = x+w;
-        w = colDaysWidth*kolDays;
-        draw_rec_tbl(x,0,w,h,m_gridPen,m_gridBrush);
-
-      QString txt(value);
-      qreal x_txt(0.), y_txt(0.);
-      QGraphicsTextItem *textDate(new QGraphicsTextItem(txt));
-        textDate->setPlainText(txt);
-        x_txt = x+w/2-textDate->document()->idealWidth()/2; // To center
-        y_txt = 0;
-
-        textDate->setPos(x_txt,y_txt);
-        sceneTable->addItem(textDate);
-    }
-
-#ifdef DEBUG_INFO
-    std::cerr << " Нумерация " << std::endl;
-#endif
-    // Нумерация дней в шапке
-    for (int i=0; i<kolDays; i++)
-    {
-#ifdef DEBUG_INFO
-       // std::cerr << " m_dates[i] = " << m_dates[i] << std::endl;
-#endif
-      QString num(QString::number(m_dates[i]));
-      QGraphicsTextItem *textDate(new QGraphicsTextItem(num));
-        textDate->setPlainText(num);
-
-      qreal x(i*colDaysWidth+colDaysWidth/2-textDate->document()->idealWidth()/2); // To center
-      qreal y(headerHeight/2);
-        textDate->setPos(x,y);
-        sceneTable->addItem(textDate);
-    }
-
-    */
-//--------------------------------------------------------------------------------------------------------------
     // выполняемые работы
     kol_curr=0;
     TGantItemList & m_items = m_topItems;
@@ -1583,6 +1764,16 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
         qscrollbarVert->setSliderPosition(0);
     }
 
+    if (headerHeight + m_rowHeight*rowcount <=  height )
+    {
+        if (qscrollbarVert!=NULL)
+            disconnect(qscrollbarVert,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert(int)));//
+
+            disconnect(qscrollbarVertgvPlan, SIGNAL(valueChanged(int)), this, SLOT(ScrollVert_P(int)));
+        // qscrollbarVertgvPlan->setSliderPosition(qscrollbarVertgvPlan->maximum());
+
+    }
+
     if (prnt_gv){
 
         int width = this->width();//
@@ -1738,6 +1929,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
  void TGantGraphicsView:: redraw() {// Q_DECL_OVERRIDE{
 
      timer->stop();
+     m_columnWidth = m_columnWidth_s;
      draw(m_contentDraw );
 
  }
@@ -2395,14 +2587,14 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
        int colDaysWidth(m_columnWidth);
 
-     #ifdef DEBUG_INFO
+   //  #ifdef DEBUG_INFO
          std::cerr << " m_columnWidth new = " << m_columnWidth << std::endl;
          std::cerr << " m_headerHeight new = " << m_headerHeight << std::endl;
          std::cerr << " m_rowHeight new = " << m_rowHeight << std::endl;
          std::cerr << " kolDays new = " << kolDays<< std::endl;
          int totalHeight(m_rowHeight*rowcount+headerHeight);
          std::cerr << " totalHeight new = " << totalHeight << std::endl;
-     #endif
+   //  #endif
 
          //int dob(0);
          dob = 0;
@@ -2486,6 +2678,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
   {
 
     if (items==NULL) return;
+    if (!items->isOpen()) return;
     kol_curr ++;
   #ifdef DEBUG_INFO
       std::cerr <<"============== kol_curr in=============== "<<  kol_curr<< std::endl;
@@ -2672,6 +2865,8 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
    {
 
      if (items==NULL) return;
+     if (!items->isOpen()) return;
+
      kol_curr ++;
    #ifdef DEBUG_INFO
        std::cerr <<"============== kol_curr in=============== "<<  kol_curr<< std::endl;

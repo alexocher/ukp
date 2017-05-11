@@ -64,6 +64,7 @@ WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
 
     DIAGR = new TGantGraphicsView(0, -1, PROJ->workDayBegin(), this);
     DIAGR->set_scrollbarVert(TREE->verticalScrollBar());
+    DIAGR->set_tree(TREE);
 
     grl->addWidget(DIAGR, 0, 1, 1, 1);
 
@@ -177,7 +178,9 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
   MODULE(Plans);
     modPlans->reflectCarryTasksToTree(tasks, *TREE, false, ROW_H); // отобразить все
     TREE->sortItems(0, Qt::AscendingOrder);
+    DIAGR->disconnect_tree();
     qtools::expand(*TREE);
+    DIAGR->set_tree(TREE);
 
   // Плановые
   QPen planItemsTaskPen(Qt::darkGray);
@@ -234,7 +237,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
         }
         else if (tsk->ordPlan()) plans[0] = tsk->ordPlan();
         else if (tsk->carryPlan()) plans[0] = tsk->carryPlan();
-      TGantItem *tskGit(new TGantItem(TGantItem::gitProject, tsk->scrName()));
+      TGantItem *tskGit(new TGantItem(TGantItem::gitProject, tsk->scrName(),NULL,tsk->id(),tsk->num()));
         tskGit->setLevel(0);
         tskGit->setOpen(true);
         if (showPlan)
@@ -256,7 +259,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
         for (int i = 0; i < 2; i++)
             if (TCarryPlan *plan = plans[i])
             {
-              TGantItem *planGit(new TGantItem(TGantItem::gitPlan, plan->scrName(), tskGit));
+              TGantItem *planGit(new TGantItem(TGantItem::gitPlan, plan->scrName(),tskGit,plan->id(),plan->num()));
                 planGit->setLevel(1);
                 planGit->setOpen(true);
                 if (showPlan)
@@ -277,7 +280,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                 }
                 foreach (TCarryProcedure *pr, plan->procedures())
                 {
-                  TGantItem *prGit(new TGantItem(TGantItem::gitProcedure, pr->scrName(), planGit));
+                  TGantItem *prGit(new TGantItem(TGantItem::gitProcedure, pr->scrName(),planGit,pr->id(),pr->num()));
                     prGit->setLevel(2);
                     prGit->setOpen(true);
                     if (showPlan)
@@ -298,7 +301,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                     }
                     foreach (TCarryWork *wrk, pr->works())
                     {
-                      TGantItem *wrkGit(new TGantItem(TGantItem::gitWork, wrk->scrName(), prGit));
+                      TGantItem *wrkGit(new TGantItem(TGantItem::gitWork, wrk->scrName(),prGit,wrk->id(),wrk->num()));
                         wrkGit->setLevel(3);
                         wrkGit->setOpen(true);
                         if (showPlan)

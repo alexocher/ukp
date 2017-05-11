@@ -1,6 +1,7 @@
 ﻿#ifndef TGANTGRAPHICSVIEW_H
 #define TGANTGRAPHICSVIEW_H
 
+#include <QTreeWidget>
 #include <QGraphicsView>
 #include <QMap>
 #include <QTime>
@@ -49,6 +50,8 @@ public:
     void setLevel(int lvl);
     bool isOpen() const;               // признак открытого узла дерева
     void setOpen(bool op);
+    bool isOpenBef() const;               // признак открытого узла дерева перед раскрытием
+    void setOpenBef(bool op);
     QDateTime begin(int ind) const;          // время начала
     void setBegin(int ind, const QDateTime &dt);
     QDateTime end(int ind) const;            // время окончания
@@ -91,6 +94,8 @@ private:
     TGantItemList       m_childs;
     // признак открытого узла
     bool                m_isOpen;
+    // признак открытого узла перед раскрытием
+    bool                m_isOpenBef;
     // Процент выполненной работы
     int                 m_carryOutPercent;
 };
@@ -148,9 +153,19 @@ public:
     //void draw_time(ContentDraw cd);         // отрисовать диаграмму
     void moveToDay(int day);           // прокрутить диаграмму, чтобы первым был day [0..GANT_KOL_DAY)
     TGantItem *findItem(const QStringList &slitnms); // глобальный поиск элементов (в элементах верхнего уровня и во всех вложенных)
-    void setOpen(TGantItem *it, bool isop); // раскрытие (сворачивание) элементов
+    TGantItem *findItem( int                   id,            // id
+         int                num,           // Номер
+       QString               name); // глобальный поиск элементов (в элементах верхнего уровня и во всех вложенных)
+    void setOpen(TGantItem *items, bool op); // раскрытие (сворачивание) элементов
+    void setOpenBef(TGantItem *items); // раскрытие (сворачивание) элементов
+    void getOpenBef(TGantItem *items); // раскрытие (сворачивание) элементов
     void show();
     void deletePlan();
+
+    void set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_);
+    void set_scrollbarHoriz(QScrollBar *qscrollbarHorizPlan_);
+    void set_tree(QTreeWidget *TR);
+    void disconnect_tree();
 
 public slots:
      void ScrollVert(int value);    // получение сигнала вертикальной прокрутки ( QAbstractSlider::sliderMoved(int value) ) от синхронизируемого элемента
@@ -158,8 +173,8 @@ public slots:
      void ScrollHoriz_T(int value);
      void ScrollHoriz_P(int value);
      void ScrollVert_P(int value);
-     void set_scrollbarVert(QScrollBar *qscrollbarVertgvPlanTree_);
-     void set_scrollbarHoriz(QScrollBar *qscrollbarHorizPlan_);
+     void collapseitem(QTreeWidgetItem *item);
+     void expanditem(QTreeWidgetItem *item);
      void redraw();         // переотрисовка диаграмму
      void newWindow();
 
@@ -182,6 +197,7 @@ private:
     int                 m_headerHeight,
                         m_columnWidth,
                         m_rowHeight;
+    int                 m_columnWidth_s;
     // элементы диаграммы верхнего уровня (m_parent==0)
     TGantItemList       m_topItems;
     // для удаления Item
@@ -200,7 +216,7 @@ private:
     ScaleView           m_scaleView;
     int                 m_currentViewDay; // текущий день просмотра (устанавливается moveToDay)
 
-    //начальная отрисовка (для появления ползунка)
+    //начальная отрисовка ()
     bool nachalo;
 
     void fillHeaderDatas(); // заполнить данные заголовка ( m_dates, m_monthStarts )
@@ -237,6 +253,9 @@ private:
     QScrollBar *qscrollbarHoriz;
     QScrollBar *qscrollbarVert;
 
+    QTreeWidget *TREE;
+    QTreeWidgetItem *item_curr;
+
     bool Vert;
     bool Vert_P;
 
@@ -245,6 +264,8 @@ private:
     int dob ;
 
     int counter;
+    int kol_collapse;
+    int kol_expand;
 
     //bool first_resizeEvent;
     // календарь
