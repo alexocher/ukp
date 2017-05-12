@@ -175,7 +175,7 @@ TAttachmentType EM_AbstractParam::getAttachmentType() const{
 
 EM_BasePlanItem::~EM_BasePlanItem(){
     qDeleteAll(_inParam);
-    qDeleteAll(_outParam);
+    qDeleteAll(_outParam);    
 }
 
 EM_BasePlanItem::EM_BasePlanItem(NODE_TYPE type, int suid):BaseTreeItem(suid,type),AbstractEntity(suid),EM_InternalState(INTERNAL_STATE_NEW_ITEM){
@@ -199,6 +199,7 @@ EM_BasePlanItem::EM_BasePlanItem(NODE_TYPE type, int suid):BaseTreeItem(suid,typ
     _oshs_item_id = -1;
     _progress = 0;
     _ext_proc_num = -1;
+
 }
 void EM_BasePlanItem::setInternalState(INTERNAL_STATE state, bool child){
     EM_InternalState::setInternalState(state);
@@ -268,7 +269,7 @@ EM_OPERATION_RETURNED_STATUS EM_BasePlanItem::saveStatus() const throw(CommonExc
     }else{
         db = getConnection(CONN_UPDATE_STATUS) ;
     }
-    if(!db.open()){
+    if(!db.open()){        
         throw CommonException::OpenDBException(db.lastError().text());
     }
     QSqlQuery *pqState = new QSqlQuery(db);
@@ -759,7 +760,7 @@ void EM_YearPlanDic::reinit(){
 EM_YearPlan::EM_YearPlan(int year):AbstractEntity(-1),BaseTree<int,NODE_TYPE>(new EM_BasePlanItem(ROOT, -1)),_connect_name(generateConnectionCustomName("YearPlan")){
     _year = year;
     _state = EMPTY;
-    _title = "UNDEF";
+    _title = "UNDEF";    
 
     getConnection(_connect_name);
 
@@ -867,7 +868,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::rem(EM_BasePlanItem *item) throw (Comm
             stack.push(*iter);
         }
 
-    }
+    }   
     QSqlDatabase db = QSqlDatabase::database(_connect_name);
     if(!db.open()){
         throw CommonException::OpenDBException(db.lastError().text());
@@ -1468,7 +1469,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
         }
     }
 
-    // сейвим сам план
+    // сейвим сам план   
     EM_YearPlan::STATE planState;
     if(_state==EM_YearPlan::EMPTY){
         q->prepare(query_InsertYearPlan);
@@ -1678,22 +1679,22 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
             }
             // ================================================================================
             // Сейви время
-            if( !cur->planBegin().isNull() ){
+            if( !cur->planBegin().isNull() && cur->planBegin().isValid() ){
                 item_suid_list<<cur->suid();
                 time_value_list<<cur->planBegin().toTime_t();
                 time_type_list<<EM_YearPlan::PLAN_BEGIN;
             }
-            if( !cur->planEnd().isNull() ){
+            if( !cur->planEnd().isNull() && cur->planEnd().isValid() ){
                 item_suid_list<<cur->suid();
                 time_value_list<<cur->planEnd().toTime_t();
                 time_type_list<<EM_YearPlan::PLAN_END;
             }
-            if( !cur->realBegin().isNull() ){
+            if( !cur->realBegin().isNull() && cur->realBegin().isValid() ){
                 item_suid_list<<cur->suid();
                 time_value_list<<cur->realBegin().toTime_t();
                 time_type_list<<EM_YearPlan::REAL_BEGIN;
             }
-            if( !cur->realEnd().isNull() ){
+            if( !cur->realEnd().isNull() && cur->realEnd().isValid() ){
                 item_suid_list<<cur->suid();
                 time_value_list<<cur->realEnd().toTime_t();
                 time_type_list<<EM_YearPlan::REAL_END;
