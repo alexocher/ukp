@@ -254,7 +254,7 @@ private:
     QScrollBar *qscrollbarVert;
 
     QTreeWidget *TREE;
-    QTreeWidgetItem *item_curr;
+    TGantItem   *m_current;
 
     bool Vert;
     bool Vert_P;
@@ -264,8 +264,6 @@ private:
     int dob ;
 
     int counter;
-    int kol_collapse;
-    int kol_expand;
 
     //bool first_resizeEvent;
     // календарь

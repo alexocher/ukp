@@ -346,9 +346,6 @@ TGantGraphicsView::TGantGraphicsView(int year, int curday, QTime workdaybegin, Q
     scene=NULL;
     gv=NULL;
 
-    kol_collapse =0;
-    kol_expand=0;
-
     timer = new QTimer();
     connect(timer,SIGNAL(timeout()),this, SLOT(redraw()));
     timer->start(100);
@@ -543,15 +540,6 @@ void TGantGraphicsView::newPlan(){
   //qscrollbarHoriz = NULL;
   //qscrollbarVert = NULL;
 
-  /*
-  if (TREE){
-
-      connect(TREE, SIGNAL(itemCollapsed(QTreeWidgetItem * )),
-             this, SLOT(collapseitem(QTreeWidgetItem * )));
-      connect(TREE, SIGNAL(itemExpanded(QTreeWidgetItem * )),
-             this, SLOT(expanditem(QTreeWidgetItem * )));
-  }
-  */
 
   if (prnt_gv){
 
@@ -969,6 +957,7 @@ void TGantGraphicsView::setOpen(TGantItem *items, bool op)
     //if (op==false)
         items->setOpen(true);//
     //else
+    m_current = items;
 
     TGantItemList &m_items = items->childs();
     if (m_items.isEmpty()) return;
@@ -1035,8 +1024,10 @@ void TGantGraphicsView::getOpenBef(TGantItem *items)
         items->setOpen(items->isOpenBef());//
 
         TGantItemList &m_items = items->childs();
-        if (m_items.isEmpty()) return;
-
+        if (m_items.isEmpty()) {
+            if (items->parent()==m_current ) items->setOpen(true);//
+            return;
+        }
         TGantItemList::iterator it2;
         for (it2=m_items.begin(); it2!=m_items.end(); ++it2)
         {
@@ -1062,24 +1053,10 @@ void TGantGraphicsView::disconnect_tree()
 //-----------------------------------------------------------------------------
 void TGantGraphicsView::collapseitem(QTreeWidgetItem *item){
 
-    kol_expand=0;
 
     std::cerr << " ==============COLLAPSE=============== " <<  std::endl;
-    //if (kol_collapse==1 && item==item_curr){
-    //    kol_collapse =0;
-    //    std::cerr << " ==============COLLAPSE DUBLE=============== " <<  std::endl;
-    //    return;
-    // }
-    if (kol_collapse==1){
-        kol_collapse=0;
-        std::cerr << " ==============COLLAPSE DUBLE=============== " <<  std::endl;
-        return;
-     }
-
     if (item==NULL) return;
-    if (item!=item_curr) kol_collapse =0;
 
-    item_curr =NULL;
     //TIdent idn1;
     QVariant var = item->data(0,Qt::UserRole);
     //  var.setValue(idn1); // copy idn1 into the variant
@@ -1091,8 +1068,7 @@ void TGantGraphicsView::collapseitem(QTreeWidgetItem *item){
     TGantItem * p =findItem( idn.id,  idn.num, idn.name);
     if (p==NULL) return;
 
-    //if (kol_collapse==0)
-        setOpen(p, false);
+    setOpen(p, false);
 
     int val = -1;
     if (qscrollbarHoriz) val =qscrollbarHoriz->value();
@@ -1104,22 +1080,14 @@ void TGantGraphicsView::collapseitem(QTreeWidgetItem *item){
     draw(m_contentDraw );
 
     if (val>=0)  qscrollbarHoriz->setSliderPosition(val);
-    if (val_v>=0)  qscrollbarVert->setSliderPosition(val_v);
-
-      kol_collapse = kol_collapse + 1;
-      item_curr = item;
+    if (val_v>=0)  qscrollbarVert->setSliderPosition(val_v);   
 
 }
 //-----------------------------------------------------------------------------
 void TGantGraphicsView:: expanditem(QTreeWidgetItem *item){
 
-    kol_collapse=0;
     std::cerr << " ==============EXPAND=============== " <<  std::endl;
-    if (kol_expand==1){
-        kol_expand =0;
-        std::cerr << " ==============EXPAND DUBLE=============== " <<  std::endl;
-        return;
-     }
+
     if (item==NULL) return;
     //TIdent idn1;
     QVariant var = item->data(0,Qt::UserRole);
@@ -1143,8 +1111,6 @@ void TGantGraphicsView:: expanditem(QTreeWidgetItem *item){
 
     if (val>=0)  qscrollbarHoriz->setSliderPosition(val);
     if (val_v>=0 && val_v!=qscrollbarVert->maximum())  qscrollbarVert->setSliderPosition(val_v);
-
-    kol_expand = kol_expand + 1;
 
 }
 //-----------------------------------------------------------------------------
@@ -1528,10 +1494,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
     Vert =false;
     Vert_P =false;
 
-    kol_collapse =0;
-    kol_expand=0;
-
-    //-------------- вроде работает 30.03.2017-----
+    //--------------  работает 30.03.2017-----
     if (sceneGant)
       sceneGant->clear();
     if (sceneTable)
@@ -1832,6 +1795,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
     if (m_scaleView == svWeek || m_scaleView == svMonth)
     {
+        m_currentDay = m_currentViewDay ;
         m_currentViewDay =0;
     }
 
@@ -1885,6 +1849,10 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
         qscrollbarHorgvPlan->setSliderPosition(colDaysWidth*m_currentViewDay);
     }
 
+    if (m_scaleView == svWeek || m_scaleView == svMonth)
+    {
+        m_currentViewDay =m_currentDay;
+    }
 #ifdef DEBUG_INFO
     std::cerr << " !!!! gv->width()   AFTER  =  " << gv->width() <<std::endl;
     std::cerr << " !!!! gv->height()  AFTER  =  " << gv->height() <<std::endl;
@@ -2432,10 +2400,13 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
        colDaysWidth =this->width()/ kolDays;
        if ((float)this->width()/ kolDays - colDaysWidth > 0.5 ) colDaysWidth=colDaysWidth+1;
 
-       if (m_currentViewDay>=0 ){
+       if (m_currentViewDay>=0 ){       //
            sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
        }
 
+       //if (m_currentDay>=0 ){
+       //    sceneGant->addRect(m_currentDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
+       //}
        //std::cerr << " this->width()  " << this->width()<< std::endl;
        //std::cerr << " colDaysWidth  " <<colDaysWidth<< std::endl;
        break;
@@ -2549,6 +2520,9 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
        if (m_currentViewDay>=0 ){
            sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
        }
+       //if (m_currentDay>=0 ){
+       //    sceneGant->addRect(m_currentDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
+       //}
 
        break;
 
@@ -2918,9 +2892,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
                    draw_txt(x,y+m_rowHeight*0.2,w,txt);
                }
 
-               if (items->carryOutPercent()==0) break;
 
-               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_white);
 
                break;
 
@@ -2958,6 +2930,10 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
                    draw_rec(x,y,w,h,pen,brush);
                    draw_txt(x,y+m_rowHeight*0.2,w,txt);
                }
+
+               if (items->carryOutPercent()==0) break;
+
+               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_white);
 
                break;
 
