@@ -1148,7 +1148,7 @@ void TGantGraphicsView::ScrollVert(int value)
 
      //disconnect(qscrollbarVertgvPlan,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert_P(int)));
       Vert_P =true;
-     qscrollbarVertgvPlan->setSliderPosition(rez);
+      qscrollbarVertgvPlan->setSliderPosition(rez);
       Vert_P =false;
      //connect(qscrollbarVertgvPlan,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert_P(int)));
 
@@ -1733,6 +1733,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
             disconnect(qscrollbarVert,SIGNAL(valueChanged(int)),this,SLOT(ScrollVert(int)));//
 
             disconnect(qscrollbarVertgvPlan, SIGNAL(valueChanged(int)), this, SLOT(ScrollVert_P(int)));
+            qscrollbarVertgvPlan->setDisabled(true);
         // qscrollbarVertgvPlan->setSliderPosition(qscrollbarVertgvPlan->maximum());
 
     }
