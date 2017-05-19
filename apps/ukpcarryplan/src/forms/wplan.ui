@@ -401,6 +401,32 @@
                </spacer>
               </item>
               <item>
+               <widget class="QPushButton" name="pbDtBeginCancel">
+                <property name="minimumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/images/delete.png</normaloff>:/images/delete.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>36</width>
+                  <height>36</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QDateEdit" name="dtBegin">
                 <property name="minimumSize">
                  <size>
@@ -515,6 +541,32 @@
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbDtEndCancel">
+                <property name="minimumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>40</width>
+                  <height>40</height>
+                 </size>
+                </property>
+                <property name="icon">
+                 <iconset resource="../res.qrc">
+                  <normaloff>:/images/delete.png</normaloff>:/images/delete.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>36</width>
+                  <height>36</height>
+                 </size>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QDateEdit" name="dtEnd">

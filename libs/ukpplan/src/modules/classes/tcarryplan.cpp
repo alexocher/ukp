@@ -398,7 +398,9 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
         if (currentProject) // не шаблон
         {
             if (fCarryTask->dtMinBegin()) currentProject->setTimeBegin(*fCarryTask->dtMinBegin());
+            else currentProject->setTimeBegin(QDateTime());
             if (fCarryTask->dtMaxEnd()) currentProject->setTimeEnd(*fCarryTask->dtMaxEnd());
+            else currentProject->setTimeEnd(QDateTime());
         }
         yearPlan->add(currentProject ? currentProject : root,planItem);
         foreach (TCarryProcedure *pr,fPlProcedures)

@@ -607,8 +607,8 @@ void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidg
                 twiPl->setIcon(0, ICONPIX(PIX_LEVEL3));
                 twiPl->setIcon(1, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
                 twiPl->setText(2, gen::intToStr(plan->planPeriod()));
-                twiPl->setText(3, plan->dtPlanBegin() ? plan->dtPlanBegin()->toString("hh:mm dd.MM") : "");
-                twiPl->setText(4, plan->dtPlanEnd() ? plan->dtPlanEnd()->toString("hh:mm dd.MM") : "");
+                twiPl->setText(3, plan->dtPlanBegin() ? plan->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
+                twiPl->setText(4, plan->dtPlanEnd() ? plan->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
                 twiPl->setText(5, "");
                 twiPl->setIcon(6, ICONPIX(plan->isSaved() ? "" : PIX_DB));
                 twiPl->setData(0, Qt::UserRole, qVariantFromValue(TIdent(plan->id(), plan->num(), plan->name(), (int)petPlan)));
@@ -627,8 +627,8 @@ void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidg
                     twiPr->setIcon(0, ICONPIX(PIX_LEVEL4));
                     twiPr->setIcon(1, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
                     twiPr->setText(2, gen::intToStr(pr->planPeriod()));
-                    twiPr->setText(3, pr->dtPlanBegin() ? pr->dtPlanBegin()->toString("hh:mm dd.MM") : "");
-                    twiPr->setText(4, pr->dtPlanEnd() ? pr->dtPlanEnd()->toString("hh:mm dd.MM") : "");
+                    twiPr->setText(3, pr->dtPlanBegin() ? pr->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
+                    twiPr->setText(4, pr->dtPlanEnd() ? pr->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
                     twiPr->setText(5, pr->employee() ? pr->employee()->name() : "");
                     twiPr->setIcon(6, ICONPIX(pr->isSaved() ? "" : PIX_DB));
                     twiPr->setData(0, Qt::UserRole, qVariantFromValue(TIdent(pr->id(), pr->num(), pr->name(), (int)petProcedure)));
@@ -647,8 +647,8 @@ void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidg
                         twiWrk->setIcon(0, ICONPIX(PIX_LEVEL5));
                         twiWrk->setIcon(1, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
                         twiWrk->setText(2, gen::intToStr(wrk->planPeriod()));
-                        twiWrk->setText(3, wrk->dtPlanBegin() ? wrk->dtPlanBegin()->toString("hh:mm dd.MM") : "");
-                        twiWrk->setText(4, wrk->dtPlanEnd() ? wrk->dtPlanEnd()->toString("hh:mm dd.MM") : "");
+                        twiWrk->setText(3, wrk->dtPlanBegin() ? wrk->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
+                        twiWrk->setText(4, wrk->dtPlanEnd() ? wrk->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
                         twiWrk->setText(5, wrk->employee() ? wrk->employee()->name() : "");
                         twiWrk->setIcon(6, ICONPIX(wrk->isSaved() ? "" : PIX_DB));
                         twiWrk->setData(0, Qt::UserRole, qVariantFromValue(TIdent(wrk->id(), wrk->num(), wrk->name(), (int)petWork)));

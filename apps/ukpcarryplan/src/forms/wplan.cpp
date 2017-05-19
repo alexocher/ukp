@@ -48,6 +48,8 @@ WPlan::WPlan(QWidget *parent) : QFrame(parent)
     connect(pbCurrentDateEnd, SIGNAL(clicked()), this, SLOT(resetPlan()));
     connect(pbDtBeginOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
     connect(pbDtEndOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbDtBeginCancel, SIGNAL(clicked()), this, SLOT(resetPlan()));
+    connect(pbDtEndCancel, SIGNAL(clicked()), this, SLOT(resetPlan()));
     connect(pbTemplatesOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
     connect(pbPeriodQuery, SIGNAL(clicked()), this, SLOT(resetPlan()));
     connect(pbPeriodOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
@@ -139,6 +141,34 @@ void WPlan::resetPlan(const QPushButton &btn)
             if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
             {
                 tsk->setDtMaxEnd(QDateTime(dtEnd->date(), QTime(9, 0, 0)));
+                teParams->setText(tsk->toHtml(!cbIsShort->isChecked()));
+            }
+        }
+    }
+    else if (&btn == pbDtBeginCancel)
+    {
+        if (QTreeWidgetItem *curIt = twProjects->currentItem())
+        {
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
+            {
+                tsk->setDtMinBegin(QDateTime());
+                dtBegin->setDate(QDate(2000,1,1));
+                teParams->setText(tsk->toHtml(!cbIsShort->isChecked()));
+            }
+        }
+    }
+    else if (&btn == pbDtEndCancel)
+    {
+        if (QTreeWidgetItem *curIt = twProjects->currentItem())
+        {
+            QStringList scrnms = qtools::hierarchyTexts(*curIt);
+            MODULE(Plans);
+            if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
+            {
+                tsk->setDtMaxEnd(QDateTime());
+                dtEnd->setDate(QDate(2000,1,1));
                 teParams->setText(tsk->toHtml(!cbIsShort->isChecked()));
             }
         }
@@ -399,6 +429,8 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
             pbCurrentDateEnd->setEnabled(isTask);
             pbDtBeginOk->setEnabled(isTask);
             pbDtEndOk->setEnabled(isTask);
+            pbDtBeginCancel->setEnabled(isTask);
+            pbDtEndCancel->setEnabled(isTask);
             dtBegin->setEnabled(isTask);
             dtEnd->setEnabled(isTask);
             pbTemplatesOk->setEnabled(isPlan);

@@ -100,11 +100,9 @@ QDateTime *TCarryTask::dtMinBegin() const
 
 void TCarryTask::setDtMinBegin(const QDateTime &dt)
 {
+    DELETE(fDtMinBegin);
     if (dt.isValid())
-    {
-        DELETE(fDtMinBegin);
         fDtMinBegin = new QDateTime(dt);
-    }
 }
 //-----------------------------------------------------------------------------
 
@@ -116,11 +114,9 @@ QDateTime *TCarryTask::dtMaxEnd() const
 
 void TCarryTask::setDtMaxEnd(const QDateTime &dt)
 {
+    DELETE(fDtMaxEnd);
     if (dt.isValid())
-    {
-        DELETE(fDtMaxEnd);
         fDtMaxEnd = new QDateTime(dt);
-    }
 }
 //-----------------------------------------------------------------------------
 
