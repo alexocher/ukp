@@ -2076,6 +2076,8 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
      QBrush m_viewdayBrush = QBrush(Qt::red);
      QGraphicsLineItem *line(NULL);
+     int j(0);
+     int n(0);
 
      switch (m_scaleView)
      {
@@ -2298,9 +2300,9 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
          #endif
 
          colDaysWidth =this->width()/12;
-
          if ((float)this->width()/12 - colDaysWidth> 0.5)
              colDaysWidth=colDaysWidth + 1;
+         if (colDaysWidth==0) colDaysWidth = 1;
 
          for (int i=0; i<12; i++)
          {
@@ -2313,9 +2315,6 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
          }
 
          // месяцы
-         //QMap<int,QString>::const_iterator it;
-         //qreal x(0.);
-         //int w(0), h(headerHeight/2);
          x= 0.0;
          w= 0.0;
          h= headerHeight/2;
@@ -2342,9 +2341,9 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
          }
 
          colDaysWidth =this->width()/52;
-
          if ((float)this->width()/52 - colDaysWidth> 0.5)
              colDaysWidth=colDaysWidth +1;
+         if (colDaysWidth==0) colDaysWidth = 1;
 
          for (int i=0; i<52; i++)
          {
@@ -2400,20 +2399,20 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
        colDaysWidth =this->width()/ kolDays;
        if ((float)this->width()/ kolDays - colDaysWidth > 0.5 ) colDaysWidth=colDaysWidth+1;
+       if (colDaysWidth==0) colDaysWidth = 1;
 
        if (m_currentViewDay>=0 ){       //
            sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
        }
 
-       //if (m_currentDay>=0 ){
-       //    sceneGant->addRect(m_currentDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
-       //}
-       //std::cerr << " this->width()  " << this->width()<< std::endl;
-       //std::cerr << " colDaysWidth  " <<colDaysWidth<< std::endl;
        break;
 //------------------------------------------------------------------------------------------------------------------
        case svMonth:
 
+         /*
+         //----------------------------------------------------------------------------
+         // приблизительный
+         //----------------------------------------------------------------------------
          // Сетка
          // Вертикальная
          #ifdef DEBUG_INFO
@@ -2433,9 +2432,6 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
          }
 
          // месяцы
-         //QMap<int,QString>::const_iterator it;
-         //qreal x(0.);
-         //int w(0), h(headerHeight/2);
          x= 0.0;
          w= 0.0;
          h= headerHeight/2;
@@ -2521,15 +2517,152 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
        if (m_currentViewDay>=0 ){
            sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
        }
-       //if (m_currentDay>=0 ){
-       //    sceneGant->addRect(m_currentDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
-       //}
+       */
 
-       break;
+       //----------------------------------------------------------------------------
+       // более точный
+       //----------------------------------------------------------------------------
+       // Сетка
+       // Вертикальная
+       #ifdef DEBUG_INFO
+          std::cerr << " Вертикаль " << std::endl;
+       #endif
 
+       //colDaysWidth =this->width()/12;
 
-       default: return;
+       colDaysWidth =this->width()/ kolDays;
+       if ((float)this->width()/ kolDays - colDaysWidth > 0.5 ) colDaysWidth=colDaysWidth+1;
+
+       if (colDaysWidth==0) colDaysWidth = 1;
+
+       //for (int i=0; i<12; i++)
+       //{
+       j=0;
+       for (it=months.begin(); it!=months.end(); ++it)
+       {
+         int kod(it.key());
+         //QString value(it.value());
+         int kolDays(days[kod]);
+         int i  = colDaysWidth* kolDays;
+         //line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,headerHeight/2);
+         line = new QGraphicsLineItem(j,0,j,headerHeight/2);
+         line->setPen(QPen(Qt::black));
+         line->setPen(m_gridPen);
+
+         sceneTable->addItem(line);
+         j =j + i;
+       }
+
+       // месяцы
+       x= 0.0;
+       w= 0.0;
+       h= headerHeight/2;
+       for (it=months.begin(); it!=months.end(); ++it)
+       {
+           int kod(it.key());
+           QString value(it.value());
+           int kolDays(days[kod]);
+
+           x = x+w;
+           w = colDaysWidth*kolDays;
+           draw_rec_tbl(x,0,w,h,m_gridPen,m_gridBrush);
+
+           QString txt(value);
+           qreal x_txt(0.), y_txt(0.);
+           QGraphicsTextItem *textDate(new QGraphicsTextItem(txt));
+
+           textDate->setPlainText(txt);
+           x_txt = x+w/2-textDate->document()->idealWidth()/2; // To center
+           y_txt = 0;
+
+           textDate->setPos(x_txt,y_txt);
+           sceneTable->addItem(textDate);
+       }
+
+       //colDaysWidth =this->width()/12;
+
+       //for (int i=0; i<12; i++)
+       //{
+       j=0;
+       for (it=months.begin(); it!=months.end(); ++it)
+       {
+        int kod(it.key());
+        //QString value(it.value());
+        int kolDays(days[kod]);
+        //QGraphicsLineItem *line(NULL);
+        //line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount+slayder);
+        int i  = colDaysWidth* kolDays;
+        //line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount);
+        line = new QGraphicsLineItem(j,0,j,m_rowHeight*rowcount);
+        line->setPen(QPen(Qt::black));
+        line->setPen(m_gridPen);
+        sceneGant->addItem(line);
+
+        line = new QGraphicsLineItem(j,headerHeight/2,j,headerHeight);
+        line->setPen(QPen(Qt::black));
+        line->setPen(m_gridPen);
+
+        sceneTable->addItem(line);
+        j = j + i;
+
+      }
+
+     #ifdef DEBUG_INFO
+        std::cerr << " Нумерация " << std::endl;
+     #endif
+     // Нумерация месяцев в шапке
+     //for (int i=0; i<12; i++)
+     //{
+     j=0;
+     n=0;
+
+     for (it=months.begin(); it!=months.end(); ++it)
+     {
+        int kod(it.key());
+        //QString value(it.value());
+        int kolDays(days[kod]);
+        //QGraphicsLineItem *line(NULL);
+        //line = new QGraphicsLineItem(i*colDaysWidth,0,i*colDaysWidth,m_rowHeight*rowcount+slayder);
+        int i  = colDaysWidth* kolDays;
+
+        QString num(QString::number(n+1));
+        QGraphicsTextItem *textDate(new QGraphicsTextItem(num));
+        textDate->setPlainText(num);
+
+        //qreal x(i*colDaysWidth+colDaysWidth/2-textDate->document()->idealWidth()/2); // To center
+        qreal x(j+i/2-textDate->document()->idealWidth()/2); // To center
+        qreal y(headerHeight/2);
+        textDate->setPos(x,y);
+        sceneTable->addItem(textDate);
+        j = j + i;
+        n = n + 1;
+      }
+
+       // Горизонтальная
+     #ifdef DEBUG_INFO
+        std::cerr << " Горизонталь " << std::endl;
+     #endif
+
+     // первая горизонталь
+     line =new QGraphicsLineItem(0,headerHeight/2,colDaysWidth*kolDays,headerHeight/2);
+     line->setPen(QPen(Qt::black));
+     sceneTable->addItem(line);
+
+     for (int i=0; i<rowcount; i++)
+     {
+        QGraphicsLineItem *line(new QGraphicsLineItem(0,i*m_rowHeight,colDaysWidth*kolDays,i*m_rowHeight));
+        line->setPen(QPen(Qt::black));
+        sceneGant->addItem(line);
      }
+
+     if (m_currentViewDay>=0 ){
+         sceneGant->addRect(m_currentViewDay*colDaysWidth,0,colDaysWidth,m_rowHeight*rowcount,m_weekendPen,m_viewdayBrush);
+     }
+
+      break;
+
+      default: return;
+     }//  switch (m_scaleView)
 
   }
 

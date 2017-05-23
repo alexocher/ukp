@@ -40,8 +40,8 @@ WPlan::WPlan(QWidget *parent) : QFrame(parent)
     connect(twProjects, SIGNAL(currentItemChanged(QTreeWidgetItem*, QTreeWidgetItem*)), this, SLOT(selectPlanElement(QTreeWidgetItem*, QTreeWidgetItem*)));
     connect(twProjects, SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(onItemChanged(QTreeWidgetItem*, int)));
 
-    dtBegin->setDate(QDate::currentDate());
-    dtEnd->setDate(QDate::currentDate());
+    dtBegin->setDate(QDate(2000, 1, 1));
+    dtEnd->setDate(QDate(2000, 1, 1));
 
     connect(pbPriorityOk, SIGNAL(clicked()), this, SLOT(resetPlan()));
     connect(pbCurrentDateBegin, SIGNAL(clicked()), this, SLOT(resetPlan()));
@@ -127,7 +127,7 @@ void WPlan::resetPlan(const QPushButton &btn)
             MODULE(Plans);
             if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
             {
-                tsk->setDtMinBegin(QDateTime(dtBegin->date(), QTime(9, 0, 0)));
+                tsk->setDtMinBegin(QDateTime(dtBegin->date(), PROJ->workDayBegin()));
                 teParams->setText(tsk->toHtml(!cbIsShort->isChecked()));
             }
         }
@@ -140,7 +140,7 @@ void WPlan::resetPlan(const QPushButton &btn)
             MODULE(Plans);
             if (TCarryTask *tsk = dynamic_cast<TCarryTask*>(modPlans->findCarryElement(modPlans->carryTasks(), scrnms)))
             {
-                tsk->setDtMaxEnd(QDateTime(dtEnd->date(), QTime(9, 0, 0)));
+                tsk->setDtMaxEnd(QDateTime(dtEnd->date(), PROJ->workDayBegin())); // закончить до ... (до начала рабочего дня работа д.б. закончена)
                 teParams->setText(tsk->toHtml(!cbIsShort->isChecked()));
             }
         }
@@ -408,8 +408,8 @@ void WPlan::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem *) // prev
             {
                 isTask = true;
                 sbPriority->setValue(tsk->priority());
-                dtBegin->setDate(tsk->dtMinBegin() ? tsk->dtMinBegin()->date() : QDate(QDate::currentDate().year(), 1, 1));
-                dtEnd->setDate(tsk->dtMaxEnd() ? tsk->dtMaxEnd()->date() : QDate(QDate::currentDate().year(), 1, 1));
+                dtBegin->setDate(tsk->dtMinBegin() ? tsk->dtMinBegin()->date() : QDate(2000, 1, 1));
+                dtEnd->setDate(tsk->dtMaxEnd() ? tsk->dtMaxEnd()->date() : QDate(2000, 1, 1));
             }
             else if (dynamic_cast<TCarryPlan*>(plEl)) isPlan = true; // TCarryPlan *plan =
             else if (TCarryProcedure *pr = dynamic_cast<TCarryProcedure*>(plEl))

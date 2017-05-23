@@ -349,11 +349,13 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
         gd.insertTopItem(tskGit);
     }
 
-    //printDiagrammTree();
+    PR(0, "111:");
+    printDiagrammTree();
 
     gd.moveToDay(QDate::currentDate().dayOfYear() - 1);
     gd.draw(whatdraw);
 
+    PR(0, "222:");
     printDiagrammTree();
 
 }
