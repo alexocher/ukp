@@ -252,8 +252,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
         {
             tskGit->setPen(GANT_IND_REAL, realItemsTaskPen);
             tskGit->setBrush(GANT_IND_REAL, realItemsTaskBrash);
-            tskGit->setBegin(GANT_IND_REAL, tsk->dtPlanBegin() ? *tsk->dtPlanBegin() : QDateTime());
-            tskGit->setEnd(GANT_IND_REAL, tsk->dtPlanEnd() ? *tsk->dtPlanEnd() : QDateTime());
+            tskGit->setBegin(GANT_IND_REAL, tsk->dtRealBegin() ? *tsk->dtRealBegin() : QDateTime());
+            tskGit->setEnd(GANT_IND_REAL, tsk->dtRealEnd() ? *tsk->dtRealEnd() : QDateTime());
             tskGit->setCarryOutPercent(tsk->carryOutPercent()); // !!! отображать только для GANT_IND_REAL
         }
         for (int i = 0; i < 2; i++)
@@ -274,8 +274,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                 {
                     planGit->setPen(GANT_IND_REAL, realItemsPlanPen);
                     planGit->setBrush(GANT_IND_REAL, realItemsPlanBrash);
-                    planGit->setBegin(GANT_IND_REAL, plan->dtPlanBegin() ? *plan->dtPlanBegin() : QDateTime());
-                    planGit->setEnd(GANT_IND_REAL, plan->dtPlanEnd() ? *plan->dtPlanEnd() : QDateTime());
+                    planGit->setBegin(GANT_IND_REAL, plan->dtRealBegin() ? *plan->dtRealBegin() : QDateTime());
+                    planGit->setEnd(GANT_IND_REAL, plan->dtRealEnd() ? *plan->dtRealEnd() : QDateTime());
                     planGit->setCarryOutPercent(plan->carryOutPercent()); // !!! отображать только для GANT_IND_REAL
                 }
                 foreach (TCarryProcedure *pr, plan->procedures())
@@ -295,8 +295,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                     {
                         prGit->setPen(GANT_IND_REAL, realItemsProcedurePen);
                         prGit->setBrush(GANT_IND_REAL, realItemsProcedureBrash);
-                        prGit->setBegin(GANT_IND_REAL, pr->dtPlanBegin() ? *pr->dtPlanBegin() : QDateTime());
-                        prGit->setEnd(GANT_IND_REAL, pr->dtPlanEnd() ? *pr->dtPlanEnd() : QDateTime());
+                        prGit->setBegin(GANT_IND_REAL, pr->dtRealBegin() ? *pr->dtRealBegin() : QDateTime());
+                        prGit->setEnd(GANT_IND_REAL, pr->dtRealEnd() ? *pr->dtRealEnd() : QDateTime());
                         prGit->setCarryOutPercent(pr->carryOutPercent()); // !!! отображать только для GANT_IND_REAL
                     }
                     foreach (TCarryWork *wrk, pr->works())
@@ -333,8 +333,8 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                                     wrkGit->setPen(GANT_IND_REAL, realItemsGetWorkPen);
                                     wrkGit->setBrush(GANT_IND_REAL, realItemsGetWorkBrash);
                             }
-                            wrkGit->setBegin(GANT_IND_REAL, wrk->dtPlanBegin() ? *wrk->dtPlanBegin() : QDateTime());
-                            wrkGit->setEnd(GANT_IND_REAL, wrk->dtPlanEnd() ? *wrk->dtPlanEnd() : QDateTime());
+                            wrkGit->setBegin(GANT_IND_REAL, wrk->dtRealBegin() ? *wrk->dtRealBegin() : QDateTime());
+                            wrkGit->setEnd(GANT_IND_REAL, wrk->dtRealEnd() ? *wrk->dtRealEnd() : QDateTime());
                             wrkGit->setCarryOutPercent(wrk->carryOutPercent()); // !!! отображать только для GANT_IND_REAL
                         }
                         prGit->insertChild(wrkGit);
