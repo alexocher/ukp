@@ -156,6 +156,7 @@ public:
     TGantItem *findItem( int                   id,            // id
          int                num,           // Номер
        QString               name); // глобальный поиск элементов (в элементах верхнего уровня и во всех вложенных)
+    TGantItem *findItemN( const QStringList &slitnms);
     void setOpen(TGantItem *items, bool op); // раскрытие (сворачивание) элементов
     void setOpenBef(TGantItem *items); // раскрытие (сворачивание) элементов
     void getOpenBef(TGantItem *items); // раскрытие (сворачивание) элементов

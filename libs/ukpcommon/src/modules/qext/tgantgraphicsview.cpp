@@ -950,6 +950,36 @@ TGantItem * TGantGraphicsView::findItem( int id,  int  num,  QString   name){
 }
 
 //-----------------------------------------------------------------------------
+TGantItem * TGantGraphicsView::findItemN( const QStringList &slitnms){
+
+    //std::cerr << " ============== name =============== " << id << " "<< num <<" "<< name.toStdString().c_str() << std::endl;
+
+    if (slitnms.count())
+    foreach (TGantItem *topIt,  m_topItems)
+    {
+        if (topIt->name()==slitnms.at(slitnms.count()-1) && slitnms.count() == 1) return topIt;
+        if (topIt->name()==slitnms.at(slitnms.count()-1) && slitnms.count() > 1)
+        foreach (TGantItem *planIt, topIt->childs())
+        {
+            if (planIt->name()==slitnms.at(slitnms.count()-2) && slitnms.count() == 2) return planIt;
+            if (planIt->name()==slitnms.at(slitnms.count()-2) && slitnms.count() > 2)
+            foreach (TGantItem *procIt, planIt->childs())
+            {
+                if (procIt->name()==slitnms.at(slitnms.count()-3) && slitnms.count() == 3) return procIt;
+                if (procIt->name()==slitnms.at(slitnms.count()-3) && slitnms.count() > 3)
+                foreach (TGantItem *workIt, procIt->childs())
+                 {
+
+                     if (workIt->name()==slitnms.at(slitnms.count()-4) ) return workIt;
+                 }
+            }
+        }
+    }
+
+    return NULL;
+}
+
+//-----------------------------------------------------------------------------
 void TGantGraphicsView::setOpen(TGantItem *items, bool op)
 {
     // isop==false - it остается видимым, все вложенные элементы скрываются
@@ -1056,7 +1086,7 @@ void TGantGraphicsView::collapseitem(QTreeWidgetItem *item){
 
     std::cerr << " ==============COLLAPSE=============== " <<  std::endl;
     if (item==NULL) return;
-
+    /*
     //TIdent idn1;
     QVariant var = item->data(0,Qt::UserRole);
     //  var.setValue(idn1); // copy idn1 into the variant
@@ -1066,6 +1096,18 @@ void TGantGraphicsView::collapseitem(QTreeWidgetItem *item){
      std::cerr << " ============== name COLLAPSE =============== " << idn.id << " "<< idn.num <<" "<< idn.name.toStdString().c_str() << std::endl;
 
     TGantItem * p =findItem( idn.id,  idn.num, idn.name);
+    */
+
+    QStringList list;
+
+    list.append(item->text(0));
+    QTreeWidgetItem *item_p = item->parent();
+    while (item_p!=NULL) {
+        list.append(item_p->text(0));
+        item_p = item_p->parent();
+    }
+     TGantItem * p =findItemN( list);
+
     if (p==NULL) return;
 
     setOpen(p, false);
@@ -1089,6 +1131,7 @@ void TGantGraphicsView:: expanditem(QTreeWidgetItem *item){
     std::cerr << " ==============EXPAND=============== " <<  std::endl;
 
     if (item==NULL) return;
+    /*
     //TIdent idn1;
     QVariant var = item->data(0,Qt::UserRole);
     //  var.setValue(idn1); // copy idn1 into the variant
@@ -1096,6 +1139,19 @@ void TGantGraphicsView:: expanditem(QTreeWidgetItem *item){
     TIdent idn = var.value<TIdent>(); // retrieve the value
 
     TGantItem * p =findItem( idn.id,  idn.num, idn.name);
+    */
+
+    QStringList list;
+
+    list.append(item->text(0));
+    QTreeWidgetItem *item_p = item->parent();
+    while (item_p!=NULL) {
+        list.append(item_p->text(0));
+        item_p = item_p->parent();
+    }
+
+    TGantItem * p =findItemN( list);
+
     if (p==NULL) return;
 
     setOpen(p, true);
