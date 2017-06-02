@@ -546,12 +546,12 @@ void TGantGraphicsView::newPlan(){
     gvPlan->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     gvPlan->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-#ifdef DEBUG_INFO
+//#ifdef DEBUG_INFO
     int w = gv->width();//->sliderPosition();//->SliderPosition();
     std::cerr << " !!!! gv->width() BEFOR =  " << w<<std::endl;
     int h = gv->height();//->width();//->sliderPosition();//->SliderPosition();
     std::cerr << " !!!! gv->height() BEFOR =  " << h<<std::endl;
-#endif
+//#endif
 
    }
 
@@ -1921,6 +1921,8 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
     gv->show();
 
+    //this->updateGeometry();//01.06.2017
+
 }
 //-----------------------------------------------------------------------------
  void TGantGraphicsView:: resizeEvent(QResizeEvent *event) {// Q_DECL_OVERRIDE{
@@ -3045,6 +3047,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
      int begin(0), end(0);
 
      QBrush  q_white =QBrush(Qt::white);
+     QBrush  q_black =QBrush(Qt::black);
        switch (m_contentDraw)
        {
            case cdPlan:
@@ -3123,7 +3126,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
                if (items->carryOutPercent()==0) break;
 
-               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_white);
+               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_black);
 
                break;
 
@@ -3194,6 +3197,10 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
                    draw_rec(x,y,w,h,pen,brush);
                    draw_txt(x,y,w,txt);
                }
+
+               if (items->carryOutPercent()==0) break;
+
+               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_black);
 
                break;
 
