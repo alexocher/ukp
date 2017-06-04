@@ -47,5 +47,7 @@
 #define PIX_LEVEL8                 QString(":/images/8_48.png")
 #define PIX_LEVEL9                 QString(":/images/9_48.png")
 #define PIX_CROSS                  QString(":/images/delete.png")
+#define PIX_DOWN                   QString(":/images/down.png")
+#define PIX_UP                     QString(":/images/up.png")
 
 #endif // DEFPICTURES_H
