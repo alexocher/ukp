@@ -3126,7 +3126,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
                if (items->carryOutPercent()==0) break;
 
-               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_black);
+               draw_rec(x,y+h/5,w*items->carryOutPercent()/100,3*h/5,pen,q_black);
 
                break;
 
@@ -3200,7 +3200,7 @@ void TGantGraphicsView::draw(TGantGraphicsView::ContentDraw cd)
 
                if (items->carryOutPercent()==0) break;
 
-               draw_rec(x,y+h/3,w*items->carryOutPercent()/100,h/3,pen,q_black);
+               draw_rec(x,y+h/5,w*items->carryOutPercent()/100,3*h/5,pen,q_black);
 
                break;
 
