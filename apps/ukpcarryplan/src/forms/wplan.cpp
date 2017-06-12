@@ -19,8 +19,8 @@ extern WGantDiagramm *wGantDiagramm;   // from wgantdiagramm.cpp
 namespace
 {
 
-    const int TW_COL_COUNT(8), TW_COL_WIDTHS[] = { 800, 60, 120, 150, 150, 200, 60, 120 };
-    const QString TW_COL_NAMES[] = { "Наименование", "Изм.", "Продолжит.", "Начало", "Окончание", "Должн. лицо", "Сохр.", "..." };
+    const int TW_COL_COUNT(8), TW_COL_WIDTHS[] = { 800, 60, 60, 120, 150, 150, 200, 60, 120 };
+    const QString TW_COL_NAMES[] = { "Наименование", "Сост.", "Изм.", "Продолжит.", "Начало", "Окончание", "Должн. лицо", "Сохр.", "..." };
 
 }
 
@@ -309,7 +309,7 @@ void WPlan::resetPlan(const QPushButton &btn)
                 if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
                 {
                     plEl->setVolatile(setvol);
-                    it->setIcon(1, ICONPIX(plEl->isVolatile() ? "" : PIX_CROSS));
+                    it->setIcon(2, ICONPIX(plEl->isVolatile() ? "" : PIX_CROSS));
                 }
             }
         }
@@ -326,7 +326,7 @@ void WPlan::resetPlan(const QPushButton &btn)
                 if (TAbstractPlanElement *plEl = modPlans->findCarryElement(modPlans->carryTasks(), scrnms))
                 {
                     plEl->setVolatile(true);
-                    it->setIcon(1, ICONPIX(""));
+                    it->setIcon(2, ICONPIX(""));
                 }
             }
         }

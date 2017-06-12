@@ -555,12 +555,13 @@ void TModulePlans::reflectTemplatesToCb(const TAbstractPlanList &plans, QComboBo
 //-----------------------------------------------------------------------------
 
 // 0. Наименование                    - ICON(PIX_LEVEL_) + TEXT
-// 1. Признак невозможности изменения - ICON(PIX_CROSS)
-// 2. Продолжительность               -                    TEXT
-// 3. Начало                          -                    TEXT
-// 4. Окончание                       -                    TEXT
-// 5. Должностное лицо                -                    TEXT
-// 6. Признак (не)сохраненности       - ICON(PIX_DB)
+// 1. Состояние                       - ICON(PIX_IND_GREEN || PIX_IND_NONE || PIX_IND_RED || PIX_IND_YELLOW)
+// 2. Признак невозможности изменения - ICON(PIX_CROSS)
+// 3. Продолжительность               -                    TEXT
+// 4. Начало                          -                    TEXT
+// 5. Окончание                       -                    TEXT
+// 6. Должностное лицо                -                    TEXT
+// 7. Признак (не)сохраненности       - ICON(PIX_DB)
 // (если onlycheckedplans==true, то непомеченные планы () план не отображать)
 void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidget &tw, bool onlycheckedplans, int rowheight)
 {
@@ -583,12 +584,12 @@ void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidg
         QTreeWidgetItem *twiTsk(new QTreeWidgetItem(&tw));
         twiTsk->setText(0, tsk->scrName());
         twiTsk->setIcon(0, ICONPIX(PIX_LEVEL2));
-        twiTsk->setIcon(1, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
-        twiTsk->setText(2, "");
+        twiTsk->setIcon(2, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
         twiTsk->setText(3, "");
         twiTsk->setText(4, "");
         twiTsk->setText(5, "");
-        twiTsk->setIcon(6, ICONPIX(tsk->isSaved() ? "" : PIX_DB));
+        twiTsk->setText(6, "");
+        twiTsk->setIcon(7, ICONPIX(tsk->isSaved() ? "" : PIX_DB));
         twiTsk->setData(0, Qt::UserRole, qVariantFromValue(TIdent(tsk->id(), tsk->num(), tsk->name(), (int)petProject)));
         twiTsk->setFlags(twiTsk->flags() | Qt::ItemIsTristate);
         twiTsk->setCheckState(0, Qt::Unchecked);
@@ -605,12 +606,12 @@ void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidg
                 QTreeWidgetItem *twiPl(new QTreeWidgetItem(twiTsk));
                 twiPl->setText(0, plan->scrName());
                 twiPl->setIcon(0, ICONPIX(PIX_LEVEL3));
-                twiPl->setIcon(1, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
-                twiPl->setText(2, gen::intToStr(plan->planPeriod()));
-                twiPl->setText(3, plan->dtPlanBegin() ? plan->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
-                twiPl->setText(4, plan->dtPlanEnd() ? plan->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
-                twiPl->setText(5, "");
-                twiPl->setIcon(6, ICONPIX(plan->isSaved() ? "" : PIX_DB));
+                twiPl->setIcon(2, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
+                twiPl->setText(3, gen::intToStr(plan->planPeriod()));
+                twiPl->setText(4, plan->dtPlanBegin() ? plan->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
+                twiPl->setText(5, plan->dtPlanEnd() ? plan->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
+                twiPl->setText(6, "");
+                twiPl->setIcon(7, ICONPIX(plan->isSaved() ? "" : PIX_DB));
                 twiPl->setData(0, Qt::UserRole, qVariantFromValue(TIdent(plan->id(), plan->num(), plan->name(), (int)petPlan)));
                 twiPl->setFlags(twiPl->flags() | Qt::ItemIsTristate);
                 twiPl->setCheckState(0, Qt::Unchecked);
@@ -625,12 +626,12 @@ void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidg
                     QTreeWidgetItem *twiPr(new QTreeWidgetItem(twiPl));
                     twiPr->setText(0, pr->scrName());
                     twiPr->setIcon(0, ICONPIX(PIX_LEVEL4));
-                    twiPr->setIcon(1, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
-                    twiPr->setText(2, gen::intToStr(pr->planPeriod()));
-                    twiPr->setText(3, pr->dtPlanBegin() ? pr->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
-                    twiPr->setText(4, pr->dtPlanEnd() ? pr->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
-                    twiPr->setText(5, pr->employee() ? pr->employee()->name() : "");
-                    twiPr->setIcon(6, ICONPIX(pr->isSaved() ? "" : PIX_DB));
+                    twiPr->setIcon(2, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
+                    twiPr->setText(3, gen::intToStr(pr->planPeriod()));
+                    twiPr->setText(4, pr->dtPlanBegin() ? pr->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
+                    twiPr->setText(5, pr->dtPlanEnd() ? pr->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
+                    twiPr->setText(6, pr->employee() ? pr->employee()->name() : "");
+                    twiPr->setIcon(7, ICONPIX(pr->isSaved() ? "" : PIX_DB));
                     twiPr->setData(0, Qt::UserRole, qVariantFromValue(TIdent(pr->id(), pr->num(), pr->name(), (int)petProcedure)));
                     twiPr->setFlags(twiPr->flags() | Qt::ItemIsTristate);
                     twiPr->setCheckState(0, Qt::Unchecked);
@@ -645,12 +646,27 @@ void TModulePlans::reflectCarryTasksToTree(const TCarryTaskList &tsks, QTreeWidg
                         QTreeWidgetItem *twiWrk(new QTreeWidgetItem(twiPr));
                         twiWrk->setText(0, wrk->scrName());
                         twiWrk->setIcon(0, ICONPIX(PIX_LEVEL5));
-                        twiWrk->setIcon(1, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
-                        twiWrk->setText(2, gen::intToStr(wrk->planPeriod()));
-                        twiWrk->setText(3, wrk->dtPlanBegin() ? wrk->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
-                        twiWrk->setText(4, wrk->dtPlanEnd() ? wrk->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
-                        twiWrk->setText(5, wrk->employee() ? wrk->employee()->name() : "");
-                        twiWrk->setIcon(6, ICONPIX(wrk->isSaved() ? "" : PIX_DB));
+
+                        switch (wrk->condition())
+                        {
+                            case cocCarryBeg:
+                                twiWrk->setIcon(1, ICONPIX(PIX_IND_YELLOW));
+                                break;
+                            case cocCarryEnd:
+                                twiWrk->setIcon(1, ICONPIX(PIX_IND_GREEN));
+                                break;
+                            case cocProblem:
+                                twiWrk->setIcon(1, ICONPIX(PIX_IND_RED));
+                                break;
+                            default: // cocGet
+                                twiWrk->setIcon(1, ICONPIX(PIX_IND_NONE));
+                        }
+                        twiWrk->setIcon(2, ICONPIX(tsk->isVolatile() ? "" : PIX_CROSS));
+                        twiWrk->setText(3, gen::intToStr(wrk->planPeriod()));
+                        twiWrk->setText(4, wrk->dtPlanBegin() ? wrk->dtPlanBegin()->toString("hh:mm dd.MM.yy") : "");
+                        twiWrk->setText(5, wrk->dtPlanEnd() ? wrk->dtPlanEnd()->toString("hh:mm dd.MM.yy") : "");
+                        twiWrk->setText(6, wrk->employee() ? wrk->employee()->name() : "");
+                        twiWrk->setIcon(7, ICONPIX(wrk->isSaved() ? "" : PIX_DB));
                         twiWrk->setData(0, Qt::UserRole, qVariantFromValue(TIdent(wrk->id(), wrk->num(), wrk->name(), (int)petWork)));
                         twiWrk->setFlags(twiWrk->flags() | Qt::ItemIsUserCheckable);
                         twiWrk->setCheckState(0, Qt::Unchecked);

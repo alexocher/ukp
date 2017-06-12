@@ -49,5 +49,9 @@
 #define PIX_CROSS                  QString(":/images/delete.png")
 #define PIX_DOWN                   QString(":/images/down.png")
 #define PIX_UP                     QString(":/images/up.png")
+#define PIX_IND_GREEN              QString(":/images/new24_ind_green.png")
+#define PIX_IND_NONE               QString(":/images/new24_ind_none.png")
+#define PIX_IND_RED                QString(":/images/new24_ind_red.png")
+#define PIX_IND_YELLOW             QString(":/images/new24_ind_yellow.png")
 
 #endif // DEFPICTURES_H

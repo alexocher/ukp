@@ -128,5 +128,9 @@
         <file>../../../images/9_48.png</file>
         <file>../../../images/down.png</file>
         <file>../../../images/up.png</file>
+        <file>../../../images/new24_ind_green.png</file>
+        <file>../../../images/new24_ind_none.png</file>
+        <file>../../../images/new24_ind_red.png</file>
+        <file>../../../images/new24_ind_yellow.png</file>
     </qresource>
 </RCC>
