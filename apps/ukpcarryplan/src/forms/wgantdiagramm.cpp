@@ -18,22 +18,6 @@ WGantDiagramm *wGantDiagramm(NULL);
 namespace
 {
 
-    QTreeWidget *TREE(NULL);
-
-    TGantGraphicsView *DIAGR(NULL);
-
-    QFrame *FR_BUTTONS(NULL);
-    //*FR_DIAGR(NULL);
-
-    QPushButton *BTN_ALL(NULL),
-                *BTN_PLAN(NULL),
-                *BTN_REAL(NULL),
-                *BTN_EXPAND(NULL),
-                *BTN_COLLAPSE(NULL),
-                *BTN_TEST(NULL);
-
-    QComboBox *CB_SCALE(NULL);
-
     const int HEADER_H(60);
     const int COLUMN_W(30);
     const int ROW_H(40);
@@ -42,15 +26,27 @@ namespace
 
 }
 
-WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) : QDialog(parent,f)
+WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) :
+    QDialog(parent,f),
+    m_tree(nullptr),
+    m_diagr(nullptr),
+    m_frButtons(nullptr),
+    m_pbAll(nullptr),
+    m_pbPlan(nullptr),
+    m_pbReal(nullptr),
+    m_pbExpand(nullptr),
+    m_pbCollapse(nullptr),
+    m_cbScale(nullptr),
+    m_pbTest(nullptr),
+    m_dtTest(nullptr)
 {
-    ui->setupUi(this);
+    m_ui->setupUi(this);
 
     QGridLayout *grl(new QGridLayout(this));
 
-    TREE = new QTreeWidget(this);
-    EL_MINMAX_WIDTH(TREE, 500);
-    if (QTreeWidgetItem *hdrIt = TREE->headerItem())
+    m_tree = new QTreeWidget(this);
+    EL_MINMAX_WIDTH(m_tree, 500);
+    if (QTreeWidgetItem *hdrIt = m_tree->headerItem())
     {
         hdrIt->setText(0, " Наименование");
         hdrIt->setTextAlignment(0, Qt::AlignLeft | Qt::AlignVCenter);
@@ -59,95 +55,100 @@ WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) : QDialog(paren
         hdrIt->setSizeHint(0, sz);
     }
 
-    TREE->setColumnWidth(0, 1000);
-    TREE->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    TREE->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    TREE->setIconSize(QSize(36, 36));
-    TREE->setUniformRowHeights(true);
-    TREE->setSortingEnabled(true);
-    TREE->setAlternatingRowColors(true);
-    grl->addWidget(TREE, 0, 0, 1, 1);
+    m_tree->setColumnWidth(0, 1000);
+    m_tree->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    m_tree->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    m_tree->setIconSize(QSize(36, 36));
+    m_tree->setUniformRowHeights(true);
+    m_tree->setSortingEnabled(true);
+    m_tree->setAlternatingRowColors(true);
+    grl->addWidget(m_tree, 0, 0, 1, 1);
 
-    DIAGR = new TGantGraphicsView(0, -1, PROJ->workDayBegin(), this);
-    DIAGR->set_scrollbarVert(TREE->verticalScrollBar());
-    DIAGR->set_tree(TREE);
+    m_diagr = new TGantGraphicsView(0, -1, PROJ->workDayBegin(), this);
+    m_diagr->set_scrollbarVert(m_tree->verticalScrollBar());
+    m_diagr->set_tree(m_tree);
 
-    grl->addWidget(DIAGR, 0, 1, 1, 1);
+    grl->addWidget(m_diagr, 0, 1, 1, 1);
 
-    FR_BUTTONS = new QFrame(this);
-    EL_MINMAX_HEIGHT(FR_BUTTONS, 50);
+    m_frButtons = new QFrame(this);
+    EL_MINMAX_HEIGHT(m_frButtons, 50);
 
-    QHBoxLayout *hbl(new QHBoxLayout(FR_BUTTONS));
+    QHBoxLayout *hbl(new QHBoxLayout(m_frButtons));
 
-    QLabel *LBL_SCALE(new QLabel("Масштаб", FR_BUTTONS));
+    QLabel *LBL_SCALE(new QLabel("Масштаб", m_frButtons));
 
-    CB_SCALE = new QComboBox(FR_BUTTONS);
-    EL_RESIZE(CB_SCALE, 120, 40);
+    m_cbScale = new QComboBox(m_frButtons);
+    EL_RESIZE(m_cbScale, 120, 40);
     QStringList scales;
     scales << "Часы" << "Дни" << "Недели" << "Месяцы";
-    CB_SCALE->addItems(scales);
-    CB_SCALE->setCurrentIndex(1);
-    connect(CB_SCALE, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleChanged(int)));
+    m_cbScale->addItems(scales);
+    m_cbScale->setCurrentIndex(1);
+    connect(m_cbScale, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleChanged(int)));
 
-    QFrame *LINE1(new QFrame(FR_BUTTONS));
+    QFrame *LINE1(new QFrame(m_frButtons));
     EL_RESIZE(LINE1, 30, 50);
     LINE1->setFrameShadow(QFrame::Raised);
     LINE1->setFrameShape(QFrame::VLine);
 
-    BTN_ALL = new QPushButton("Все", FR_BUTTONS);
-    EL_RESIZE(BTN_ALL, 200, 50);
-    BTN_ALL->setCheckable(true);
-    connect(BTN_ALL, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
+    m_pbAll = new QPushButton("Все", m_frButtons);
+    EL_RESIZE(m_pbAll, 200, 50);
+    m_pbAll->setCheckable(true);
+    connect(m_pbAll, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
 
-    BTN_PLAN = new QPushButton("План", FR_BUTTONS);
-    EL_RESIZE(BTN_PLAN, 200, 50);
-    BTN_PLAN->setCheckable(true);
-    connect(BTN_PLAN, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
+    m_pbPlan = new QPushButton("План", m_frButtons);
+    EL_RESIZE(m_pbPlan, 200, 50);
+    m_pbPlan->setCheckable(true);
+    connect(m_pbPlan, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
 
-    BTN_REAL = new QPushButton("Выполнение", FR_BUTTONS);
-    EL_RESIZE(BTN_REAL, 200, 50);
-    BTN_REAL->setCheckable(true);
-    connect(BTN_REAL, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
+    m_pbReal = new QPushButton("Выполнение", m_frButtons);
+    EL_RESIZE(m_pbReal, 200, 50);
+    m_pbReal->setCheckable(true);
+    connect(m_pbReal, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
 
-    QFrame *LINE2(new QFrame(FR_BUTTONS));
+    QFrame *LINE2(new QFrame(m_frButtons));
     EL_RESIZE(LINE2, 30, 50);
     LINE2->setFrameShadow(QFrame::Raised);
     LINE2->setFrameShape(QFrame::VLine);
 
-    BTN_EXPAND = new QPushButton(FR_BUTTONS);
-    //QPushButton &btn = *BTN_EXPAND;
-    BTN_EXPAND->setIconSize(QSize(32,32));
-    BTN_EXPAND->setIcon(ICONPIX(PIX_DOWN));
-    EL_RESIZE(BTN_EXPAND, 50, 50);
-    connect(BTN_EXPAND, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
+    m_pbExpand = new QPushButton(m_frButtons);
+    //QPushButton &btn = *m_pbExpand;
+    m_pbExpand->setIconSize(QSize(32,32));
+    m_pbExpand->setIcon(ICONPIX(PIX_DOWN));
+    EL_RESIZE(m_pbExpand, 50, 50);
+    connect(m_pbExpand, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
 
-    BTN_COLLAPSE = new QPushButton(FR_BUTTONS);
-    BTN_COLLAPSE->setIcon(ICONPIX(PIX_UP));
-    BTN_COLLAPSE->setIconSize(QSize(32,32));
-    EL_RESIZE(BTN_COLLAPSE, 50, 50);
-    connect(BTN_COLLAPSE, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
+    m_pbCollapse = new QPushButton(m_frButtons);
+    m_pbCollapse->setIcon(ICONPIX(PIX_UP));
+    m_pbCollapse->setIconSize(QSize(32,32));
+    EL_RESIZE(m_pbCollapse, 50, 50);
+    connect(m_pbCollapse, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
 
-    BTN_TEST = new QPushButton("Тест", FR_BUTTONS);
-    EL_RESIZE(BTN_TEST, 200, 50);
-    connect(BTN_TEST, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
+    m_dtTest = new QDateTimeEdit(QDateTime(QDate::currentDate(),QTime::currentTime()),m_frButtons);
+    EL_RESIZE(m_dtTest, 120, 30);
+    m_dtTest->setDisplayFormat("hh:mm dd.MM");
+
+    m_pbTest = new QPushButton("Тест", m_frButtons);
+    EL_RESIZE(m_pbTest, 200, 50);
+    connect(m_pbTest, SIGNAL(clicked()), this, SLOT(resetGantDiagramm()));
 
     hbl->addWidget(LBL_SCALE);
-    hbl->addWidget(CB_SCALE);
+    hbl->addWidget(m_cbScale);
     hbl->addWidget(LINE1);
-    hbl->addWidget(BTN_ALL);
-    hbl->addWidget(BTN_ALL);
-    hbl->addWidget(BTN_PLAN);
-    hbl->addWidget(BTN_REAL);
+    hbl->addWidget(m_pbAll);
+    hbl->addWidget(m_pbAll);
+    hbl->addWidget(m_pbPlan);
+    hbl->addWidget(m_pbReal);
     hbl->addWidget(LINE2);
-    hbl->addWidget(BTN_EXPAND);
-    hbl->addWidget(BTN_COLLAPSE);
+    hbl->addWidget(m_pbExpand);
+    hbl->addWidget(m_pbCollapse);
     hbl->addStretch();
-    hbl->addWidget(BTN_TEST);
+    hbl->addWidget(m_dtTest);
+    hbl->addWidget(m_pbTest);
 
     hbl->setMargin(0);
     hbl->setSpacing(10);
 
-    grl->addWidget(FR_BUTTONS, 1, 0, 1, 2);
+    grl->addWidget(m_frButtons, 1, 0, 1, 2);
 
     grl->setMargin(10);
     grl->setHorizontalSpacing(0);
@@ -170,30 +171,30 @@ void WGantDiagramm::resetGantDiagramm()
 void WGantDiagramm::resetGantDiagramm(const QPushButton &btn)
 {
     MODULE(Plans);
-    TGantGraphicsView::ScaleView sc((TGantGraphicsView::ScaleView)CB_SCALE->currentIndex());
-    if (&btn == BTN_ALL)
+    TGantGraphicsView::ScaleView sc((TGantGraphicsView::ScaleView)m_cbScale->currentIndex());
+    if (&btn == m_pbAll)
     {
         prepare(modPlans->carryTasks(), TGantGraphicsView::cdAll, sc);
     }
-    else if (&btn == BTN_PLAN)
+    else if (&btn == m_pbPlan)
     {
         prepare(modPlans->carryTasks(), TGantGraphicsView::cdPlan, sc);
     }
-    else if (&btn == BTN_REAL)
+    else if (&btn == m_pbReal)
     {
         prepare(modPlans->carryTasks(), TGantGraphicsView::cdReal, sc);
     }
-    else if (&btn == BTN_EXPAND)
+    else if (&btn == m_pbExpand)
     {
         if (CURRENT_LEVEL<3) CURRENT_LEVEL++;
-        qtools::expand(*TREE,CURRENT_LEVEL);
+        qtools::expand(*m_tree,CURRENT_LEVEL);
     }
-    else if (&btn == BTN_COLLAPSE)
+    else if (&btn == m_pbCollapse)
     {
         if (CURRENT_LEVEL>0) CURRENT_LEVEL--;
-        qtools::expand(*TREE,CURRENT_LEVEL);
+        qtools::expand(*m_tree,CURRENT_LEVEL);
     }
-    else if (&btn == BTN_TEST)
+    else if (&btn == m_pbTest)
     {
       int SECS(172800); // 2 дня
       qsrand(uint(QTime::currentTime().msec()));
@@ -244,26 +245,26 @@ void WGantDiagramm::resetGantDiagramm(const QPushButton &btn)
 
 void WGantDiagramm::scaleChanged(int ind)
 {
-    TGantGraphicsView &gd = *DIAGR;
+    TGantGraphicsView &gd = *m_diagr;
     gd.setScaleView(TGantGraphicsView::ScaleView(ind));
 }
 //-----------------------------------------------------------------------------
 
 void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDraw whatdraw, TGantGraphicsView::ScaleView sc)
 {
-    BTN_ALL->setChecked(whatdraw == TGantGraphicsView::cdAll);
-    BTN_PLAN->setChecked(whatdraw == TGantGraphicsView::cdPlan);
-    BTN_REAL->setChecked(whatdraw == TGantGraphicsView::cdReal);
+    m_pbAll->setChecked(whatdraw == TGantGraphicsView::cdAll);
+    m_pbPlan->setChecked(whatdraw == TGantGraphicsView::cdPlan);
+    m_pbReal->setChecked(whatdraw == TGantGraphicsView::cdReal);
 
-    CB_SCALE->setCurrentIndex((int)sc);
+    m_cbScale->setCurrentIndex((int)sc);
 
   MODULE(Plans);
-    modPlans->reflectCarryTasksToTree(tasks, *TREE, false, ROW_H); // отобразить все
-    TREE->sortItems(0, Qt::AscendingOrder);
-    DIAGR->disconnect_tree();
-    qtools::expand(*TREE);
+    modPlans->reflectCarryTasksToTree(tasks, *m_tree, false, ROW_H); // отобразить все
+    m_tree->sortItems(0, Qt::AscendingOrder);
+    m_diagr->disconnect_tree();
+    qtools::expand(*m_tree);
     CURRENT_LEVEL = 3;
-    DIAGR->set_tree(TREE);
+    m_diagr->set_tree(m_tree);
 
   // Плановые
   QPen planItemsTaskPen(Qt::darkGray);
@@ -291,7 +292,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
   QPen realItemsProblemWorkPen(Qt::red);
   QBrush realItemsProblemWorkBrash(Qt::red);
 
-  TGantGraphicsView &gd = *DIAGR;
+  TGantGraphicsView &gd = *m_diagr;
     gd.setScaleView(sc);
     gd.setHeaderHeight(HEADER_H);
     gd.setColumnWidth(COLUMN_W);
@@ -446,7 +447,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
 
 void WGantDiagramm::printDiagrammTree()
 {
-    TGantGraphicsView &gd = *DIAGR;
+    TGantGraphicsView &gd = *m_diagr;
     PR(0, "GantGraphicsView:");
     foreach (TGantItem *topIt, gd.topItems())
     {

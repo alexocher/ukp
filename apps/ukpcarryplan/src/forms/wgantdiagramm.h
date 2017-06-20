@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <TCarryTask>
 #include <TGantGraphicsView>
+#include <QComboBox>
+#include <QDateTimeEdit>
 #include "ui_wgantdiagramm.h"
 
 class WGantDiagramm : public QDialog, private Ui::WGantDiagramm
@@ -24,7 +26,29 @@ public slots:
     void scaleChanged(int ind);
 
 private:
-    Ui::WGantDiagramm *ui;
+    Ui::WGantDiagramm *m_ui;
+
+    QTreeWidget *m_tree;
+
+    TGantGraphicsView *m_diagr;
+
+    QFrame *m_frButtons;
+
+    QPushButton *m_pbAll;
+
+    QPushButton *m_pbPlan;
+
+    QPushButton *m_pbReal;
+
+    QPushButton *m_pbExpand;
+
+    QPushButton *m_pbCollapse;
+
+    QComboBox *m_cbScale;
+
+    QPushButton *m_pbTest;
+
+    QDateTimeEdit *m_dtTest;
 
 };
 
