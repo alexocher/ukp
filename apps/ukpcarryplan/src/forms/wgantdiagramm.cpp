@@ -196,9 +196,13 @@ void WGantDiagramm::resetGantDiagramm(const QPushButton &btn)
     }
     else if (&btn == m_pbTest)
     {
-      int SECS(172800); // 2 дня
-      qsrand(uint(QTime::currentTime().msec()));
-
+        //RAND_INIT;
+        // 1. Сдвинуть все на 2 дня (отставание по времени)
+        // 2. Для всех работ установить wrk->setCondition()
+        // 3. Для всех работ установить wrk->setCarryOutPercent()
+        // 4. Рассчитать carryOutPercent для процедур, планов и проектов
+      int SECS(172800);
+      QDateTime dtTest  = m_dtTest->dateTime();
         foreach (TCarryTask *tsk, modPlans->carryTasks())
         {
           TCarryPlan *plans[2] = { NULL };
@@ -218,27 +222,97 @@ void WGantDiagramm::resetGantDiagramm(const QPushButton &btn)
 
             tsk->setDtRealBegin(tsk->dtPlanBegin() ? tsk->dtPlanBegin()->addSecs(SECS) : QDateTime());
             tsk->setDtRealEnd(tsk->dtPlanEnd() ? tsk->dtPlanEnd()->addSecs(SECS) : QDateTime());
-            tsk->setCarryOutPercent(rand() % (100-0+1)+0);
+          qint64 secsTskPeriod(tsk->dtRealBegin() && tsk->dtRealEnd() ? tsk->dtRealBegin()->secsTo(*tsk->dtRealEnd()) : 0);
+          qint64 secsTskTest(0);
             for (int i = 0; i < 2; i++)
                 if (TCarryPlan *plan = plans[i])
                 {
                     plan->setDtRealBegin(plan->dtPlanBegin() ? plan->dtPlanBegin()->addSecs(SECS) : QDateTime());
                     plan->setDtRealEnd(plan->dtPlanEnd() ? plan->dtPlanEnd()->addSecs(SECS) : QDateTime());
-                    plan->setCarryOutPercent(rand() % (100-0+1)+0);
+                  qint64 secsPlanPeriod(plan->dtRealBegin() && plan->dtRealEnd() ? plan->dtRealBegin()->secsTo(*plan->dtRealEnd()) : 0);
+                  qint64 secsPlanTest(0);
                     foreach (TCarryProcedure *pr, plan->procedures())
                     {
                         pr->setDtRealBegin(pr->dtPlanBegin() ? pr->dtPlanBegin()->addSecs(SECS) : QDateTime());
                         pr->setDtRealEnd(pr->dtPlanEnd() ? pr->dtPlanEnd()->addSecs(SECS) : QDateTime());
-                        pr->setCarryOutPercent(rand() % (100-0+1)+0);
+                      qint64 secsPrPeriod(pr->dtRealBegin() && pr->dtRealEnd() ? pr->dtRealBegin()->secsTo(*pr->dtRealEnd()) : 0);
+                      qint64 secsPrTest(0);
                         foreach (TCarryWork *wrk, pr->works())
                         {
                             wrk->setDtRealBegin(wrk->dtPlanBegin() ? wrk->dtPlanBegin()->addSecs(SECS) : QDateTime());
                             wrk->setDtRealEnd(wrk->dtPlanEnd() ? wrk->dtPlanEnd()->addSecs(SECS) : QDateTime());
-                            wrk->setCarryOutPercent(rand() % (100-0+1)+0);
+                          qint64 secsWrkPeriod(wrk->dtRealBegin() && wrk->dtRealEnd() ? wrk->dtRealBegin()->secsTo(*wrk->dtRealEnd()) : 0);
+                            if (*wrk->dtRealBegin() > dtTest)
+                            {
+                                wrk->setCondition(cocGet);
+                                wrk->setCarryOutPercent(0);
+                            }
+                            else if (*wrk->dtRealEnd() <= dtTest)
+                            {
+                                wrk->setCondition(cocCarryEnd);
+                                wrk->setCarryOutPercent(100);
+                                secsPrTest += secsWrkPeriod;
+                                secsPlanTest += secsWrkPeriod;
+                                secsTskTest += secsWrkPeriod;
+                            }
+                            else
+                            {
+                                wrk->setCondition(cocCarryBeg);
+                              qint64 secsWrkTest(wrk->dtRealBegin()->secsTo(dtTest));
+                                wrk->setCarryOutPercent(secsWrkPeriod ? int(double(secsWrkTest) / secsWrkPeriod * 100) : 0);
+                                secsPrTest += secsWrkTest;
+                                secsPlanTest += secsWrkTest;
+                                secsTskTest += secsWrkTest;
+                            }
+                        }
+                        pr->setCarryOutPercent(secsPrPeriod ? int(double(secsPrTest) / secsPrPeriod * 100) : 0);
+                    }
+                    plan->setCarryOutPercent(secsPlanPeriod ? int(double(secsPlanTest) / secsPlanPeriod * 100) : 0);
+                }
+            tsk->setCarryOutPercent(secsTskPeriod ? int(double(secsTskTest) / secsTskPeriod * 100) : 0);
+        }
+/*
+        foreach (TCarryTask *tsk, modPlans->carryTasks())
+        {
+          TCarryPlan *plans[2] = { NULL };
+            if (tsk->ordPlan() && tsk->carryPlan())
+            {
+                if (tsk->ordPlan()->scrName()<tsk->carryPlan()->scrName())
+                {
+                    plans[0] = tsk->ordPlan(); plans[1] = tsk->carryPlan();
+                }
+                else
+                {
+                    plans[1] = tsk->ordPlan(); plans[0] = tsk->carryPlan();
+                }
+            }
+            else if (tsk->ordPlan()) plans[0] = tsk->ordPlan();
+            else if (tsk->carryPlan()) plans[0] = tsk->carryPlan();
+
+            tsk->setDtRealBegin(tsk->dtPlanBegin() ? tsk->dtPlanBegin()->addSecs(SECS) : QDateTime());
+            tsk->setDtRealEnd(tsk->dtPlanEnd() ? tsk->dtPlanEnd()->addSecs(SECS) : QDateTime());
+            tsk->setCarryOutPercent(RAND_100);
+            for (int i = 0; i < 2; i++)
+                if (TCarryPlan *plan = plans[i])
+                {
+                    plan->setDtRealBegin(plan->dtPlanBegin() ? plan->dtPlanBegin()->addSecs(SECS) : QDateTime());
+                    plan->setDtRealEnd(plan->dtPlanEnd() ? plan->dtPlanEnd()->addSecs(SECS) : QDateTime());
+                    plan->setCarryOutPercent(RAND_100);
+                    foreach (TCarryProcedure *pr, plan->procedures())
+                    {
+                        pr->setDtRealBegin(pr->dtPlanBegin() ? pr->dtPlanBegin()->addSecs(SECS) : QDateTime());
+                        pr->setDtRealEnd(pr->dtPlanEnd() ? pr->dtPlanEnd()->addSecs(SECS) : QDateTime());
+                        pr->setCarryOutPercent(RAND_100);
+                        foreach (TCarryWork *wrk, pr->works())
+                        {
+                            wrk->setDtRealBegin(wrk->dtPlanBegin() ? wrk->dtPlanBegin()->addSecs(SECS) : QDateTime());
+                            wrk->setDtRealEnd(wrk->dtPlanEnd() ? wrk->dtPlanEnd()->addSecs(SECS) : QDateTime());
+                            wrk->setCarryOutPercent(RAND_100);
                         }
                     }
                 }
         }
+*/
     }
 }
 //-----------------------------------------------------------------------------

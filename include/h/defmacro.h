@@ -10,6 +10,7 @@
 
 #include <QtDebug>
 #include <TAbstractApp>
+#include <QTime>
 
 //#define EMPTY QString("")
 
@@ -71,6 +72,11 @@
 #define MIN2(a,b) ((a)>(b)?(b):(a))
 #define MIN3(a,b,c) ((MIN2(a,b))<(c)?(MIN2(a,b)):(c))
 #define MIN4(a,b,c,d) MIN2(MIN2(a,b),MIN2(c,d))
+
+// Случайные величины
+#define RAND_INIT qsrand(uint(QTime::currentTime().msec()))
+#define RAND(from,to) (rand() % ((to)-(from)+1)+(from))
+#define RAND_100 RAND(0,100)
 
 // Удаление объекта c присвоением указателю NULL
 #define DELETE(ob) {if((ob)){delete ob;ob=NULL;}}
