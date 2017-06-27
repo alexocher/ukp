@@ -18,10 +18,6 @@ WGantDiagramm *wGantDiagramm(NULL);
 namespace
 {
 
-    const int HEADER_H(60);
-    const int COLUMN_W(30);
-    const int ROW_H(40);
-
     int CURRENT_LEVEL(3);
 
 }
@@ -51,7 +47,7 @@ WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) :
         hdrIt->setText(0, " Наименование");
         hdrIt->setTextAlignment(0, Qt::AlignLeft | Qt::AlignVCenter);
         QSize sz = hdrIt->sizeHint(0);
-        sz.setHeight(HEADER_H);
+        sz.setHeight(PROJCARRYPLAN->diagrammSettings().headerHeight());
         hdrIt->setSizeHint(0, sz);
     }
 
@@ -333,7 +329,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
     m_cbScale->setCurrentIndex((int)sc);
 
   MODULE(Plans);
-    modPlans->reflectCarryTasksToTree(tasks, *m_tree, false, ROW_H); // отобразить все
+    modPlans->reflectCarryTasksToTree(tasks, *m_tree, false, PROJCARRYPLAN->diagrammSettings().rowHeight()); // отобразить все
     m_tree->sortItems(0, Qt::AscendingOrder);
     m_diagr->disconnect_tree();
     qtools::expand(*m_tree);
@@ -341,40 +337,40 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
     m_diagr->set_tree(m_tree);
 
   // Плановые
-  QPen planItemsTaskPen(Qt::darkGray);
-  QBrush planItemsTaskBrash(Qt::darkGray);
-  QPen planItemsPlanPen(Qt::darkGray);
-  QBrush planItemsPlanBrash(Qt::darkGray);
-  QPen planItemsProcedurePen(Qt::darkGray);
-  QBrush planItemsProcedureBrash(Qt::darkGray);
-  QPen planItemsWorkPen(Qt::blue);
-  QBrush planItemsWorkBrash(Qt::blue);
+  QPen planItemsTaskPen(PROJCARRYPLAN->diagrammSettings().planItemsTaskPen());
+  QBrush planItemsTaskBrash(PROJCARRYPLAN->diagrammSettings().planItemsTaskBrash());
+  QPen planItemsPlanPen(PROJCARRYPLAN->diagrammSettings().planItemsPlanPen());
+  QBrush planItemsPlanBrash(PROJCARRYPLAN->diagrammSettings().planItemsPlanBrash());
+  QPen planItemsProcedurePen(PROJCARRYPLAN->diagrammSettings().planItemsProcedurePen());
+  QBrush planItemsProcedureBrash(PROJCARRYPLAN->diagrammSettings().planItemsProcedureBrash());
+  QPen planItemsWorkPen(PROJCARRYPLAN->diagrammSettings().planItemsWorkPen());
+  QBrush planItemsWorkBrash(PROJCARRYPLAN->diagrammSettings().planItemsWorkBrash());
   // Реальные
-  QPen realItemsTaskPen(Qt::darkRed);
-  QBrush realItemsTaskBrash(Qt::darkRed);
-  QPen realItemsPlanPen(Qt::darkRed);
-  QBrush realItemsPlanBrash(Qt::darkRed);
-  QPen realItemsProcedurePen(Qt::darkRed);
-  QBrush realItemsProcedureBrash(Qt::darkRed);
+  QPen realItemsTaskPen(PROJCARRYPLAN->diagrammSettings().realItemsTaskPen());
+  QBrush realItemsTaskBrash(PROJCARRYPLAN->diagrammSettings().realItemsTaskBrash());
+  QPen realItemsPlanPen(PROJCARRYPLAN->diagrammSettings().realItemsPlanPen());
+  QBrush realItemsPlanBrash(PROJCARRYPLAN->diagrammSettings().realItemsPlanBrash());
+  QPen realItemsProcedurePen(PROJCARRYPLAN->diagrammSettings().realItemsProcedurePen());
+  QBrush realItemsProcedureBrash(PROJCARRYPLAN->diagrammSettings().realItemsProcedureBrash());
   // ... работы в зависимости от статуса
-  QPen realItemsGetWorkPen(Qt::darkGreen);
-  QBrush realItemsGetWorkBrash(Qt::darkGreen);
-  QPen realItemsBegWorkPen(Qt::green);
-  QBrush realItemsBegWorkBrash(Qt::green);
-  QPen realItemsEndWorkPen(Qt::blue);
-  QBrush realItemsEndWorkBrash(Qt::blue);
-  QPen realItemsProblemWorkPen(Qt::red);
-  QBrush realItemsProblemWorkBrash(Qt::red);
+  QPen realItemsGetWorkPen(PROJCARRYPLAN->diagrammSettings().realItemsGetWorkPen());
+  QBrush realItemsGetWorkBrash(PROJCARRYPLAN->diagrammSettings().realItemsGetWorkBrash());
+  QPen realItemsBegWorkPen(PROJCARRYPLAN->diagrammSettings().realItemsBegWorkPen());
+  QBrush realItemsBegWorkBrash(PROJCARRYPLAN->diagrammSettings().realItemsBegWorkBrash());
+  QPen realItemsEndWorkPen(PROJCARRYPLAN->diagrammSettings().realItemsEndWorkPen());
+  QBrush realItemsEndWorkBrash(PROJCARRYPLAN->diagrammSettings().realItemsGetWorkBrash());
+  QPen realItemsProblemWorkPen(PROJCARRYPLAN->diagrammSettings().realItemsProblemWorkPen());
+  QBrush realItemsProblemWorkBrash(PROJCARRYPLAN->diagrammSettings().realItemsProblemWorkBrash());
 
   TGantGraphicsView &gd = *m_diagr;
     gd.setScaleView(sc);
-    gd.setHeaderHeight(HEADER_H);
-    gd.setColumnWidth(COLUMN_W);
-    gd.setRowHeight(ROW_H);
-    gd.setGridPen(QPen(Qt::darkGray));
-    gd.setWeekendPen(QPen(Qt::darkRed));
-    gd.setGridBrush( QBrush(Qt::white));
-    gd.setWeekendBrush(QBrush(Qt::lightGray));
+    gd.setHeaderHeight(PROJCARRYPLAN->diagrammSettings().headerHeight());
+    gd.setColumnWidth(PROJCARRYPLAN->diagrammSettings().columnWidth());
+    gd.setRowHeight(PROJCARRYPLAN->diagrammSettings().rowHeight());
+    gd.setGridPen(PROJCARRYPLAN->diagrammSettings().gridPen());
+    gd.setWeekendPen(PROJCARRYPLAN->diagrammSettings().weekendPen());
+    gd.setGridBrush(PROJCARRYPLAN->diagrammSettings().gridBrush());
+    gd.setWeekendBrush(PROJCARRYPLAN->diagrammSettings().weekendBrush());
     gd.clearTopItems();
 
   bool showPlan(whatdraw != TGantGraphicsView::cdReal), showReal(whatdraw != TGantGraphicsView::cdPlan);

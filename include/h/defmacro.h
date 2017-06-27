@@ -57,7 +57,7 @@
 #define PROJ         TAbstractApp::project
 #define PROJUKP      ((TAppUkp*)TAbstractApp::project)
 #define PROJPLAN     ((TAppPlan*)TAbstractApp::project)
-#define PROJCARRYPLAN ((TAppCarryPlan*)TAbstractApp::project)
+#define PROJCARRYPLAN (dynamic_cast<TAppCarryPlan*>(TAbstractApp::project))
 
 // Склейка ...
 #define JOINT(frst,scnd) frst##scnd
@@ -235,5 +235,7 @@ qWarning().noquote() << CLR_RED << "ERROR. " << (nm) << CLR_GRAY << " [" << __PR
 #define PR_FN_LN_MSG(s,cl) qWarning() << CLR_GRAY << "[" << __PRETTY_FUNCTION__ << "][" << __LINE__ << "]" << CLR_RESET << cl << s << CLR_RESET;
 
 #define PRINT_BYTEARRAY_CODES(ar,sz) for(uint z=0;z<(uint)sz;z++){printf("%4d\t",(int)((unsigned char)ar[z]));if((z+1)%5==0 || (int)z==((int)sz-1))printf("\n");}
+
+#define COLOR(s) QColor((s).section(".",0,0).toInt(),(s).section(".",1,1).toInt(),(s).section(".",2,2).toInt(),(s).section(".",3,3).isEmpty() ? 255 : (s).section(".",3,3).toInt())
 
 #endif // DEFMACRO_H

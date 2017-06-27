@@ -515,8 +515,6 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
         pbOptional->setEnabled(!isProcedure);
         lblControl->setEnabled(!isProcedure);
         pbControl->setEnabled(!isProcedure);
-        lblOrder->setEnabled(isProcedure);
-        cbOrder->setEnabled(isProcedure);
       TCarryProcedure *curProc(NULL);
       TCarryWork *curWork(NULL);
         if (isProcedure) curProc = curTemplate->findProcedure(idnt->num);

@@ -15,6 +15,7 @@
 #include <WOrgShtat>
 #include <WProduction>
 #include <TfrmDialog_NNm>
+#include <TfrmSettings>
 
 TfrmMainUkpCarryPlan *frmMainUkpCarryPlan(NULL);
 
@@ -39,7 +40,8 @@ namespace
             *actCascade(NULL),
             *actCloseAll(NULL),
             *actExit(NULL),
-            *actAddProject(NULL);
+            *actAddProject(NULL),
+            *actSettings(NULL);
 
     QMdiArea *MDI_AREA(NULL);
 
@@ -102,6 +104,8 @@ void TfrmMainUkpCarryPlan::createControls()
     mainToolBar->addSeparator();
     actAddProject = mainToolBar->addAction(ICONPIX(PIX_QUESTION),"&Добавить проект",this,SLOT(clickAction()));
     mainToolBar->addSeparator();
+    actSettings = mainToolBar->addAction(ICONPIX(PIX_SETTINGS),"&Настройка приложения",this,SLOT(clickAction()));
+    mainToolBar->addSeparator();
     actExit = mainToolBar->addAction(ICONPIX(PIX_EXIT),"В&ыйти",this,SLOT(clickAction()));
     actExit->setShortcut(QKeySequence("Ctrl+Q"));
 
@@ -121,6 +125,8 @@ void TfrmMainUkpCarryPlan::createControls()
     topMenu->addAction(actTileVertical);
     topMenu->addAction(actCascade);
     topMenu->addAction(actCloseAll);
+    topMenu = mainMenuBar->addMenu("&Настройка");
+    topMenu->addAction(actSettings);
     topMenu = mainMenuBar->addMenu("&Справка");
     topMenu->addAction(actAddProject);
 
@@ -299,6 +305,14 @@ void TfrmMainUkpCarryPlan::clickAction(const QAction &act)
             else delete newCarryTask; // message ???
         }
         delete dlg;
+    }
+    else if (&act==actSettings)
+    {
+      TfrmSettings *dlg(new TfrmSettings());
+        if (dlg->exec()==QDialog::Accepted)
+        {
+
+        }
     }
     else if (&act==actExit)
     {
