@@ -13,8 +13,6 @@ public:
     DiagrammSettings() = delete;
     DiagrammSettings(const DiagrammSettings &) = delete;
     DiagrammSettings &operator=(const DiagrammSettings &) = delete;
-    DiagrammSettings(DiagrammSettings &&) = delete;
-    DiagrammSettings &operator=(DiagrammSettings &&) = delete;
 
     int headerHeight() const;
     int columnWidth() const;

@@ -24,17 +24,17 @@ namespace
 
 WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) :
     QDialog(parent,f),
-    m_tree(nullptr),
-    m_diagr(nullptr),
-    m_frButtons(nullptr),
-    m_pbAll(nullptr),
-    m_pbPlan(nullptr),
-    m_pbReal(nullptr),
-    m_pbExpand(nullptr),
-    m_pbCollapse(nullptr),
-    m_cbScale(nullptr),
-    m_pbTest(nullptr),
-    m_dtTest(nullptr)
+    m_tree(NULL),
+    m_diagr(NULL),
+    m_frButtons(NULL),
+    m_pbAll(NULL),
+    m_pbPlan(NULL),
+    m_pbReal(NULL),
+    m_pbExpand(NULL),
+    m_pbCollapse(NULL),
+    m_cbScale(NULL),
+    m_pbTest(NULL),
+    m_dtTest(NULL)
 {
     m_ui->setupUi(this);
 

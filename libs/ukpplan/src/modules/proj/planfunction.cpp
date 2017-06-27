@@ -901,7 +901,7 @@ void FillVectorJob(TCarryTaskList &tasks) // заполнить job данным
                                 break;
                             }
                         } // конец цикла перебора вектора исполнителей
-                        if(!flfind) executor.push_back(executortemp); // доб. тек. исполнителя в вектор исполнителей executor                                                                                                
+                        if(!flfind) executor.push_back(executortemp); // доб. тек. исполнителя в вектор исполнителей executor
                     } // цикл перебора возможных исполнителей процедуры
 
                     // Заполнить оставшиеся реквизиты работы. Отдельно для защищенной работы и незащищенной работы
