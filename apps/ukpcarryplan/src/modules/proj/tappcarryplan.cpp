@@ -41,6 +41,15 @@ DiagrammSettings::DiagrammSettings(const QString &projecgroup, const QString &pr
     }
     m_gridPen = COLOR(value.toString());
 
+    value = settings.value("bridBrush");
+    if (!value.isValid())
+    {
+      QColor color(Qt::white);
+        value = QString("%1.%2.%3.%4").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha());
+        settings.setValue("bridBrush", value);
+    }
+    m_gridBrush = COLOR(value.toString());
+
     value = settings.value("weekendPen");
     if (!value.isValid())
     {
@@ -49,15 +58,6 @@ DiagrammSettings::DiagrammSettings(const QString &projecgroup, const QString &pr
         settings.setValue("weekendPen", value);
     }
     m_weekendPen = COLOR(value.toString());
-
-    value = settings.value("bridBrush");
-    if (!value.isValid())
-    {
-      QColor color(Qt::white);
-        value = QString("%1.%2.%3.%4").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha());
-        settings.setValue("bridBrush", value);
-    }
-    m_bridBrush = COLOR(value.toString());
 
     value = settings.value("weekendBrush");
     if (!value.isValid())
@@ -303,7 +303,7 @@ QColor &DiagrammSettings::weekendPen() const
 
 QColor &DiagrammSettings::gridBrush() const
 {
-    return const_cast<QColor &>(m_bridBrush);
+    return const_cast<QColor &>(m_gridBrush);
 }
 //-----------------------------------------------------------------------------
 

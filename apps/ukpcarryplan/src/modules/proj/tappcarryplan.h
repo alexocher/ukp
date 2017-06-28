@@ -19,8 +19,8 @@ public:
     int rowHeight() const;
 
     QColor &gridPen() const;
-    QColor &weekendPen() const;
     QColor &gridBrush() const;
+    QColor &weekendPen() const;
     QColor &weekendBrush() const;
 
     QColor &planItemsTaskPen() const;
@@ -55,8 +55,8 @@ private:
     int m_rowHeight;
 
     QColor m_gridPen;
+    QColor m_gridBrush;
     QColor m_weekendPen;
-    QColor m_bridBrush;
     QColor m_weekendBrush;
 
     QColor m_planItemsTaskPen;

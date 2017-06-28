@@ -12,6 +12,23 @@ TfrmSettings::~TfrmSettings()
 }
 //-----------------------------------------------------------------------------
 
+void TfrmSettings::resetSettings()
+{
+    if (QPushButton *btn = dynamic_cast<QPushButton *>(sender())) resetSettings(*btn);
+}
+//-----------------------------------------------------------------------------
+
+void TfrmSettings::resetSettings(const QPushButton &btn)
+{
+    if (&btn==pbPen)
+    {
+    }
+    else if (&btn==pbBrush)
+    {
+    }
+}
+//-----------------------------------------------------------------------------
+
 void TfrmSettings::apply()
 {
     accept();
