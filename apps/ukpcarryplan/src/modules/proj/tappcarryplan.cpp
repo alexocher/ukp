@@ -295,9 +295,21 @@ QColor &DiagrammSettings::gridPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setGridPen(const QColor &color)
+{
+    m_gridPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::weekendPen() const
 {
     return const_cast<QColor &>(m_weekendPen);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setWeekendPen(const QColor &color)
+{
+    m_weekendPen = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -307,9 +319,21 @@ QColor &DiagrammSettings::gridBrush() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setGridBrush(const QColor &color)
+{
+    m_gridBrush = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::weekendBrush() const
 {
     return const_cast<QColor &>(m_weekendBrush);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setWeekendBrush(const QColor &color)
+{
+    m_weekendBrush = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -319,9 +343,21 @@ QColor &DiagrammSettings::planItemsTaskPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setPlanItemsTaskPen(const QColor &color)
+{
+    m_planItemsTaskPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::planItemsTaskBrash() const
 {
     return const_cast<QColor &>(m_planItemsTaskBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setPlanItemsTaskBrash(const QColor &color)
+{
+    m_planItemsTaskBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -331,9 +367,21 @@ QColor &DiagrammSettings::planItemsPlanPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setPlanItemsPlanPen(const QColor &color)
+{
+    m_planItemsPlanPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::planItemsPlanBrash() const
 {
     return const_cast<QColor &>(m_planItemsPlanBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setPlanItemsPlanBrash(const QColor &color)
+{
+    m_planItemsPlanBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -343,9 +391,21 @@ QColor &DiagrammSettings::planItemsProcedurePen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setPlanItemsProcedurePen(const QColor &color)
+{
+    m_planItemsProcedurePen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::planItemsProcedureBrash() const
 {
     return const_cast<QColor &>(m_planItemsProcedureBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setPlanItemsProcedureBrash(const QColor &color)
+{
+    m_planItemsProcedureBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -355,9 +415,21 @@ QColor &DiagrammSettings::planItemsWorkPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setPlanItemsWorkPen(const QColor &color)
+{
+    m_planItemsWorkPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::planItemsWorkBrash() const
 {
     return const_cast<QColor &>(m_planItemsWorkBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setPlanItemsWorkBrash(const QColor &color)
+{
+    m_planItemsWorkBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -367,9 +439,21 @@ QColor &DiagrammSettings::realItemsTaskPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setRealItemsTaskPen(const QColor &color)
+{
+    m_realItemsTaskPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::realItemsTaskBrash() const
 {
     return const_cast<QColor &>(m_realItemsTaskBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRealItemsTaskBrash(const QColor &color)
+{
+    m_realItemsTaskBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -379,9 +463,21 @@ QColor &DiagrammSettings::realItemsPlanPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setRealItemsPlanPen(const QColor &color)
+{
+    m_realItemsPlanPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::realItemsPlanBrash() const
 {
     return const_cast<QColor &>(m_realItemsPlanBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRealItemsPlanBrash(const QColor &color)
+{
+    m_realItemsPlanBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -391,9 +487,21 @@ QColor &DiagrammSettings::realItemsProcedurePen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setRealItemsProcedurePen(const QColor &color)
+{
+    m_realItemsProcedurePen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::realItemsProcedureBrash() const
 {
     return const_cast<QColor &>(m_realItemsProcedureBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRealItemsProcedureBrash(const QColor &color)
+{
+    m_realItemsProcedureBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -403,9 +511,21 @@ QColor &DiagrammSettings::realItemsGetWorkPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setRealItemsGetWorkPen(const QColor &color)
+{
+    m_realItemsGetWorkPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::realItemsGetWorkBrash() const
 {
     return const_cast<QColor &>(m_realItemsGetWorkBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRealItemsGetWorkBrash(const QColor &color)
+{
+    m_realItemsGetWorkBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -415,9 +535,21 @@ QColor &DiagrammSettings::realItemsBegWorkPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setRealItemsBegWorkPen(const QColor &color)
+{
+    m_realItemsBegWorkPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::realItemsBegWorkBrash() const
 {
     return const_cast<QColor &>(m_realItemsBegWorkBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRealItemsBegWorkBrash(const QColor &color)
+{
+    m_realItemsBegWorkBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -427,9 +559,21 @@ QColor &DiagrammSettings::realItemsEndWorkPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setRealItemsEndWorkPen(const QColor &color)
+{
+    m_realItemsEndWorkPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::realItemsEndWorkBrash() const
 {
     return const_cast<QColor &>(m_realItemsEndWorkBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRealItemsEndWorkBrash(const QColor &color)
+{
+    m_realItemsEndWorkBrash = color;
 }
 //-----------------------------------------------------------------------------
 
@@ -439,9 +583,21 @@ QColor &DiagrammSettings::realItemsProblemWorkPen() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setRealItemsProblemWorkPen(const QColor &color)
+{
+    m_realItemsProblemWorkPen = color;
+}
+//-----------------------------------------------------------------------------
+
 QColor &DiagrammSettings::realItemsProblemWorkBrash() const
 {
     return const_cast<QColor &>(m_realItemsProblemWorkBrash);
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRealItemsProblemWorkBrash(const QColor &color)
+{
+    m_realItemsProblemWorkBrash = color;
 }
 //-----------------------------------------------------------------------------
 

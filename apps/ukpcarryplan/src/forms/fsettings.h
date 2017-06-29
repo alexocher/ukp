@@ -15,6 +15,8 @@ public:
     explicit TfrmSettings(QWidget *parent=0, Qt::WindowFlags f=0);
     ~TfrmSettings();
 
+    void prepare();
+
 public slots:
 
     void resetSettings();

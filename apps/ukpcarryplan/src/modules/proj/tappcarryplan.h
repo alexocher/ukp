@@ -19,34 +19,82 @@ public:
     int rowHeight() const;
 
     QColor &gridPen() const;
+    void setGridPen(const QColor &color);
+
     QColor &gridBrush() const;
+    void setGridBrush(const QColor &color);
+
     QColor &weekendPen() const;
+    void setWeekendPen(const QColor &color);
+
     QColor &weekendBrush() const;
+    void setWeekendBrush(const QColor &color);
 
     QColor &planItemsTaskPen() const;
+    void setPlanItemsTaskPen(const QColor &color);
+
     QColor &planItemsTaskBrash() const;
+    void setPlanItemsTaskBrash(const QColor &color);
+
     QColor &planItemsPlanPen() const;
+    void setPlanItemsPlanPen(const QColor &color);
+
     QColor &planItemsPlanBrash() const;
+    void setPlanItemsPlanBrash(const QColor &color);
+
     QColor &planItemsProcedurePen() const;
+    void setPlanItemsProcedurePen(const QColor &color);
+
     QColor &planItemsProcedureBrash() const;
+    void setPlanItemsProcedureBrash(const QColor &color);
+
     QColor &planItemsWorkPen() const;
+    void setPlanItemsWorkPen(const QColor &color);
+
     QColor &planItemsWorkBrash() const;
+    void setPlanItemsWorkBrash(const QColor &color);
 
     QColor &realItemsTaskPen() const;
+    void setRealItemsTaskPen(const QColor &color);
+
     QColor &realItemsTaskBrash() const;
+    void setRealItemsTaskBrash(const QColor &color);
+
     QColor &realItemsPlanPen() const;
+    void setRealItemsPlanPen(const QColor &color);
+
     QColor &realItemsPlanBrash() const;
+    void setRealItemsPlanBrash(const QColor &color);
+
     QColor &realItemsProcedurePen() const;
+    void setRealItemsProcedurePen(const QColor &color);
+
     QColor &realItemsProcedureBrash() const;
+    void setRealItemsProcedureBrash(const QColor &color);
 
     QColor &realItemsGetWorkPen() const;
+    void setRealItemsGetWorkPen(const QColor &color);
+
     QColor &realItemsGetWorkBrash() const;
+    void setRealItemsGetWorkBrash(const QColor &color);
+
     QColor &realItemsBegWorkPen() const;
+    void setRealItemsBegWorkPen(const QColor &color);
+
     QColor &realItemsBegWorkBrash() const;
+    void setRealItemsBegWorkBrash(const QColor &color);
+
     QColor &realItemsEndWorkPen() const;
+    void setRealItemsEndWorkPen(const QColor &color);
+
     QColor &realItemsEndWorkBrash() const;
+    void setRealItemsEndWorkBrash(const QColor &color);
+
     QColor &realItemsProblemWorkPen() const;
+    void setRealItemsProblemWorkPen(const QColor &color);
+
     QColor &realItemsProblemWorkBrash() const;
+    void setRealItemsProblemWorkBrash(const QColor &color);
 
 private:
 

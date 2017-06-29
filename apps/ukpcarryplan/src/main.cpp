@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QTranslator>
+#include <QLibraryInfo>
 #include <defMacro>
 #include <TAppCarryPlan>
 #include <TfrmMainUkpCarryPlan>
@@ -25,9 +26,30 @@ int main(int argc, char *argv[])
     if (EM_User *selfUser = input2system(argc, argv, false)) params.append(QString("selfUser=%1").arg(selfUser->SUID()));
     else return -666;
 
+    QString locale = QLocale::system().name();
     QTranslator qtTranslator;
-    qtTranslator.load("qt_ru.qm");
-    a.installTranslator(&qtTranslator);
+    if (qtTranslator.load("qt_" + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+         a.installTranslator(&qtTranslator);
+
+//    QTranslator qtTranslator;
+//    if (qtTranslator.load("qtukp_ru"))
+//         a.installTranslator(&qtTranslator);
+
+//assistant_ru.qm
+//designer_ru.qm
+//linguist_ru.qm
+//qmlviewer_ru.qm
+//qtbase_ru.qm
+//qtconfig_ru.qm
+//qtdeclarative_ru.qm
+//qt_help_ru.qm
+//qtmultimedia_ru.qm
+//qtquick1_ru.qm
+//qtquickcontrols_ru.qm
+//qt_ru.qm
+//qtscript_ru.qm
+//qtxmlpatterns_ru.qm
+
     TAppCarryPlan *ukpApp = TAppCarryPlan::instance(params); // num, name
     if (!ukpApp->init())
     {
