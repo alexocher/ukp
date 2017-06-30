@@ -309,6 +309,7 @@ void TfrmMainUkpCarryPlan::clickAction(const QAction &act)
     else if (&act==actSettings)
     {
       TfrmSettings *dlg(new TfrmSettings(this));
+        dlg->prepare();
         if (dlg->exec()==QDialog::Accepted)
         {
 

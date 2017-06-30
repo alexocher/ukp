@@ -41,12 +41,12 @@ DiagrammSettings::DiagrammSettings(const QString &projecgroup, const QString &pr
     }
     m_gridPen = COLOR(value.toString());
 
-    value = settings.value("bridBrush");
+    value = settings.value("gridBrush");
     if (!value.isValid())
     {
       QColor color(Qt::white);
         value = QString("%1.%2.%3.%4").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha());
-        settings.setValue("bridBrush", value);
+        settings.setValue("gridBrush", value);
     }
     m_gridBrush = COLOR(value.toString());
 

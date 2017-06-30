@@ -46,12 +46,6 @@
      <height>500</height>
     </size>
    </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
    <widget class="QLabel" name="lblPlanTask">
     <property name="geometry">
      <rect>
@@ -172,9 +166,6 @@
     </property>
     <property name="lineWidth">
      <number>2</number>
-    </property>
-    <property name="text">
-     <string>Проект</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -345,9 +336,6 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>План</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
@@ -377,7 +365,7 @@
      <string>Контур</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="pbBrush">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -472,7 +460,7 @@
      <string>Элементы выполнения</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_3">
+   <widget class="QRadioButton" name="rbPlanWork">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -494,7 +482,7 @@
      </size>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
+   <widget class="QLabel" name="lblPlanWork">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -614,9 +602,6 @@
     </property>
     <property name="lineWidth">
      <number>2</number>
-    </property>
-    <property name="text">
-     <string>Работа</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -765,9 +750,6 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Процедура</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
@@ -915,14 +897,11 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>План</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_9">
+   <widget class="QLabel" name="lblRealWorkGet">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -1043,14 +1022,11 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Работа (получена)</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_10">
+   <widget class="QLabel" name="lblRealProcedure">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -1170,9 +1146,6 @@
     </property>
     <property name="lineWidth">
      <number>2</number>
-    </property>
-    <property name="text">
-     <string>Процедура</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -1321,14 +1294,11 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Проект</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_7">
+   <widget class="QRadioButton" name="rbRealWorkGet">
     <property name="geometry">
      <rect>
       <x>270</x>
@@ -1350,7 +1320,7 @@
      </size>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_8">
+   <widget class="QRadioButton" name="rbRealProcedure">
     <property name="geometry">
      <rect>
       <x>270</x>
@@ -1372,7 +1342,7 @@
      </size>
     </property>
    </widget>
-   <widget class="QLabel" name="label_12">
+   <widget class="QLabel" name="lblRealWorkBegin">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -1493,14 +1463,11 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Работа (выполняется)</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_9">
+   <widget class="QRadioButton" name="rbRealWorkBegin">
     <property name="geometry">
      <rect>
       <x>270</x>
@@ -1522,7 +1489,7 @@
      </size>
     </property>
    </widget>
-   <widget class="QLabel" name="label_13">
+   <widget class="QLabel" name="lblRealWorkEnd">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -1643,14 +1610,11 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Работа (выполнена)</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_10">
+   <widget class="QRadioButton" name="rbRealWorkEnd">
     <property name="geometry">
      <rect>
       <x>270</x>
@@ -1672,7 +1636,7 @@
      </size>
     </property>
    </widget>
-   <widget class="QLabel" name="label_14">
+   <widget class="QLabel" name="lblRealWorkProblem">
     <property name="geometry">
      <rect>
       <x>300</x>
@@ -1793,14 +1757,11 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Работа (проблемы)</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_11">
+   <widget class="QRadioButton" name="rbRealWorkProblem">
     <property name="geometry">
      <rect>
       <x>270</x>
@@ -1965,9 +1926,6 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Выходные</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
@@ -2118,9 +2076,6 @@
     <property name="lineWidth">
      <number>2</number>
     </property>
-    <property name="text">
-     <string>Сетка</string>
-    </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
@@ -2264,6 +2219,448 @@
     </property>
     <property name="text">
      <string>Ширина столбца</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblGrid_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>160</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Сетка</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblRealWorkProblem_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>470</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Работа (проблемы)</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblPlanWork_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>350</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Работа</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblRealTask_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>230</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Проект</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblRealProcedure_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>310</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Процедура</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblRealWorkEnd_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>430</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Работа (выполнена)</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblRealWorkBegin_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>390</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Работа (выполняется)</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblRealPlan_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>270</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>План</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblPlanPlan_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>270</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>План</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblRealWorkGet_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>350</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Работа (получена)</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblWeekend_2">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>160</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Выходные</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblPlanTask_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>230</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Проект</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lblPlanProcedure_2">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>310</y>
+      <width>220</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>220</width>
+      <height>30</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Процедура</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>

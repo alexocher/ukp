@@ -26,30 +26,54 @@ void TfrmSettings::prepare()
     pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().gridPen());
     pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().gridBrush());
     lblGrid->setPalette(pal);
-//    lblWeekend
-//        PROJCARRYPLAN->diagrammSettings().weekendPen() : PROJCARRYPLAN->diagrammSettings().weekendBrush()
-//    lblPlanTask
-//        PROJCARRYPLAN->diagrammSettings().planItemsTaskPen() : PROJCARRYPLAN->diagrammSettings().planItemsTaskBrash()
-//    lblPlanPlan
-//        PROJCARRYPLAN->diagrammSettings().planItemsPlanPen() : PROJCARRYPLAN->diagrammSettings().planItemsPlanBrash()
-//    lblPlanProcedure
-//        PROJCARRYPLAN->diagrammSettings().planItemsProcedurePen() : PROJCARRYPLAN->diagrammSettings().planItemsProcedureBrash()
-//    lblPlanWork
-//        PROJCARRYPLAN->diagrammSettings().planItemsWorkPen() : PROJCARRYPLAN->diagrammSettings().planItemsWorkBrash()
-//    lblRealTask
-//        PROJCARRYPLAN->diagrammSettings().realItemsTaskPen() : PROJCARRYPLAN->diagrammSettings().realItemsTaskBrash()
-//    lblRealPlan
-//        PROJCARRYPLAN->diagrammSettings().realItemsPlanPen() : PROJCARRYPLAN->diagrammSettings().realItemsPlanBrash()
-//    lblRealProcedure
-//        PROJCARRYPLAN->diagrammSettings().realItemsProcedurePen() : PROJCARRYPLAN->diagrammSettings().realItemsProcedureBrash()
-//    lblRealWorkBegin
-//        PROJCARRYPLAN->diagrammSettings().realItemsBegWorkPen() : PROJCARRYPLAN->diagrammSettings().realItemsBegWorkBrash()
-//    lblRealWorkEnd
-//        PROJCARRYPLAN->diagrammSettings().realItemsEndWorkPen() : PROJCARRYPLAN->diagrammSettings().realItemsEndWorkBrash()
-//    lblRealWorkGet
-//        PROJCARRYPLAN->diagrammSettings().realItemsGetWorkPen() : PROJCARRYPLAN->diagrammSettings().realItemsGetWorkBrash()
-//    lblRealWorkProblem
-//        PROJCARRYPLAN->diagrammSettings().realItemsProblemWorkPen() : PROJCARRYPLAN->diagrammSettings().realItemsProblemWorkBrash()
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().weekendPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().weekendBrush());
+    lblWeekend->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().planItemsTaskPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().planItemsTaskBrash());
+    lblPlanTask->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().planItemsPlanPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().planItemsPlanBrash());
+    lblPlanPlan->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().planItemsProcedurePen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().planItemsProcedureBrash());
+    lblPlanProcedure->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().planItemsWorkPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().planItemsWorkBrash());
+    lblPlanWork->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().realItemsTaskPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().realItemsTaskBrash());
+    lblRealTask->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().realItemsPlanPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().realItemsPlanBrash());
+    lblRealPlan->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().realItemsProcedurePen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().realItemsProcedureBrash());
+    lblRealProcedure->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().realItemsBegWorkPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().realItemsBegWorkBrash());
+    lblRealWorkBegin->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().realItemsEndWorkPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().realItemsEndWorkBrash());
+    lblRealWorkEnd->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().realItemsGetWorkPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().realItemsGetWorkBrash());
+    lblRealWorkGet->setPalette(pal);
+    pal = palette();
+    pal.setColor(QPalette::WindowText,PROJCARRYPLAN->diagrammSettings().realItemsProblemWorkPen());
+    pal.setColor(QPalette::Window,PROJCARRYPLAN->diagrammSettings().realItemsProblemWorkBrash());
+    lblRealWorkProblem->setPalette(pal);
 }
 //-----------------------------------------------------------------------------
 
@@ -104,7 +128,7 @@ void TfrmSettings::resetSettings(const QPushButton &btn)
             if (rbGrid->isChecked())
             {
                 value = QString("%1.%2.%3.%4").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha());
-                settings.setValue(isPen ? "gridPen" : "bridBrush", value);
+                settings.setValue(isPen ? "gridPen" : "gridBrush", value);
                 if (isPen) PROJCARRYPLAN->diagrammSettings().setGridPen(COLOR(value.toString()));
                 else PROJCARRYPLAN->diagrammSettings().setGridBrush(COLOR(value.toString()));
             }
