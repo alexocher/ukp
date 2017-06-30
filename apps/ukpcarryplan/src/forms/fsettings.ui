@@ -2126,6 +2126,12 @@
       <height>30</height>
      </size>
     </property>
+    <property name="minimum">
+     <number>10</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
    </widget>
    <widget class="QSpinBox" name="sbRowHeight">
     <property name="geometry">
@@ -2147,6 +2153,12 @@
       <width>60</width>
       <height>30</height>
      </size>
+    </property>
+    <property name="minimum">
+     <number>10</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_18">
@@ -2194,6 +2206,12 @@
       <width>60</width>
       <height>30</height>
      </size>
+    </property>
+    <property name="minimum">
+     <number>20</number>
+    </property>
+    <property name="maximum">
+     <number>200</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_19">

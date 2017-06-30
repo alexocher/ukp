@@ -10,9 +10,9 @@ public:
 
     DiagrammSettings(const QString &projecgroup, const QString &projecname);
 
-    DiagrammSettings() = delete;
-    DiagrammSettings(const DiagrammSettings &) = delete;
-    DiagrammSettings &operator=(const DiagrammSettings &) = delete;
+//    DiagrammSettings() = delete;
+//    DiagrammSettings(const DiagrammSettings &) = delete;
+//    DiagrammSettings &operator=(const DiagrammSettings &) = delete;
 
     int headerHeight() const;
     int columnWidth() const;
