@@ -15,8 +15,13 @@ public:
 //    DiagrammSettings &operator=(const DiagrammSettings &) = delete;
 
     int headerHeight() const;
+    void setHeaderHeight(int h);
+
     int columnWidth() const;
+    void setColumnWidth(int w);
+
     int rowHeight() const;
+    void setRowHeight(int h);
 
     QColor &gridPen() const;
     void setGridPen(const QColor &color);

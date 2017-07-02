@@ -277,15 +277,33 @@ int DiagrammSettings::headerHeight() const
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setHeaderHeight(int h)
+{
+    m_headerHeight = h;
+}
+//-----------------------------------------------------------------------------
+
 int DiagrammSettings::columnWidth() const
 {
     return m_columnWidth;
 }
 //-----------------------------------------------------------------------------
 
+void DiagrammSettings::setColumnWidth(int w)
+{
+    m_columnWidth = w;
+}
+//-----------------------------------------------------------------------------
+
 int DiagrammSettings::rowHeight() const
 {
     return m_rowHeight;
+}
+//-----------------------------------------------------------------------------
+
+void DiagrammSettings::setRowHeight(int h)
+{
+    m_rowHeight = h;
 }
 //-----------------------------------------------------------------------------
 

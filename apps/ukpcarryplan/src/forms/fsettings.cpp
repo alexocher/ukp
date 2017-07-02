@@ -212,14 +212,14 @@ void TfrmSettings::apply()
     QVariant value;
     QColor color;
 
-    value = sbHeaderHeight->value();
-    settings.setValue("headerHeight", value);
+    settings.setValue("headerHeight", sbHeaderHeight->value());
+    ds.setHeaderHeight(sbHeaderHeight->value());
 
-    value = sbColumnWidth->value();
-    settings.setValue("columnWidth", value);
+    settings.setValue("columnWidth", sbColumnWidth->value());
+    ds.setColumnWidth(sbColumnWidth->value());
 
-    value = sbRowHeight->value();
-    settings.setValue("rowHeight", value);
+    settings.setValue("rowHeight", sbRowHeight->value());
+    ds.setRowHeight(sbRowHeight->value());
 
     color = ds.gridPen();
     value = QString("%1.%2.%3.%4").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha());
