@@ -83,7 +83,9 @@ private:
     int                      _progress;             // прогресс
 
     bool                     _is_tester;            // провверяющая задача
-    int                      _ext_proc_num;  // код внешней процедуры
+    int                      _ext_proc_num;         // код внешней процедуры
+
+    QList<int>               _linkeditem;
 protected:
     QList<TEmployeeType>     _template_employee;    // список возможных исполителей (роли)
     TEmployeeType            _templ_employee;       // возможный исполнитель
@@ -215,6 +217,13 @@ public:
     int                     getProgress() const;
     bool                    isTester() const;    
     int                     getExtProcNum() const;
+
+    const QList<int>        &getLinkedItem() const; //список для идентификаторов связанных узлов (надо будет доработать на указатели объектов)
+
+    void    addLinkedItem(int item);        // добавить элемент
+    void    remLinkedItemByIdx(int idx);    // удалить элемент по индексу
+    void    remLinkedItem(int item);        // удалить элемент
+    void    remLinkedItem();                // удалить все
 
     bool    isVisualHide() const; // признак видимости
 
@@ -405,6 +414,8 @@ signals:
     void notifyStatusChange(QList<int> ls);
 private:
     EM_BasePlanItem* Instance(NODE_TYPE type,int suid);
+    QString conv(const QList<int> &ls );
+    void conv(EM_BasePlanItem *item, QString str);
 public:
     ~EM_YearPlan();
     // создать пустой годовой план

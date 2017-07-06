@@ -31,6 +31,7 @@
                                     " i.tbegin, " \
                                     " i.tend, "  \
                                     " i.is_tester, " \
+                                    " i.linkeditem, "\
                                     " s.main_state, "\
                                     " s.state, " \
                                     " s.problem " \
@@ -66,7 +67,7 @@
                                     " is_optional, is_present, ext_module_type, descr, src_title, res_title, "\
                                     " ext_proc, custom_number, template_employee, oshs_item_id, duration, progress, " \
                                     " tbegin, tend," \
-                                    " is_tester " \
+                                    " is_tester, linkeditem " \
                                     " ) "\
                                     " VALUES "\
                                     " ("\
@@ -75,7 +76,7 @@
                                     " :is_optional, :is_present, :ext_module_type, :descr, :src_title, :res_title, "\
                                     " :ext_proc, :custom_number, :template_employee, :oshs_item_id, :duration, :progress," \
                                     " to_timestamp(:tbegin)::timestamp, to_timestamp(:tend)::timestamp, " \
-                                    " :is_tester " \
+                                    " :is_tester, :linkeditem " \
                                     " ) "\
                                     " RETURNING suid"
 
@@ -88,7 +89,7 @@
                                     " ext_module_type=:ext_module_type, descr=:descr, src_title=:src_title, res_title=:res_title, "\
                                     " ext_proc=:ext_proc, custom_number=:custom_number, template_employee=:template_employee, oshs_item_id=:oshs_item_id, " \
                                     " duration=:duration, progress=:progress, tbegin=to_timestamp(:tbegin)::timestamp, tend = to_timestamp(:tend)::timestamp, " \
-                                    " is_tester = :is_tester " \
+                                    " is_tester = :is_tester, linkeditem=:linkeditem " \
                                     " WHERE suid = :suid "
 // Добавление/Обновление статусов узла
 #define query_InsertPlanItemState   "INSERT INTO plan.planitem_state "\
@@ -561,6 +562,32 @@ void EM_BasePlanItem::setExtProcNum(int value){
 int EM_BasePlanItem::getExtProcNum() const{
     return _ext_proc_num;
 }
+const QList<int> & EM_BasePlanItem::getLinkedItem()const{
+    return _linkeditem;
+}
+void    EM_BasePlanItem::addLinkedItem(int item){
+    if(!_linkeditem.contains(item)){
+        _linkeditem<<item;
+        setModify();
+    }
+}
+void    EM_BasePlanItem::remLinkedItemByIdx(int idx){
+    if(idx>=0 && _linkeditem.size()>idx){
+        _linkeditem.removeAt(idx);
+        setModify();
+    }
+}
+void    EM_BasePlanItem::remLinkedItem(int item){
+    if(_linkeditem.contains(item)){
+        _linkeditem.removeOne(item);
+        setModify();
+    }
+}
+void    EM_BasePlanItem::remLinkedItem(){
+    _linkeditem.clear();
+    setModify();
+}
+
 //----------------------------------------------------
 EM_ProjectPlanItem::EM_ProjectPlanItem(int suid):EM_BasePlanItem(PROJECT, suid){
     _production = 0;
@@ -1179,7 +1206,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
     QDateTime l_tbegin;
     QDateTime l_tend;
     bool l_tester;
-
+    QString l_linkeditem;
     // индексы столбцов
     rec = q->record();
     const int ind_suid = rec.indexOf("suid");
@@ -1208,6 +1235,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
     const int ind_tbegin = rec.indexOf("tbegin");
     const int ind_tend = rec.indexOf("tend");
     const int ind_tester = rec.indexOf("is_tester");
+    const int ind_linkeditem = rec.indexOf("linkeditem");
 
     QMap<int,EM_BasePlanItem*> mTree;
     EM_BasePlanItem *root = 0;
@@ -1246,6 +1274,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
         l_tbegin = q->value(ind_tbegin).toDateTime();
         l_tend = q->value(ind_tend).toDateTime();
         l_tester = q->value(ind_tester).toBool();
+        l_linkeditem = q->value(ind_linkeditem).toString();
 
         int pkey = l_parent_suid;
         int key = l_suid;
@@ -1308,6 +1337,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
             newItem->setOshsItemID(l_oshs_item_id);
             newItem->setProgress(l_progress);
             newItem->setTester(l_tester);
+            conv(newItem,l_linkeditem);
             if(newItem->getType()==PROJECT){
                 EM_Production* prud = produc_dic.by(l_production_type);
                 ((EM_ProjectPlanItem*)newItem)->setProduction(prud);
@@ -1450,6 +1480,26 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::fromDB(int year)throw(CommonException:
     return opOK;
 }
 
+QString EM_YearPlan::conv(const QList<int> &ls ){
+    QString resultString;
+    if(!ls.isEmpty()){
+        QStringList sl;
+        foreach(int n, ls) sl << QString::number(n);
+        resultString = sl.join(",");
+    }else{
+        resultString = "";
+    }
+    return resultString;
+}
+void EM_YearPlan::conv(EM_BasePlanItem* item, QString str){
+    if(!str.isNull() && !str.isEmpty()){
+        QStringList sl = str.split(",");
+        foreach (QString s, sl) {
+            item->addLinkedItem(s.toInt());
+        }
+    }
+}
+
 EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBException,CommonException::SQLException){
     QSqlDatabase db = QSqlDatabase::database(_connect_name);
     if(!db.open()){
@@ -1586,6 +1636,7 @@ EM_OPERATION_RETURNED_STATUS EM_YearPlan::toDB()throw(CommonException::OpenDBExc
             pq->bindValue(":oshs_item_id",cur->getOshsItemID());
             pq->bindValue(":progress",cur->getProgress());
             pq->bindValue(":is_tester",cur->isTester());
+            pq->bindValue(":linkeditem",conv(cur->getLinkedItem()));
             if(isNewItem){
                 pq->bindValue(":yearplan_suid", suid());
             }else{
