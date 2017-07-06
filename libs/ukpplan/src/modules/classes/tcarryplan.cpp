@@ -395,12 +395,18 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
         foreach (TStatus st,statuses()) planItem->addStatus(st);
         planItem->setDescr(descr());
         planItem->setProgress(carryOutPercent());
+        planItem->remLinkedItem();
+        for (int linkElNum : linkedElements())
+            planItem->addLinkedItem(linkElNum);
         if (currentProject) // не шаблон
         {
             if (fCarryTask->dtMinBegin()) currentProject->setTimeBegin(*fCarryTask->dtMinBegin());
             else currentProject->setTimeBegin(QDateTime());
             if (fCarryTask->dtMaxEnd()) currentProject->setTimeEnd(*fCarryTask->dtMaxEnd());
             else currentProject->setTimeEnd(QDateTime());
+            currentProject->remLinkedItem();
+            for (int linkElNum : fCarryTask->linkedElements())
+                currentProject->addLinkedItem(linkElNum);
         }
         yearPlan->add(currentProject ? currentProject : root,planItem);
         foreach (TCarryProcedure *pr,fPlProcedures)
@@ -430,6 +436,9 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
             prItem->setDescr(pr->descr());
             prItem->setExtProcNum(pr->externProcedureNum());
             prItem->setProgress(pr->carryOutPercent());
+            prItem->remLinkedItem();
+            for (int linkElNum : pr->linkedElements())
+                prItem->addLinkedItem(linkElNum);
             yearPlan->add(planItem,prItem);
             foreach (TCarryWork *wrk,pr->works())
             {
@@ -463,6 +472,9 @@ PR1(4,"carryTask()->year(): %1",carryTask()->year());
                 wrkItem->setExtModuleType(wrk->externalModule());
                 wrkItem->setProgress(wrk->carryOutPercent());
                 wrkItem->setExtProcNum(wrk->externProcedureNum());
+                wrkItem->remLinkedItem();
+                for (int linkElNum : wrk->linkedElements())
+                    wrkItem->addLinkedItem(linkElNum);
                 yearPlan->add(prItem,wrkItem);
             }
         }

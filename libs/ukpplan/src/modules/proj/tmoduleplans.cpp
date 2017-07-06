@@ -396,6 +396,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                         if (curProject->getTimeBegin().isValid()) newCarryTask->setDtMinBegin(curProject->getTimeBegin());
                         if (curProject->getTimeEnd().isValid()) newCarryTask->setDtMaxEnd(curProject->getTimeEnd());
                         newCarryTask->setSaved(true);
+                        newCarryTask->setLinkedElements(curProject->getLinkedItem());
                         for(EM_BasePlanItem::iterator planIter = curProject->begin(); planIter != curProject->end(); ++planIter)
                         {
                             PR(8, "for planIter");
@@ -436,6 +437,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                 newCarryPlan->setDescr(curPlan->getDescr());
                                 newCarryPlan->setCarryOutPercent(curPlan->getProgress());
                                 newCarryPlan->setSaved(true);
+                                newCarryPlan->setLinkedElements(curPlan->getLinkedItem());
                                 for(EM_BasePlanItem::iterator prIter = curPlan->begin(); prIter != curPlan->end(); ++prIter)
                                 {
                                     //PR(16,"for prIter");
@@ -467,6 +469,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                         newCarryProcedure->setExternProcedureNum(curPr->getExtProcNum());
                                         newCarryProcedure->setCarryOutPercent(curPr->getProgress());
                                         newCarryProcedure->setSaved(true);
+                                        newCarryProcedure->setLinkedElements(curPr->getLinkedItem());
                                         for(EM_BasePlanItem::iterator wrkIter = curPr->begin(); wrkIter != curPr->end(); ++wrkIter)
                                         {
                                             //PR(24,"for wrkIter");
@@ -503,6 +506,7 @@ void TModulePlans::fillTasks(QList<int> tskids)
                                                 newCarryWork->setControl(curWrk->isTester());
                                                 newCarryWork->setCarryOutPercent(curWrk->getProgress());
                                                 newCarryWork->setSaved(true);
+                                                newCarryWork->setLinkedElements(curWrk->getLinkedItem());
                                                 newCarryProcedure->insertWork(newCarryWork);
                                             }
                                         }
@@ -853,6 +857,7 @@ bool TModulePlans::fromDB(QString param)
                         newCarryPlan->setStatuses(curTmpl->getStatus());
                         newCarryPlan->setDescr(curTmpl->getDescr());
                         newCarryPlan->setSaved(true);
+                        newCarryPlan->setLinkedElements(curTmpl->getLinkedItem());
                         for(EM_BasePlanItem::iterator prIter = curTmpl->begin(); prIter != curTmpl->end(); ++prIter)
                         {
                             //PR(8,"for prIter");
@@ -886,6 +891,7 @@ bool TModulePlans::fromDB(QString param)
                                 newCarryProcedure->setExternProcedureNum(curPr->getExtProcNum());
                                 //PR3(4,"proc: %1, TemplEmployee: %2, OshsItemID: %3",newCarryProcedure->scrName(),curPr->getTemplEmployee(),curPr->getOshsItemID());
                                 newCarryProcedure->setSaved(true);
+                                newCarryProcedure->setLinkedElements(curPr->getLinkedItem());
                                 for(EM_BasePlanItem::iterator wrkIter = curPr->begin(); wrkIter != curPr->end(); ++wrkIter)
                                 {
                                     //PR(16,"for wrkIter");
@@ -922,6 +928,7 @@ bool TModulePlans::fromDB(QString param)
                                         newCarryWork->setPresent(curWrk->isPresent());
                                         newCarryWork->setControl(curWrk->isTester());
                                         newCarryWork->setSaved(true);
+                                        newCarryWork->setLinkedElements(curWrk->getLinkedItem());
                                         newCarryProcedure->insertWork(newCarryWork);
                                     }
                                 }
