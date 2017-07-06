@@ -45,6 +45,7 @@ TAbstractPlanElement::TAbstractPlanElement(const TAbstractPlanElement &ape) : TA
         }
     fPossibleEmployees.setAutoDelete(false);
     foreach (TEmployee * empl, ape.fPossibleEmployees) fPossibleEmployees.append(empl);
+    fLinkedElements = ape.fLinkedElements;
 }
 //-----------------------------------------------------------------------------
 
@@ -114,6 +115,7 @@ TAbstractPlanElement &TAbstractPlanElement::operator=(const TAbstractPlanElement
     fDescr = ape.fDescr;
     fUnitId = ape.fUnitId;
     fCarryOutPercent = ape.fCarryOutPercent;
+    fLinkedElements = ape.fLinkedElements;
     return *this;
 }
 //-----------------------------------------------------------------------------
@@ -142,6 +144,7 @@ void TAbstractPlanElement::reset(bool thisonly)
     fDescr = "";
     fUnitId = 0;
     fCarryOutPercent = 0;
+    fLinkedElements.clear();
 }
 //-----------------------------------------------------------------------------
 
@@ -520,6 +523,18 @@ int TAbstractPlanElement::carryOutPercent() const
 void TAbstractPlanElement::setCarryOutPercent(int cop)
 {
     fCarryOutPercent = cop;
+}
+//-----------------------------------------------------------------------------
+
+QList<int> &TAbstractPlanElement::linkedElements() const
+{
+    return const_cast<QList<int> &>(fLinkedElements);
+}
+//-----------------------------------------------------------------------------
+
+void TAbstractPlanElement::setLinkedElements(const QList<int> &elements)
+{
+    fLinkedElements = elements;
 }
 //-----------------------------------------------------------------------------
 

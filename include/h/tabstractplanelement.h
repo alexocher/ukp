@@ -33,6 +33,7 @@ protected:
     QString             fDescr;        // Дескриптор
     int                 fUnitId;       // id формирования, кому принадлежит элемент
     int                 fCarryOutPercent; // Процент выполненной работы
+    QList<int>          fLinkedElements; // Список связанных элементов (после выполнения которых может быть начато выполнение данного)
 
 public:
     explicit TAbstractPlanElement(int id = 0, int n = 0, QString nm = "", TAbstractObject *parent = NULL);
@@ -97,6 +98,8 @@ public:
     void setUnitId(int id);
     int carryOutPercent() const;       // Процент выполненной работы
     void setCarryOutPercent(int cop);
+    QList<int> &linkedElements() const; // Список связанных элементов (после выполнения которых может быть начато выполнение данного)
+    void setLinkedElements(const QList<int> &elements);
 
     TAbstractPlanElement &operator=(const TAbstractPlanElement &att);
 
