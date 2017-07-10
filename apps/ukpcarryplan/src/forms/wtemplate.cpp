@@ -9,6 +9,7 @@
 #include <TModuleUnits>
 #include <WTemplate>
 #include <TfrmDialog_NNm>
+#include <TfrmLinkedElements>
 
 WTemplate *wTemplate(NULL);
 
@@ -57,6 +58,7 @@ WTemplate::WTemplate(QWidget *parent) : QFrame(parent)
     connect(pbClearResults,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbOptional,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbControl,SIGNAL(clicked()),this,SLOT(resetTemplates()));
+    connect(pbLinkedElements,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbApplyCurrentItem,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbClearCurrentItem,SIGNAL(clicked()),this,SLOT(resetTemplates()));
     connect(pbDiagramma,SIGNAL(clicked()),this,SLOT(resetTemplates()));
@@ -70,6 +72,8 @@ WTemplate::WTemplate(QWidget *parent) : QFrame(parent)
 
     connect(rbTime_hours,SIGNAL(toggled(bool)),this,SLOT(toggledTimeVariant(bool)));
     connect(rbTime_days,SIGNAL(toggled(bool)),this,SLOT(toggledTimeVariant(bool)));
+
+    lblLinkedElements_val->setBackgroundRole(QPalette::Base);
 
     resetTemplates(*pbRefreshTemplate);
 
@@ -315,6 +319,33 @@ void WTemplate::resetTemplates(const QPushButton &btn)
         pbControl->setChecked(isChck);
         pbControl->setIcon(ICONPIX(!isChck ? "" : PIX_CHECKED));
     }
+    else if (&btn==pbLinkedElements)
+    {
+      MODULE(Plans);
+        if (TCarryPlan *curTemplate = dynamic_cast<TCarryPlan*>(modPlans->findPlanTemplate(cbTemplates->currentText(),true)))
+        {
+            if (QTreeWidgetItem *curIt = twCurrentTemplate->currentItem())
+            {
+                if (TIdent *curIdnt = qtools::ident(*curIt))
+                {
+                  MODULE(Plans);
+                    if ((TPlanElementType)curIdnt->tag==petProcedure)
+                    {
+                        if (TCarryProcedure *pr = curTemplate->findProcedure(curIdnt->num))
+                        {
+                          TCarryProcedureList procs;
+                            procs.setAutoDelete(false);
+                            foreach (TCarryProcedure *curPr, curTemplate->procedures())
+                                if (curPr != pr) procs.append(curPr);
+                          TfrmLinkedElements dlg(procs,pr->linkedElements());
+                            if (dlg.exec() == QDialog::Accepted)
+                                selectPlanElement(twCurrentTemplate->currentItem(),NULL);
+                        }
+                    }
+                }
+            }
+        }
+    }
     else if (&btn==pbApplyCurrentItem)
     {
       MODULE(Plans);
@@ -412,6 +443,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
         pbOptional->setIcon(ICONPIX(""));
         pbControl->setChecked(false);
         pbControl->setIcon(ICONPIX(""));
+        lblLinkedElements_val->setText("");
     }
     else if (&btn==pbDiagramma)
     {
@@ -515,6 +547,9 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
         pbOptional->setEnabled(!isProcedure);
         lblControl->setEnabled(!isProcedure);
         pbControl->setEnabled(!isProcedure);
+        lblLinkedElements->setEnabled(isProcedure);
+        lblLinkedElements_val->setEnabled(isProcedure);
+        pbLinkedElements->setEnabled(isProcedure);
       TCarryProcedure *curProc(NULL);
       TCarryWork *curWork(NULL);
         if (isProcedure) curProc = curTemplate->findProcedure(idnt->num);
@@ -552,6 +587,12 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
                 cbEmployee->setCurrentIndex(cbEmployee->findText(convertEnums::enumToStr(rl.type())));
                 modUnits->findUnitForTemplateInCb(*cbExtUnit,rl.unitId());
             }
+            QStringList slHint;
+            foreach (int num, curProc->linkedElements())
+                if (TCarryProcedure *pr = curTemplate->findProcedure(num))
+                    slHint << pr->scrName();
+            lblLinkedElements_val->setText(curProc->linkedElements().count() ? QString::number(curProc->linkedElements().count()) : "");
+            lblLinkedElements_val->setToolTip(slHint.join("\n"));
         }
         else if (curWork)
         {

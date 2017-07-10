@@ -17,6 +17,7 @@ HEADERS += src/modules/proj/tappcarryplan.h
 HEADERS += src/forms/fmainukpcarryplan.h \
            src/forms/fdialog_nnm.h \
            src/forms/fsettings.h \
+           src/forms/flinkedelements.h \
            src/forms/wgantdiagramm.h \
            src/forms/wcompanycalendar.h \
            src/forms/wemployeecalendar.h \
@@ -31,6 +32,7 @@ SOURCES += src/main.cpp \
            src/forms/fmainukpcarryplan.cpp \
            src/forms/fdialog_nnm.cpp \
            src/forms/fsettings.cpp \
+           src/forms/flinkedelements.cpp \
            src/forms/wgantdiagramm.cpp \
            src/forms/wcompanycalendar.cpp \
            src/forms/wemployeecalendar.cpp \
@@ -42,6 +44,7 @@ SOURCES += src/main.cpp \
 FORMS   += src/forms/fmainukpcarryplan.ui \
            src/forms/fdialog_nnm.ui \
            src/forms/fsettings.ui \
+           src/forms/flinkedelements.ui \
            src/forms/wgantdiagramm.ui \
            src/forms/wcompanycalendar.ui \
            src/forms/wemployeecalendar.ui \
