@@ -172,12 +172,10 @@ void TCarryPlan::reflectToTree(QTreeWidget &tw, bool astemplate)
           QTreeWidgetItem *twiPr(new QTreeWidgetItem(&tw,lastPr));
             twiPr->setText(0,pr->scrName());
             twiPr->setIcon(0,ICONPIX(PIX_LEVEL4));
-            twiPr->setText(1,"");
-            twiPr->setText(2,"");
           QString extNm("");
             if (pr->isExtern())
                 if (TExternProcedureTemplate *extProc = modPlans->findExternProcedureTemplate(pr->externProcedureNum())) extNm = extProc->scrName();
-            twiPr->setText(3,extNm);
+            twiPr->setText(1,extNm);
             twiPr->setData(0,Qt::UserRole,qVariantFromValue(TIdent(pr->id(),pr->num(),pr->name(),(int)petProcedure)));
             twiPr->setFlags(twiPr->flags() | Qt::ItemIsTristate);
             twiPr->setCheckState(0,Qt::Unchecked);
@@ -187,13 +185,11 @@ void TCarryPlan::reflectToTree(QTreeWidget &tw, bool astemplate)
               QTreeWidgetItem *twiWrk(new QTreeWidgetItem(twiPr,lastWrk));
                 twiWrk->setText(0,wrk->scrName());
                 twiWrk->setIcon(0,ICONPIX(PIX_LEVEL5));
-                twiWrk->setText(1,"");
-                twiWrk->setText(2,"");
                 //BUTCHER
-                QString extNm("");
-                  if (wrk->isExtern())
-                      if (TExternProcedureTemplate *extProc = modPlans->findExternProcedureTemplate(wrk->externProcedureNum())) extNm = extProc->scrName();
-                  twiPr->setText(3,extNm);
+              QString extNm("");
+                if (wrk->isExtern())
+                    if (TExternProcedureTemplate *extProc = modPlans->findExternProcedureTemplate(wrk->externProcedureNum())) extNm = extProc->scrName();
+                twiWrk->setText(1,extNm);
                 twiWrk->setData(0,Qt::UserRole,qVariantFromValue(TIdent(wrk->id(),wrk->num(),wrk->name(),(int)petWork)));
                 twiWrk->setFlags(twiWrk->flags() | Qt::ItemIsUserCheckable);
                 twiWrk->setCheckState(0,Qt::Unchecked);

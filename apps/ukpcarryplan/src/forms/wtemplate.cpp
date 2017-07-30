@@ -35,8 +35,8 @@ WTemplate::WTemplate(QWidget *parent) : QFrame(parent)
     twCurrentTemplate->setColumnWidth(0,766); twCurrentTemplate->setColumnWidth(1,50); twCurrentTemplate->setColumnWidth(2,50); twCurrentTemplate->setColumnWidth(3,50);
     if (QTreeWidgetItem *hdrIt = twCurrentTemplate->headerItem())
     {
-        hdrIt->setText(0,"Наименование"); hdrIt->setText(1,"ИД"); hdrIt->setText(2,"Рез"); hdrIt->setText(3,"ВПМ");
-        for (int i=0; i<4; i++) hdrIt->setTextAlignment(i,Qt::AlignCenter);
+        hdrIt->setText(0,"Наименование"); hdrIt->setText(1,"ВПМ");
+        for (int i=0; i<2; i++) hdrIt->setTextAlignment(i,Qt::AlignCenter);
     }
     twCurrentTemplate->setIconSize(QSize(36,36));
     twCurrentTemplate->setUniformRowHeights(true);
@@ -371,7 +371,7 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                                 extNm = ep->scrName();
                             }
                             else pr->setExternProcedureNum(0);
-                            curIt->setText(3,extNm);
+                            curIt->setText(1,extNm);
                             pr->setSourcesTitle(edSources->text());
                             //lwSources
                             pr->setResultsTitle(edResults->text());
@@ -399,6 +399,14 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                                         wrk->setName(edName->text());
                                         wrk->setScrName(QString("%1. %2").arg(wrk->num(),2,10,QChar(' ')).arg(wrk->name()));
                                         curIt->setText(0,wrk->scrName());
+                                      QString extNm("");
+                                        if (TExternProcedureTemplate *ep = modPlans->findExternProcedureTemplate(cbExtProcedure->currentText()))
+                                        {
+                                            wrk->setExternProcedureNum(ep->num());
+                                            extNm = ep->scrName();
+                                        }
+                                        else wrk->setExternProcedureNum(0);
+                                        curIt->setText(1,extNm);
                                         wrk->setSourcesTitle(edSources->text());
                                         //lwSources
                                         wrk->setResultsTitle(edResults->text());
@@ -408,16 +416,6 @@ void WTemplate::resetTemplates(const QPushButton &btn)
                                         wrk->setControl(pbControl->isChecked());
                                         wrk->setSaved(false);
                                         pr->setSaved(false);
-
-                                        // BUTCHER
-                                        QString extNm("");
-                                        if (TExternProcedureTemplate *ep = modPlans->findExternProcedureTemplate(cbExtProcedure->currentText())){
-                                            wrk->setExternProcedureNum(ep->num());
-                                            extNm = ep->scrName();
-                                        }else{
-                                            wrk->setExternProcedureNum(0);
-                                        }
-                                        curIt->setText(3,extNm);
                                     }
                     }
                     curTemplate->setSaved(false);
@@ -492,7 +490,6 @@ void WTemplate::selectPattern(const QString &) //scrnm
   MODULE(Plans);
     if (TCarryPlan *curTemplate = dynamic_cast<TCarryPlan*>(modPlans->findPlanTemplate(cbTemplates->currentText(),true)))
     {
-        edTemplateTime->setText(gen::intToStr(curTemplate->planPeriod()));
         curTemplate->reflectToTree(*twCurrentTemplate,true);
         //twCurrentTemplate->model()->sort(0);
         twCurrentTemplate->sortItems(0,Qt::AscendingOrder);
@@ -505,7 +502,6 @@ void WTemplate::selectPattern(const QString &) //scrnm
         twCurrentTemplate->clear();
         resetTemplates(*pbClearCurrentItem);
         setEnabledControls(false);
-        edTemplateTime->setText("");
     }
 }
 //-----------------------------------------------------------------------------
@@ -531,8 +527,7 @@ void WTemplate::selectPlanElement(QTreeWidgetItem *curIt, QTreeWidgetItem*)
         resetTemplates(*pbClearCurrentItem);
         setEnabledControls(true);
       bool isProcedure((TPlanElementType)idnt->tag==petProcedure);
-        lblExtProcedure->setEnabled(isProcedure);
-        //cbExtProcedure->setEnabled(isProcedure);
+        lblExtProcedure->setEnabled(true);
         cbExtProcedure->setEnabled(true); //BUTCHER!!!
         lblEmployee->setEnabled(isProcedure);
         cbEmployee->setEnabled(isProcedure);

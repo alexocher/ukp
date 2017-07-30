@@ -138,8 +138,12 @@ WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) :
     hbl->addWidget(m_pbExpand);
     hbl->addWidget(m_pbCollapse);
     hbl->addStretch();
-    hbl->addWidget(m_dtTest);
-    hbl->addWidget(m_pbTest);
+    //hbl->addWidget(m_dtTest);
+    //hbl->addWidget(m_pbTest);
+    m_dtTest->hide();
+    m_dtTest->hide();
+
+    m_pbTest = new QPushButton("Тест", m_frButtons);
 
     hbl->setMargin(0);
     hbl->setSpacing(10);
@@ -396,7 +400,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
         tskGit->setOpen(true);
         if (showPlan)
         {
-            tskGit->setLabel(GANT_IND_PLAN, gen::intToStr(tsk->num()));
+            //tskGit->setLabel(GANT_IND_PLAN, gen::intToStr(tsk->num()));
             tskGit->setPen(GANT_IND_PLAN, planItemsTaskPen);
             tskGit->setBrush(GANT_IND_PLAN, planItemsTaskBrash);
             tskGit->setBegin(GANT_IND_PLAN, tsk->dtPlanBegin() ? *tsk->dtPlanBegin() : QDateTime());
@@ -418,7 +422,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                 planGit->setOpen(true);
                 if (showPlan)
                 {
-                    planGit->setLabel(GANT_IND_PLAN, gen::intToStr(plan->num()));
+                    //planGit->setLabel(GANT_IND_PLAN, gen::intToStr(plan->num()));
                     planGit->setPen(GANT_IND_PLAN, planItemsPlanPen);
                     planGit->setBrush(GANT_IND_PLAN, planItemsPlanBrash);
                     planGit->setBegin(GANT_IND_PLAN, plan->dtPlanBegin() ? *plan->dtPlanBegin() : QDateTime());
@@ -439,7 +443,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                     prGit->setOpen(true);
                     if (showPlan)
                     {
-                        prGit->setLabel(GANT_IND_PLAN, gen::intToStr(pr->num()));
+                        //prGit->setLabel(GANT_IND_PLAN, gen::intToStr(pr->num()));
                         prGit->setPen(GANT_IND_PLAN, planItemsProcedurePen);
                         prGit->setBrush(GANT_IND_PLAN, planItemsProcedureBrash);
                         prGit->setBegin(GANT_IND_PLAN, pr->dtPlanBegin() ? *pr->dtPlanBegin() : QDateTime());
@@ -460,7 +464,7 @@ void WGantDiagramm::prepare(TCarryTaskList &tasks, TGantGraphicsView::ContentDra
                         wrkGit->setOpen(true);
                         if (showPlan)
                         {
-                            wrkGit->setLabel(GANT_IND_PLAN, gen::intToStr(wrk->num()));
+                            //wrkGit->setLabel(GANT_IND_PLAN, gen::intToStr(wrk->num()));
                             wrkGit->setPen(GANT_IND_PLAN, planItemsWorkPen);
                             wrkGit->setBrush(GANT_IND_PLAN, planItemsWorkBrash);
                             wrkGit->setBegin(GANT_IND_PLAN, wrk->dtPlanBegin() ? *wrk->dtPlanBegin() : QDateTime());

@@ -33,8 +33,8 @@ namespace
             *actTemplate(NULL),
             *actOrgShtat(NULL),
             *actProduction(NULL),
-            *actCompanyCalendar(NULL),
-            *actEmployeeCalendar(NULL),
+            //*actCompanyCalendar(NULL),
+            //*actEmployeeCalendar(NULL),
             *actTileHorizontal(NULL),
             *actTileVertical(NULL),
             *actCascade(NULL),
@@ -94,9 +94,9 @@ void TfrmMainUkpCarryPlan::createControls()
     actOrgShtat = mainToolBar->addAction(ICONPIX(PIX_ORGSHTAT),"&Оргштат",this,SLOT(clickAction()));
     actProduction = mainToolBar->addAction(ICONPIX(PIX_PRODUCTION),"Продук&ция",this,SLOT(clickAction()));
     mainToolBar->addSeparator();
-    actCompanyCalendar = mainToolBar->addAction(ICONPIX(PIX_WORKCALENDAR),"Календарь предпри&ятия",this,SLOT(clickAction()));
-    actEmployeeCalendar = mainToolBar->addAction(ICONPIX(PIX_EMPLOYEECALENDAR),"Календарь сотрудников",this,SLOT(clickAction()));
-    mainToolBar->addSeparator();
+    //actCompanyCalendar = mainToolBar->addAction(ICONPIX(PIX_WORKCALENDAR),"Календарь предпри&ятия",this,SLOT(clickAction()));
+    //actEmployeeCalendar = mainToolBar->addAction(ICONPIX(PIX_EMPLOYEECALENDAR),"Календарь сотрудников",this,SLOT(clickAction()));
+    //mainToolBar->addSeparator();
     actTileHorizontal = mainToolBar->addAction(ICONPIX(PIX_TILEHORIZONTAL),"Расположить &горизонтально",this,SLOT(clickAction()));
     actTileVertical = mainToolBar->addAction(ICONPIX(PIX_TILEVERTICAL),"Расположить вер&тикально",this,SLOT(clickAction()));
     actCascade = mainToolBar->addAction(ICONPIX(PIX_CASCADE),"Расположить ка&скадом",this,SLOT(clickAction()));
@@ -117,9 +117,9 @@ void TfrmMainUkpCarryPlan::createControls()
     topMenu = mainMenuBar->addMenu("&Данные");
     topMenu->addAction(actOrgShtat);
     topMenu->addAction(actProduction);
-    topMenu = mainMenuBar->addMenu("&Календарь");
-    topMenu->addAction(actCompanyCalendar);
-    topMenu->addAction(actEmployeeCalendar);
+    //topMenu = mainMenuBar->addMenu("&Календарь");
+    //topMenu->addAction(actCompanyCalendar);
+    //topMenu->addAction(actEmployeeCalendar);
     topMenu = mainMenuBar->addMenu("&Вид");
     topMenu->addAction(actTileHorizontal);
     topMenu->addAction(actTileVertical);
@@ -216,6 +216,7 @@ void TfrmMainUkpCarryPlan::clickAction(const QAction &act)
         if (SUB_WINDOWS.indexOf(swProduction)==-1) SUB_WINDOWS.append(swProduction);
         swProduction->show();
     }
+/*
     else if (&act==actCompanyCalendar)
     {
         if (!swCompanyCalendar)
@@ -248,6 +249,7 @@ void TfrmMainUkpCarryPlan::clickAction(const QAction &act)
         if (SUB_WINDOWS.indexOf(swEmployeeCalendar)==-1) SUB_WINDOWS.append(swEmployeeCalendar);
         swEmployeeCalendar->show();
     }
+*/
     else if (&act==actTileHorizontal)
     {
       TMdiSubWindow *sw(SUB_WINDOWS.count() ? SUB_WINDOWS.first() : NULL);

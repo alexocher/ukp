@@ -575,32 +575,6 @@
           </property>
          </spacer>
         </item>
-        <item>
-         <widget class="QLabel" name="lblTemplateTime">
-          <property name="text">
-           <string>Общая продолжительность</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="edTemplateTime">
-          <property name="minimumSize">
-           <size>
-            <width>70</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>70</width>
-            <height>40</height>
-           </size>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
        </layout>
       </item>
       <item>
