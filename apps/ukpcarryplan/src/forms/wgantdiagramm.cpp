@@ -141,9 +141,7 @@ WGantDiagramm::WGantDiagramm(QWidget *parent, Qt::WindowFlags f) :
     //hbl->addWidget(m_dtTest);
     //hbl->addWidget(m_pbTest);
     m_dtTest->hide();
-    m_dtTest->hide();
-
-    m_pbTest = new QPushButton("Тест", m_frButtons);
+    m_pbTest->hide();
 
     hbl->setMargin(0);
     hbl->setSpacing(10);
